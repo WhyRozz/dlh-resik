@@ -9,24 +9,22 @@ class Penarikan extends Model
 {
     use HasFactory;
 
+    protected $table = 'penarikan';
+    protected $primaryKey = 'id_penarikan';
+    public $timestamps = false;
+    
     protected $fillable = [
-        'user_id',
-        'nama',
-        'waktu_penarikan',
-        'jenis',
+        'id_masyarakat',
+        'id_pns',
+        'jumlah_uang',
+        'jenis_ewallet',
         'nomor_ewallet',
-        'jumlah',
         'status',
-        'catatan',
+        'tanggal_penarikan',
     ];
-
+    
     protected $casts = [
-        'waktu_penarikan' => 'datetime',
-        'jumlah' => 'decimal:2',
+        'jumlah_uang' => 'decimal:2',
+        'tanggal_penarikan' => 'datetime',
     ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-}
+} 
