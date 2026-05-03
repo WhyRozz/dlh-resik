@@ -49,14 +49,14 @@ class TpsController extends Controller
                 'regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/',
             ],
             'alamat' => 'required|string',
-            'kapasitas' => 'nullable|integer|min:0',
+            'kapasitas' => 'nullable|string|max:20',
             'keterangan' => 'nullable|string',
         ], [
             'nama_tps.required' => 'Nama TPS wajib diisi.',
             'lokasi.required' => 'Koordinat GPS wajib diisi.',
             'lokasi.regex' => 'Format koordinat tidak valid. Gunakan: -7.601478,111.943225',
             'alamat.required' => 'Alamat Lengkap wajib diisi.',
-            'kapasitas.integer' => 'Kapasitas harus berupa angka.',
+            'kapasitas.string' => 'Kapasitas harus berupa angka & teks.',
         ]);
 
         Tps::create($validated);
@@ -69,32 +69,26 @@ class TpsController extends Controller
      * Update TPS
      */
     public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'nama_tps' => 'required|string|max:150',
-            'lokasi' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/',
-            ],
-            'alamat' => 'required|string',
-            'kapasitas' => 'nullable|integer|min:0',
-            'keterangan' => 'nullable|string',
-        ], [
-            'nama_tps.required' => 'Nama TPS wajib diisi.',
-            'lokasi.required' => 'Koordinat GPS wajib diisi.',
-            'lokasi.regex' => 'Format koordinat tidak valid. Gunakan: -7.601478,111.943225',
-            'alamat.required' => 'Alamat Lengkap wajib diisi.',
-            'kapasitas.integer' => 'Kapasitas harus berupa angka.',
-        ]);
+{
+    $validated = $request->validate([
+        'nama_tps' => 'required|string|max:150',
+        'lokasi'   => 'required|string|max:255|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/',
+        'alamat'   => 'required|string',
+        'kapasitas' => 'nullable|string|max:20', // DI DATABASE VARCHAR, JANGAN PAKE INTEGER
+        'keterangan'=> 'nullable|string',
+    ], [
+        'nama_tps.required' => 'Nama TPS wajib diisi.',
+        'lokasi.required'   => 'Lokasi koordinat wajib diisi.',
+        'lokasi.regex'      => 'Format koordinat harus Latitude,Longitude (contoh: -7.123,112.456).',
+        'alamat.required'   => 'Alamat wajib diisi.',
+        // Hapus pesan error integer karena tipenya string/varchar
+    ]);
 
-        $tps = Tps::findOrFail($id);
-        $tps->update($validated);
+    $tps = Tps::findOrFail($id);
+    $tps->update($validated);
 
-        return redirect()->route('admin.tps.index')
-            ->with('success', 'Data TPS berhasil diperbarui!');
-    }
+    return redirect()->route('admin.tps.index')->with('success', 'Data TPS berhasil diperbarui!');
+}
 
     /**
      * Hapus TPS

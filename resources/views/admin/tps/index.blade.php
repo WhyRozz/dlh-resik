@@ -9,16 +9,19 @@
 @endpush
 
 @section('content')
-<div class="content-header">
-    <h2>Kelola TPS</h2>
-</div>
+{{-- Notifikasi sukses --}}
+@if(session('success'))
+    <div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 12px 20px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+        {{ session('success') }}
+    </div>
+@endif
 
 <div class="search-bar">
     <input type="text" class="search-input" id="searchInput" placeholder="Cari TPS berdasarkan nama atau lokasi...">
 </div>
 
 <div class="table-container">
-    <!-- ✅ Header Tabel dengan styling baru -->
+    <!-- Header Tabel -->
     <div class="tps-header">
         <h3 class="tps-title">Daftar Informasi TPS</h3>
         <a href="{{ route('admin.tps.create') }}" class="btn-tambah-tps">
@@ -26,7 +29,7 @@
         </a>
     </div>
 
-    <!-- ✅ Table dengan class tps-table -->
+    <!-- Table -->
     <table class="tps-table">
         <thead>
             <tr>
@@ -40,7 +43,7 @@
         </thead>
         <tbody id="tpsTableBody">
             @forelse($tpsList as $index => $tps)
-                <tr>
+                <tr data-id="{{ $tps->id_tps }}">
                     <td class="no-urut">{{ $index + 1 }}</td>
                     <td class="nama-tps">{{ $tps->nama_tps }}</td>
                     <td>
@@ -59,16 +62,30 @@
                         {{ Str::limit($tps->keterangan ?? '-', 40) }}
                     </td>
                     <td>
-                        <div class="aksi-buttons">
-                            <a href="{{ route('admin.tps.edit', $tps->id_tps) }}"
-                               class="btn-aksi btn-edit"
-                               title="Edit">✏️</a>
-                            <button type="button"
-                                    class="btn-aksi btn-delete"
-                                    title="Hapus"
-                                    onclick="konfirmasiHapus({{ $tps->id_tps }})">🗑️</button>
-                        </div>
-                    </td>
+
+                    
+                    <div class="aksi-buttons" style="display: flex; gap: 4px;">
+                        {{-- ✅ Tombol Edit dengan icon gambar --}}
+                        <button type="button"
+                                onclick="window.location.href='{{ route('admin.tps.edit', $tps->id_tps) }}'"
+                                style="display: inline-flex; align-items: center; justify-content: center; margin: 0 2px; padding: 6px 10px; background: #fff3cd; color: #856404; border: 1px solid #ffc107; border-radius: 4px; cursor: pointer; vertical-align: middle; transition: all 0.2s;"
+                                title="Edit"
+                                onmouseover="this.style.background='#ffeaa7'"
+                                onmouseout="this.style.background='#fff3cd'">
+                            <img src="{{ asset('assets/icons/edit.png') }}" alt="Edit" style="width: 18px; height: 18px; vertical-align: middle;">
+                        </button>
+
+                        {{-- ✅ Tombol Hapus dengan icon gambar --}}
+                        <button type="button"
+                                onclick="konfirmasiHapus({{ $tps->id_tps }})"
+                                style="display: inline-flex; align-items: center; justify-content: center; margin: 0 2px; padding: 6px 10px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px; cursor: pointer; vertical-align: middle; transition: all 0.2s;"
+                                title="Hapus"
+                                onmouseover="this.style.background='#f5c6cb'"
+                                onmouseout="this.style.background='#f8d7da'">
+                            <img src="{{ asset('assets/icons/delete.png') }}" alt="Hapus" style="width: 18px; height: 18px; vertical-align: middle;">
+                        </button>
+                    </div>
+                </td>
                 </tr>
             @empty
                 <tr>
@@ -87,6 +104,42 @@
 
 {{-- Popup Modals --}}
 @include('admin.tps.partials.modals')
+
+{{-- Error Popup --}}
+<div id="errorPopup" class="popup-overlay">
+    <div class="popup-content error">
+        <h3>Kesalahan!</h3>
+        <p id="errorMessage">Terjadi kesalahan.</p>
+        <button type="button" class="popup-btn" onclick="closeErrorPopup()">Tutup</button>
+    </div>
+</div>
+
+{{-- Script Close Popup --}}
+<script>
+function closeErrorPopup() {
+    const popup = document.getElementById('errorPopup');
+    popup.querySelector('.popup-content').classList.remove('show');
+    setTimeout(() => {
+        popup.classList.remove('active');
+    }, 300);
+}
+</script>
+
+{{-- Script Error Handling --}}
+@if($errors->any())
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const errorMsg = "{{ $errors->first() }}";
+    document.getElementById('errorMessage').textContent = errorMsg;
+    const popup = document.getElementById('errorPopup');
+    popup.classList.add('active');
+    setTimeout(() => {
+        popup.querySelector('.popup-content').classList.add('show');
+    }, 10);
+});
+</script>
+@endif
+
 @endsection
 
 @push('scripts')

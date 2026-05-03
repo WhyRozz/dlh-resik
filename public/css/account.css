@@ -26,10 +26,25 @@
     opacity: 1;
 }
 
+.content-header {
+    margin-bottom: 5px !important;
+}
+
 .content-header h2 {
     color: #2e8b57;
     font-size: 24px;
-    margin-bottom: 20px;
+    margin-bottom: 12px !important;
+}
+
+/* 1. Override margin <hr> separator (inline style: margin: 40px 0) */
+hr[style*="margin: 40px"] {
+    margin: 10px 0 !important;
+}
+
+/* 2. Override margin-top .petugas-section (inline style: margin-top: 20px) */
+.petugas-section[style*="margin-top: 20px"] {
+    margin-top: 0 !important;
+    padding-top: 5px !important;
 }
 
 /* Accounts Grid */
@@ -37,7 +52,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 15px !important;
 }
 
 .account-card {
@@ -136,7 +151,7 @@
 }
 
 .btn-outline:hover {
-    background: #e6f2e6;
+    background: #4EA674;
 }
 
 .btn-danger {
@@ -736,11 +751,13 @@
    SEARCH BAR MODERN - HALAMAN AKUN
    ========================================= */
 .search-wrapper-akun {
-    margin-top: -100px;
+    margin-top: -120px;
     width: 100%;
     justify-content: flex-end;
     max-width: 400px;
-    margin-bottom: 50px; 
+    margin-bottom: 80px !important;  
+    margin-left: auto;    /* Push ke kanan */
+    margin-right: 100px;
 }
 
 .search-input-akun {

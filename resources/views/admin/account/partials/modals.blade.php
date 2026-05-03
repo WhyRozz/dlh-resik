@@ -95,7 +95,40 @@
                 <select id="levelPetugas" name="level" required>
                     <option value="">-- Pilih Petugas --</option>
                     <option value="petugas_dlh">Petugas DLH</option>
-                    <option value="bank_sampah">Bank Sampah</option>
+                    <optgroup label="--- Bank Sampah ---">
+                        <option value="bank_sampah_kelurahan_kauman_kauman_nganjuk">Bank Sampah KELURAHAN KAUMAN (Kauman, Nganjuk)</option>
+                        <option value="bank_sampah_kramat_bersih_kramat_nganjuk">Bank Sampah KRAMAT BERSIH (Kramat, Nganjuk)</option>
+                        <option value="bank_sampah_kelurahan_cangkringan_cangkringan_nganjuk">Bank Sampah KELURAHAN CANGKRINGAN (Cangkringan, Nganjuk)</option>
+                        <option value="bank_sampah_ngudi_sariro_jatirejo_nganjuk">Bank Sampah NGUDI SARIRO (Jatirejo, Nganjuk)</option>
+                        <option value="bank_sampah_margo_utomo_begadung_nganjuk">Bank Sampah MARGO UTOMO (Begadung, Nganjuk)</option>
+                        <option value="bank_sampah_sejahtera_kartoharjo_nganjuk">Bank Sampah SEJAHTERA (Kartoharjo, Nganjuk)</option>
+                        <option value="bank_sampah_melati_kedungdowo_nganjuk">Bank Sampah MELATI (Kedungdowo, Nganjuk)</option>
+                        <option value="bank_sampah_anggrek_werungotok_nganjuk">Bank Sampah ANGGREK (Werungotok, Nganjuk)</option>
+                        <option value="bank_sampah_sumber_rejeki_werungotok_nganjuk">Bank Sampah SUMBER REJEKI (Werungotok, Nganjuk)</option>
+                        <option value="bank_sampah_beringin_hijau_ringinanom_nganjuk">Bank Sampah BERINGIN HIJAU (Ringinanom, Nganjuk)</option>
+                        <option value="bank_sampah_ploso_ploso_nganjuk">Bank Sampah PLOSO (Ploso, Nganjuk)</option>
+                        <option value="bank_sampah_mulyo_agung_kudu_kertosono">Bank Sampah MULYO AGUNG (Kudu, Kertosono)</option>
+                        <option value="bank_sampah_estu_sae_petak_bagor">Bank Sampah ESTU SAE (Petak, Bagor)</option>
+                        <option value="bank_sampah_desa_ngangkatan_ngangkatan_rejoso">Bank Sampah DESA NGANGKATAN (Ngangkatan, Rejoso)</option>
+                        <option value="bank_sampah_desa_jegreg_jegreg_lengkong">Bank Sampah DESA JEGREG (Jegreg, Lengkong)</option>
+                        <option value="bank_sampah_musirkidul_musirkidul_rejoso">Bank Sampah MUSIRKIDUL (Musirkidul, Rejoso)</option>
+                        <option value="bank_sampah_tanjung_tanjunganom_tanjunganom">Bank Sampah TANJUNG (Tanjunganom, Tanjunganom)</option>
+                        <option value="bank_sampah_flamboyan_loceret_loceret">Bank Sampah FLAMBOYAN (Loceret, Loceret)</option>
+                        <option value="bank_sampah_pelita_bogo_nganjuk">Bank Sampah PELITA (Bogo, Nganjuk)</option>
+                        <option value="bank_sampah_desa_getas_getas_tanjunganom">Bank Sampah DESA GETAS (Getas, Tanjunganom)</option>
+                        <option value="bank_sampah_mbejaji_juwet_ngronggot">Bank Sampah MBEJAJI (Juwet, Ngronggot)</option>
+                        <option value="bank_sampah_kedondong_kedondong_bagor">Bank Sampah KEDONDONG (Kedondong, Bagor)</option>
+                        <option value="bank_sampah_sinar_terang_jampes_pace">Bank Sampah SINAR TERANG (Jampes, Pace)</option>
+                        <option value="bank_sampah_desa_blongko_blongko_ngetos">Bank Sampah DESA BLONGKO (Blongko, Ngetos)</option>
+                        <option value="bank_sampah_bukur_bukur_patianrowo">Bank Sampah BUKUR (Bukur, Patianrowo)</option>
+                        <option value="bank_sampah_bungur_makmur_bungur_sukomoro">Bank Sampah BUNGUR MAKMUR (Bungur, Sukomoro)</option>
+                        <option value="bank_sampah_seger_waras_mabung_baron">Bank Sampah SEGER WARAS (Mabung, Baron)</option>
+                        <option value="bank_sampah_maju_bahagia_gondanglegi_prambon">Bank Sampah MAJU BAHAGIA (Gondanglegi, Prambon)</option>
+                        <option value="bank_sampah_barokah_kemlokolegi_baron">Bank Sampah BAROKAH (Kemlokolegi, Baron)</option>
+                        <option value="bank_sampah_dahlia_senjayan_gondang">Bank Sampah DAHLIA (Senjayan, Gondang)</option>
+                        <option value="bank_sampah_cengkok_cengkok_ngronggot">Bank Sampah CENGKOK (Cengkok, Ngronggot)</option>
+                        <option value="bank_sampah_induk_salepok_omahe_nganjuk_kedondong_bagor">Bank Sampah Induk SALEPOK OMAHE NGANJUK (Kedondong, Bagor)</option>
+                    </optgroup>
                 </select>
             </div>
 

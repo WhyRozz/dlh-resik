@@ -11,40 +11,30 @@
 @section('content')
 <div class="table-container">
     
-    <!-- ✅ SEARCH BOX DIPISAH - Posisi Atas Kanan -->
-    <div class="search-container-top">
-        <form method="GET" action="{{ route('admin.artikel.index') }}" class="search-form-top">
-            <div class="search-wrapper-top">
-                <input 
-                    type="text" 
-                    name="search" 
-                    class="search-input-top" 
-                    placeholder="Cari berdasarkan judul..."
-                    value="{{ request('search') }}"
-                    autocomplete="off"
-                >
-                <button type="submit" class="search-btn-top">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </button>
-                @if(request('search'))
-                <a href="{{ route('admin.artikel.index') }}" class="search-clear-top" title="Hapus">×</a>
-                @endif
-            </div>
-        </form>
+    <!-- 🔍 Search Bar Modern (Seperti Halaman Akun) -->
+    <div class="search-wrapper-akun" style="margin-top: 0; margin-right: 0; margin-bottom: 20px;">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+            type="text" 
+            id="searchArtikel" 
+            class="search-input-akun" 
+            placeholder="Cari artikel berdasarkan judul..."
+            value="{{ request('search') }}"
+            onkeyup="filterArtikel()"
+        >
     </div>
 
-    <!-- ✅ HEADER: Judul + Tombol Tambah (Tetap Sebelahan) -->
-    <div class="table-header-custom">
-        <h2 class="table-header-title">Daftar Artikel</h2>
-        <a href="{{ route('admin.artikel.create') }}" class="btn-tambah-custom">
-            <span>+</span> TAMBAH ARTIKEL
-        </a>
-    </div>
-    
-    <hr class="header-divider">
+    <!-- Header Section (Seperti Halaman Akun) -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h3 style="color: #20A726; margin: 0; font-size: 20px; font-weight: 600;">
+            Daftar Artikel
+        </h3>
+    <button type="button" 
+            onclick="location.href='{{ route('admin.artikel.create') }}'"
+            style="background: #20A726; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+        + Tambah Artikel
+    </button>
+</div>
 
     <table class="table-design">
     <thead>
@@ -64,15 +54,20 @@
                 <td>
                     <div class="action-btns">
                         <a href="{{ route('admin.artikel.edit', $artikel->id_artikel) }}" 
-                           class="btn-action btn-edit" 
-                           title="Edit">
-                            ✏️
+                        style="display: inline-block; margin: 0 0px; padding: 8px 10px; background: #fff3cd; color: #856404; border: none; border-radius: 4px; cursor: pointer; vertical-align: middle;" 
+                        title="Edit">
+                        <img src="{{ asset('assets/icons/edit.png') }}" 
+                        alt="Edit" 
+                        style="width: 18px; height: 18px; object-fit: contain; display: block;">
                         </a>
+                        
                         <button type="button" 
-                                class="btn-action btn-delete" 
-                                title="Hapus"
-                                onclick="showDeleteModal({{ $artikel->id_artikel }})">
-                            🗑️
+                        class="btn-action btn-delete" 
+                        title="Hapus"
+                        onclick="showDeleteModal({{ $artikel->id_artikel }})">
+                        <img src="{{ asset('assets/icons/delete.png') }}" 
+                        alt="Hapus" 
+                        style="width: 18px; height: 18px; vertical-align: middle; display: inline-block;">
                         </button>
                     </div>
                 </td>
@@ -201,17 +196,24 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 @endif
 
-// ✅ LIVE SEARCH - Ubah selector ke class baru
-const searchInput = document.querySelector('.search-input-top'); // ✅ Ganti dari .search-input
-let debounceTimer = null;
-
-if (searchInput) {
-    searchInput.addEventListener('input', function(e) {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            e.target.closest('form').submit();
-        }, 500);
-    });
+// 🔍 Search Artikel (Client-side seperti di Akun)
+function filterArtikel() {
+    const input = document.getElementById('searchArtikel');
+    const filter = input.value.toLowerCase();
+    const table = document.querySelector('.table-design');
+    const tr = table.getElementsByTagName('tr');
+    
+    for (let i = 1; i < tr.length; i++) {
+        const td = tr[i].getElementsByTagName('td')[1]; // Kolom Judul
+        if (td) {
+            const txtValue = td.textContent || td.innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+    }
 }
 </script>
 @endpush

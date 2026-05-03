@@ -111,18 +111,55 @@
         @if($petugas->count() > 0)
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse;">
-                    <thead style="background: #f5f5f5;">
+                    <thead style="background: #e6f2e6;">
                         <tr>
                             <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">No</th>
-                            <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Nama Admin</th>
+                            <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Nama Petugas</th>
                             <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Email</th>
                             <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">No Telpon</th>
-                            <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Petugas</th>
+                            <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Wilayah Kerja</th>
                             <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Kata Sandi</th>
                             <th style="padding: 12px 15px; text-align: center; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @php
+                        $levelNames = [
+                            'petugas_dlh' => 'Petugas DLH',
+                            'bank_sampah_kelurahan_kauman_kauman_nganjuk' => 'BS Kel. Kauman (Kauman, Nganjuk)',
+                            'bank_sampah_kramat_bersih_kramat_nganjuk' => 'BS Kramat Bersih (Kramat, Nganjuk)',
+                            'bank_sampah_kelurahan_cangkringan_cangkringan_nganjuk' => 'BS Kel. Cangkringan (Cangkringan, Nganjuk)',
+                            'bank_sampah_ngudi_sariro_jatirejo_nganjuk' => 'BS Ngudi Sariro (Jatirejo, Nganjuk)',
+                            'bank_sampah_margo_utomo_begadung_nganjuk' => 'BS Margo Utomo (Begadung, Nganjuk)',
+                            'bank_sampah_sejahtera_kartoharjo_nganjuk' => 'BS Sejahtera (Kartoharjo, Nganjuk)',
+                            'bank_sampah_melati_kedungdowo_nganjuk' => 'BS Melati (Kedungdowo, Nganjuk)',
+                            'bank_sampah_anggrek_werungotok_nganjuk' => 'BS Anggrek (Werungotok, Nganjuk)',
+                            'bank_sampah_sumber_rejeki_werungotok_nganjuk' => 'BS Sumber Rejeki (Werungotok, Nganjuk)',
+                            'bank_sampah_beringin_hijau_ringinanom_nganjuk' => 'BS Beringin Hijau (Ringinanom, Nganjuk)',
+                            'bank_sampah_ploso_ploso_nganjuk' => 'BS Ploso (Ploso, Nganjuk)',
+                            'bank_sampah_mulyo_agung_kudu_kertosono' => 'BS Mulyo Agung (Kudu, Kertosono)',
+                            'bank_sampah_estu_sae_petak_bagor' => 'BS Estu Sae (Petak, Bagor)',
+                            'bank_sampah_desa_ngangkatan_ngangkatan_rejoso' => 'BS Desa Ngangkatan (Ngangkatan, Rejoso)',
+                            'bank_sampah_desa_jegreg_jegreg_lengkong' => 'BS Desa Jegreg (Jegreg, Lengkong)',
+                            'bank_sampah_musirkidul_musirkidul_rejoso' => 'BS Musirkidul (Musirkidul, Rejoso)',
+                            'bank_sampah_tanjung_tanjunganom_tanjunganom' => 'BS Tanjung (Tanjunganom)',
+                            'bank_sampah_flamboyan_loceret_loceret' => 'BS Flamboyan (Loceret)',
+                            'bank_sampah_pelita_bogo_nganjuk' => 'BS Pelita (Bogo, Nganjuk)',
+                            'bank_sampah_desa_getas_getas_tanjunganom' => 'BS Desa Getas (Getas, Tanjunganom)',
+                            'bank_sampah_mbejaji_juwet_ngronggot' => 'BS Mbejaji (Juwet, Ngronggot)',
+                            'bank_sampah_kedondong_kedondong_bagor' => 'BS Kedondong (Kedondong, Bagor)',
+                            'bank_sampah_sinar_terang_jampes_pace' => 'BS Sinar Terang (Jampes, Pace)',
+                            'bank_sampah_desa_blongko_blongko_ngetos' => 'BS Desa Blongko (Blongko, Ngetos)',
+                            'bank_sampah_bukur_bukur_patianrowo' => 'BS Bukur (Bukur, Patianrowo)',
+                            'bank_sampah_bungur_makmur_bungur_sukomoro' => 'BS Bungur Makmur (Bungur, Sukomoro)',
+                            'bank_sampah_seger_waras_mabung_baron' => 'BS Seger Waras (Mabung, Baron)',
+                            'bank_sampah_maju_bahagia_gondanglegi_prambon' => 'BS Maju Bahagia (Gondanglegi, Prambon)',
+                            'bank_sampah_barokah_kemlokolegi_baron' => 'BS Barokah (Kemlokolegi, Baron)',
+                            'bank_sampah_dahlia_senjayan_gondang' => 'BS Dahlia (Senjayan, Gondang)',
+                            'bank_sampah_cengkok_cengkok_ngronggot' => 'BS Cengkok (Cengkok, Ngronggot)',
+                            'bank_sampah_induk_salepok_omahe_nganjuk_kedondong_bagor' => 'BS Induk Salepok Omahe Nganjuk (Kedondong, Bagor)',
+                        ];
+                    @endphp
                         @foreach($petugas as $index => $p)
                             <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 12px 15px;">{{ $index + 1 }}</td>
@@ -130,25 +167,32 @@
                                 <td style="padding: 12px 15px;">{{ htmlspecialchars($p->email) }}</td>
                                 <td style="padding: 12px 15px;">{{ htmlspecialchars($p->no_telepon) }}</td>
                                 <td style="padding: 12px 15px;">
-                                    <span style="display: inline-block; padding: 4px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; font-size: 12px; font-weight: 500;">
-                                        {{ $p->level === 'petugas_dlh' ? 'Petugas DLH' : 'Bank Sampah' }}
-                                    </span>
-                                </td>
+                                <span style="display: inline-block; padding: 4px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; font-size: 12px; font-weight: 500;">
+                                    {{ $levelNames[$p->level] ?? $p->level }}
+                                </span>
+                            </td>
+                            
                                 <td style="padding: 12px 15px;">••••••••••••</td>
                                 <td style="padding: 12px 15px; text-align: center;">
                                     <button type="button" class="btn-edit-modal" 
-                                            onclick="openPetugasModal('edit', {
-                                                id: '{{ $p->id_petugas }}',
-                                                nama: '{{ addslashes($p->nama_lengkap) }}',
-                                                email: '{{ addslashes($p->email) }}',
-                                                telpon: '{{ addslashes($p->no_telepon) }}',
-                                                level: '{{ $p->level }}'
-                                            })"
-                                            style="display: inline-block; margin: 0 2px; padding: 5px 10px; background: #fff3cd; color: #856404; border: none; border-radius: 4px; cursor: pointer;"
-                                            title="Edit">✏️</button>
+                                    onclick='openPetugasModal("edit", {{ json_encode([
+                                        "id" => $p->id_petugas,
+                                        "nama" => $p->nama_lengkap,
+                                        "email" => $p->email,
+                                        "telpon" => $p->no_telepon,
+                                        "level" => $p->level
+                                    ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }})'
+                                    <button onclick='openPetugasModal("edit", ...)' 
+                                    style="display: inline-block; margin: 0 2px; padding: 5px 10px; background: #fff3cd; color: #856404; border: none; border-radius: 4px; cursor: pointer; vertical-align: middle;" 
+                                    title="Edit">
+                                    <img src="{{ asset('assets/icons/edit.png') }}" alt="Edit" style="width: 18px; height: 18px; vertical-align: middle;">
+                                    </button>
+                                    
                                     <button onclick="confirmDelete({{ $p->id_petugas }})" 
-                                            style="display: inline-block; margin: 0 2px; padding: 5px 10px; background: #f8d7da; color: #721c24; border: none; border-radius: 4px; cursor: pointer;"
-                                            title="Hapus">🗑️</button>
+                                    style="display: inline-block; margin: 0 2px; padding: 5px 10px; background: #f8d7da; color: #721c24; border: none; border-radius: 4px; cursor: pointer; vertical-align: middle;"
+                                    title="Hapus">
+                                    <img src="{{ asset('assets/icons/delete.png') }}" alt="Hapus" style="width: 18px; height: 18px; object-fit: contain; display: block;">
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -358,26 +402,56 @@ function deleteAdmin(id) {
     form.submit();
 }
 
-// ==================== KONFIRMASI HAPUS PETUGAS ====================
+// Fungsi untuk Konfirmasi Hapus dengan Popup (SweetAlert2)
 function confirmDelete(id) {
+    // 1. Tampilkan Popup Konfirmasi
     Swal.fire({
         title: 'Apakah Anda yakin?',
         text: "Data petugas akan dihapus permanen!",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#dc3545', // Merah sesuai status-ditolak
+        confirmButtonColor: '#dc3545',
         cancelButtonColor: '#6c757d',
         confirmButtonText: 'Ya, Hapus!',
         cancelButtonText: 'Batal',
         reverseButtons: true
     }).then((result) => {
+        // 2. Jika user klik "Ya, Hapus!"
         if (result.isConfirmed) {
-            const baseUrl = "{{ url('admin/petugas') }}";
-            const deleteForm = document.getElementById('deleteForm');
-            if (deleteForm) {
-                deleteForm.action = baseUrl + '/' + id;
-                deleteForm.submit();
-            }
+            // Kirim permintaan hapus (AJAX)
+            fetch(`/admin/petugas/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Jika berhasil dihapus
+                    Swal.fire({
+                        title: 'Terhapus!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#20A726'
+                    }).then(() => {
+                        location.reload(); // Refresh halaman otomatis
+                    });
+                } else {
+                    // Jika gagal
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: data.message,
+                        icon: 'error'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Error!', 'Terjadi kesalahan sistem', 'error');
+            });
         }
     });
 }

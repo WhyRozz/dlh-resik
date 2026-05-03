@@ -197,6 +197,24 @@
     border-left: 5px solid #dc3545;
 }
 
+/* Tambahkan style success ini */
+.popup-content.success {
+    border-left: 5px solid #28a745;
+}
+
+.popup-content.success h3 {
+    color: #28a745;
+}
+
+/* Ubah warna tombol popup form jadi hijau (karena biasanya untuk 'Simpan'/'Tutup') */
+.popup-btn {
+    background: #2e8b57; /* Hijau sesuai tema */
+}
+
+.popup-btn:hover {
+    background: #226b42;
+}
+
 .popup-content h3 {
     margin: 0 0 15px 0;
     font-size: 20px;
