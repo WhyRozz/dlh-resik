@@ -18,6 +18,55 @@
     padding: 20px;
 }
 
+/* ========================================
+   SEARCH BOX MODERN (SAMA SEPERTI AKUN)
+   ======================================== */
+
+/* Container search - posisi kanan */
+.search-wrapper-akun {
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: 0;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+/* Input box dengan desain pill/rounded */
+.search-input-akun {
+    width: 100%;
+    padding: 12px 20px 12px 45px;
+    border: 2px solid #e8f5e9;
+    border-radius: 50px;
+    font-size: 14px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/* Efek saat diklik/focus */
+.search-input-akun:focus {
+    border-color: #20A726;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(32, 167, 38, 0.15);
+}
+
+/* Icon search di kiri */
+.search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #20A726;
+    font-size: 16px;
+    pointer-events: none;
+}
+
+/* ========================================
+   HEADER & TOMBOL TAMBAH
+   ======================================== */
+
 /* Header dengan judul dan tombol */
 .table-header-custom {
     display: flex;
@@ -33,17 +82,10 @@
     margin: 0;
 }
 
-/* Garis hijau di bawah judul */
-.header-divider {
-    border: none;
-    border-top: 2px solid #2e8b57;
-    margin: 10px 0 20px 0;
-}
-
-/* Tombol tambah */
-.btn-tambah-custom {
-    background: #d4edda;
-    color: #2e8b57;
+/* Tombol tambah artikel (Hijau solid seperti Akun) */
+.btn-tambah-artikel {
+    background: #20A726;
+    color: white;
     padding: 10px 20px;
     border-radius: 6px;
     text-decoration: none;
@@ -53,23 +95,31 @@
     align-items: center;
     gap: 8px;
     transition: all 0.2s;
-    border: 1px solid #2e8b57;
+    border: none;
+    cursor: pointer;
 }
 
-.btn-tambah-custom:hover {
-    background: #2e8b57;
-    color: white;
+.btn-tambah-artikel:hover {
+    background: #095E0D;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(32, 167, 38, 0.3);
 }
 
-.btn-tambah-custom span {
+.btn-tambah-artikel span {
     font-size: 18px;
     font-weight: bold;
+}
+
+/* Garis hijau di bawah judul */
+.header-divider {
+    border: none;
+    border-top: 2px solid #2e8b57;
+    margin: 10px 0 20px 0;
 }
 
 /* ========================================
    TABEL
    ======================================== */
-
 .table-design {
     width: 100%;
     border-collapse: collapse;
@@ -85,7 +135,7 @@
 
 /* Header tabel abu-abu */
 .table-design thead th {
-    background: #f5f5f5;
+    background: #e6f2e6;
     color: #333;
     font-weight: 700;
     text-transform: capitalize;
@@ -150,7 +200,7 @@
 }
 
 /* ========================================
-   MODAL STYLES
+   MODAL STYLES (SAMA SEPERTI AKUN)
    ======================================== */
 
 .modal-overlay {
@@ -182,31 +232,50 @@
     transform: scale(0.9);
     transition: transform 0.3s ease;
     overflow: hidden;
+    text-align: center;
+    padding: 40px 30px;
 }
 
 .modal-overlay.show .modal-content {
     transform: scale(1);
 }
 
+/* Warning Icon */
+.modal-warning-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: #fff3cd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #ffc107;
+}
+
+.modal-warning-icon svg {
+    width: 40px;
+    height: 40px;
+    color: #ffc107;
+}
+
 .modal-header {
-    padding: 20px 25px;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 0;
+    border-bottom: none;
+    margin-bottom: 15px;
 }
 
 .modal-header h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 24px;
     color: #333;
     font-weight: 600;
-}
-
-.modal-header.error h3 {
-    color: #dc3545;
+    font-family: 'Georgia', serif;
 }
 
 .modal-body {
-    padding: 25px;
-    text-align: center;
+    padding: 0;
+    margin-bottom: 30px;
 }
 
 .modal-body p {
@@ -217,30 +286,31 @@
 }
 
 .modal-footer {
-    padding: 20px 25px;
-    border-top: 1px solid #e0e0e0;
+    padding: 0;
+    border-top: none;
     display: flex;
     gap: 12px;
-    justify-content: flex-end;
+    justify-content: center;
 }
 
 .btn-modal {
-    padding: 10px 24px;
+    padding: 12px 30px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
+    min-width: 100px;
 }
 
 .btn-batal {
-    background: #e0e0e0;
-    color: #666;
+    background: #6c757d;
+    color: white;
 }
 
 .btn-batal:hover {
-    background: #d0d0d0;
+    background: #5a6268;
     transform: translateY(-2px);
 }
 
@@ -255,11 +325,10 @@
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
-
-
 /* ========================================
    EMPTY STATE
    ======================================== */
+
 .empty-state {
     text-align: center;
     padding: 40px 20px;
@@ -274,61 +343,6 @@
 
 .empty-state a:hover {
     text-decoration: underline;
-}
-
-/* ========================================
-   RESPONSIVE DESIGN
-   ======================================== */
-
-@media (max-width: 768px) {
-    .table-header-custom {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .btn-tambah-custom {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .table-design th,
-    .table-design td {
-        padding: 12px 15px;
-        font-size: 13px;
-    }
-
-    .action-btns {
-        gap: 6px;
-    }
-
-    .btn-action {
-        width: 32px;
-        height: 32px;
-    }
-
-    .toast {
-        left: 20px;
-        right: 20px;
-        max-width: none;
-    }
-}
-
-@media (max-width: 480px) {
-    .table-container {
-        padding: 15px;
-        border-radius: 8px;
-    }
-
-    .table-design th,
-    .table-design td {
-        padding: 10px 12px;
-        font-size: 12px;
-    }
-
-    .modal-content {
-        width: 95%;
-    }
 }
 
 /* ========================================
@@ -440,183 +454,61 @@
     box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
 }
 
-
 /* ========================================
-   SEARCH BOX COMPACT (KANAN ATAS)
+   RESPONSIVE DESIGN
    ======================================== */
 
-/* Update table-header-custom untuk menampung search */
-.table-header-custom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 5px;
-}
-
-.search-input-compact:focus {
-    border-color: #1e5c39;
-    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
-    width: 320px;
-}
-
-.search-btn-compact:hover {
-    background: #1e5c39;
-}
-
-.search-btn-compact svg {
-    color: white;
-    width: 14px;
-    height: 14px;
-}
-
-.search-clear-compact:hover {
-    color: #dc3545;
-}
-
-/* Responsive untuk mobile */
 @media (max-width: 768px) {
+    .search-wrapper-akun {
+        max-width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .search-input-akun {
+        width: 100%;
+    }
+
     .table-header-custom {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
         gap: 15px;
     }
 
-    .search-form-inline {
-        width: 100%;
-    }
-
-    .search-input-compact {
-        width: 100%;
-    }
-
-    .search-input-compact:focus {
-        width: 100%;
-    }
-
-    .btn-tambah-custom {
+    .btn-tambah-artikel {
         width: 100%;
         justify-content: center;
+    }
+
+    .table-design th,
+    .table-design td {
+        padding: 12px 15px;
+        font-size: 13px;
+    }
+
+    .action-btns {
+        gap: 6px;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
     }
 }
 
 @media (max-width: 480px) {
-    .search-input-compact {
-        width: 100%;
-        padding: 8px 35px 8px 10px;
+    .table-container {
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .table-design th,
+    .table-design td {
+        padding: 10px 12px;
         font-size: 12px;
     }
 
-    .search-btn-compact {
-        padding: 5px 8px;
-        right: 3px;
+    .modal-content,
+    .success-modal-content {
+        width: 95%;
     }
-
-    .search-clear-compact {
-        right: 40px;
-    }
-}
-
-
-/* ========================================
-   SEARCH BOX TOP RIGHT (TERPISAH)
-   ======================================== */
-
-.search-container-top {
-    display: flex;
-    justify-content: flex-end; /* Rata Kanan */
-    margin-bottom: 15px;
-}
-
-.search-form-top {
-    margin: 0;
-}
-
-.search-wrapper-top {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.search-input-top {
-    width: 250px; /* Ukuran compact */
-    padding: 8px 35px 8px 12px;
-    border: 2px solid #2e8b57;
-    border-radius: 20px;
-    font-size: 13px;
-    outline: none;
-    transition: all 0.3s;
-}
-
-.search-input-top:focus {
-    border-color: #1e5c39;
-    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
-    width: 280px;
-}
-
-.search-btn-top {
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #2e8b57;
-    border: none;
-    padding: 5px 9px;
-    border-radius: 15px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-
-.search-btn-top:hover {
-    background: #1e5c39;
-}
-
-.search-btn-top svg {
-    color: white;
-    width: 14px;
-    height: 14px;
-}
-
-.search-clear-top {
-    position: absolute;
-    right: 45px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #999;
-    font-size: 20px;
-    text-decoration: none;
-    cursor: pointer;
-    line-height: 1;
-}
-
-.search-clear-top:hover {
-    color: #dc3545;
-}
-
-/* Responsive Mobile */
-@media (max-width: 768px) {
-    .search-container-top {
-        justify-content: center;
-    }
-    
-    .search-input-top,
-    .search-input-top:focus {
-        width: 100%;
-    }
-}
-
-/* Geser posisi Search Box */
-.search-wrapper-top {
-    margin-top: -10px;    /* 📏 Kurangi jarak kosong di atas (negatif = naik) */
-    margin-right: 15px;  /* 📏 Geser ke kanan (tambah px = makin ke kanan) */
-    margin-bottom: 10px; /* 📏 Jarak ke judul "Daftar Artikel" di bawahnya */
-}
-
-/* Jika container utama masih punya padding atas yang terlalu besar */
-.table-container {
-    padding-top: 12px;   /* 📏 Kecilkan dari 20px → 12px (sesuaikan selera) */
 }

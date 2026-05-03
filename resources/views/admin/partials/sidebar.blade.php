@@ -11,7 +11,7 @@
             {{-- Beranda --}}
             <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <a href="{{ route('admin.dashboard') }}">
-                    <i class="fas fa-home"></i>
+                    <img src="{{ asset('assets/icons/beranda.png') }}" alt="Beranda" class="custom-icon">
                     <span>Beranda</span>
                 </a>
             </li>
@@ -19,7 +19,7 @@
             {{-- Laporan Sampah Ilegal --}}
             <li class="nav-item {{ request()->routeIs('admin.laporan*') ? 'active' : '' }}">
                 <a href="{{ route('admin.laporan.index') }}">
-                    <i class="fas fa-exclamation-triangle"></i>
+                    <img src="{{ asset('assets/icons/laporan_sampah.png') }}" alt="Laporan" class="custom-icon">
                     <span>Laporan Sampah Ilegal</span>
                 </a>
             </li>
@@ -28,7 +28,7 @@
             <li class="nav-item has-dropdown {{ request()->routeIs('admin.bank-sampah*') ? 'active open' : '' }}">
                 <a href="javascript:void(0)" class="dropdown-toggle" aria-expanded="false" onclick="toggleDropdown(this)">
                     <div class="nav-link-text">
-                        <i class="fas fa-recycle"></i>
+                        <img src="{{ asset('assets/icons/bank_sampah.png') }}" alt="Bank-Sampah" class="custom-icon">
                         <span>Bank Sampah</span>
                     </div>
                     <i class="fas fa-chevron-down arrow"></i>
@@ -44,7 +44,7 @@
             {{-- Artikel Edukasi --}}
             <li class="nav-item {{ request()->routeIs('admin.artikel*') ? 'active' : '' }}">
                 <a href="{{ route('admin.artikel.index') }}">
-                    <i class="fas fa-newspaper"></i>
+                    <img src="{{ asset('assets/icons/artikel.png') }}" alt="Artikel" class="custom-icon">
                     <span>Artikel Edukasi</span>
                 </a>
             </li>
@@ -52,7 +52,7 @@
             {{-- Informasi TPS --}}
             <li class="nav-item {{ request()->routeIs('admin.tps*') ? 'active' : '' }}">
                 <a href="{{ route('admin.tps.index') }}">
-                    <i class="fas fa-map-marker-alt"></i>
+                    <img src="{{ asset('assets/icons/tps2.png') }}" alt="TPS" class="custom-icon">
                     <span>Informasi TPS</span>
                 </a>
             </li>
@@ -60,7 +60,7 @@
             {{-- Data Pengguna --}}
             <li class="nav-item {{ request()->routeIs('admin.data-pengguna*') ? 'active' : '' }}">
                 <a href="{{ route('admin.data-pengguna.index') }}">
-                    <i class="fas fa-users"></i>
+                    <img src="{{ asset('assets/icons/data_pengguna.png') }}" alt="Data-Pengguna" class="custom-icon">
                     <span>Data Pengguna</span>
                 </a>
             </li>
@@ -68,7 +68,7 @@
             {{-- Kelola Akun --}}
             <li class="nav-item {{ request()->routeIs('admin.akun*') ? 'active' : '' }}">
                 <a href="{{ route('admin.akun.index') }}">
-                    <i class="fas fa-user-cog"></i>
+                    <img src="{{ asset('assets/icons/kelola_akun.png') }}" alt="Kelola-Akun" class="custom-icon">
                     <span>Kelola Akun</span>
                 </a>
             </li>
@@ -79,8 +79,8 @@
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
+                    <img src="{{ asset('assets/icons/keluar.png') }}" alt="Logout" class="custom-icon">
+                    <span>Keluar</span>
                 </button>
             </form>
         </div>

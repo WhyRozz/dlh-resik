@@ -83,11 +83,11 @@
         <div class="form-row">
             <div class="form-group">
                 <label class="form-label">Kapasitas (opsional)</label>
-                <input type="number"
+                <input type="text"
                        name="kapasitas"
                        class="form-input"
                        value="{{ old('kapasitas', $tps->kapasitas ?? '') }}"
-                       min="0"
+                       maxlength="20"
                        placeholder="Contoh: 100">
             </div>
         </div>
