@@ -1,0 +1,529 @@
+/* ============================================
+   penjemputan.css — Admin RESIK
+   (Khusus Navbar, Konten, Tabel, & Responsive)
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f0;
+    min-height: 100vh;
+}
+
+/* ===================================================
+   MAIN WRAPPER
+   =================================================== */
+.main-wrapper {
+    margin-left: 260px; /* Sesuai dengan --sidebar-width di sidebar.css */
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease;
+}
+
+/* ===================================================
+   NAVBAR
+   =================================================== */
+.admin-navbar {
+    height: 65px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    gap: 16px;
+}
+
+.menu-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #333;
+    padding: 5px;
+}
+
+.navbar-search {
+    background: #f0f0f0;
+    border-radius: 25px;
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    width: 340px;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+.navbar-search:focus-within {
+    background: #e8f5e9;
+    outline: 1px solid #a5d6a7;
+}
+
+.navbar-search input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    outline: none;
+    font-size: 13.5px;
+    color: #333;
+}
+
+.navbar-search input::placeholder {
+    color: #aaa;
+}
+
+.navbar-search button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    font-size: 14px;
+}
+
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    background: #2e7d32;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+/* ===================================================
+   MAIN CONTENT
+   =================================================== */
+.main-content {
+    padding: 28px;
+    flex: 1;
+}
+
+/* ===================================================
+   CONTENT CARD
+   =================================================== */
+.content-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 28px 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.content-card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2e7d32;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #4caf50;
+    letter-spacing: 0.3px;
+}
+
+/* ===================================================
+   TABLE
+   =================================================== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead th {
+    padding: 13px 16px;
+    text-align: left;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #444;
+    background: #fafafa;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+tbody td {
+    padding: 14px 16px;
+    font-size: 13.5px;
+    color: #555;
+    border-bottom: 1px solid #f2f2f2;
+    vertical-align: middle;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background: #f9fdf9;
+}
+
+tbody td img {
+    width: 64px;
+    height: 52px;
+    object-fit: cover;
+    border-radius: 7px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* Aksi Buttons */
+.aksi-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-approve,
+.btn-reject {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s, opacity 0.15s;
+}
+
+.btn-approve {
+    background: #43a047;
+    color: white;
+}
+
+.btn-reject {
+    background: #e53935;
+    color: white;
+}
+
+.btn-approve:hover {
+    background: #2e7d32;
+    transform: scale(1.1);
+}
+
+.btn-reject:hover {
+    background: #b71c1c;
+    transform: scale(1.1);
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    color: #aaa;
+    padding: 40px 0;
+    font-size: 14px;
+}
+
+/* ===================================================
+   RESPONSIVE (Khusus Konten & Navbar)
+   =================================================== */
+@media (max-width: 768px) {
+    .main-wrapper {
+        margin-left: 0;
+    }
+
+    .menu-toggle-btn {
+        display: block;
+    }
+
+    .navbar-search {
+        display: none;
+    }
+
+    .main-content {
+        padding: 16px;
+    }
+
+    .content-card {
+        padding: 18px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    thead th,
+    tbody td {
+        padding: 10px 10px;
+    }
+
+    tbody td img {
+        width: 48px;
+        height: 40px;
+    }
+}
+
+
+
+/* ===================================================
+   MODAL DETAIL PENJEMPUTAN
+   =================================================== */
+
+/* Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+/* Container Modal */
+.modal-container {
+    background: #fff;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 650px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    animation: modalSlideIn 0.25s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header Modal */
+.modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 1;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #2e7d32;
+    font-weight: 700;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #888;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.modal-close:hover {
+    color: #e53935;
+}
+
+/* Body Modal */
+.modal-body {
+    padding: 24px;
+}
+
+.detail-content {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* Foto */
+.detail-image img {
+    width: 100%;
+    border-radius: 10px;
+    object-fit: cover;
+    max-height: 280px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: #f5f5f5;
+}
+
+/* Form Detail */
+.detail-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    font-size: 0.95rem;
+    color: #333;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4caf50;
+    background: #fff;
+}
+
+.form-group input[readonly],
+.form-group textarea[readonly] {
+    cursor: not-allowed;
+    background: #f5f5f5;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Footer Modal */
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #eee;
+    text-align: right;
+    background: #fff;
+    position: sticky;
+    bottom: 0;
+}
+
+.btn-tutup {
+    background: #6c757d;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-tutup:hover {
+    background: #5a6268;
+}
+
+/* Scrollbar halus */
+.modal-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modal-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.modal-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+    .detail-content {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .detail-image img {
+        max-height: 220px;
+    }
+
+    .modal-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .modal-body {
+        padding: 18px;
+    }
+}
+
+/* ============================================
+   STATUS BADGES & AKSI SELESAI
+   ============================================ */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+    display: inline-block;
+    white-space: nowrap;
+}
+.status-diproses { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+.status-berhasil { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status-ditolak  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+.aksi-selesai {
+    color: #999;
+    font-size: 12px;
+    font-weight: 500;
+    font-style: italic;
+}
+
+.no-img {
+    width: 64px; height: 52px;
+    object-fit: cover;
+    border-radius: 7px;
+    background: #e9ecef;
+}
+
+/* Optimasi Lebar Kolom Tabel */
+table th:nth-child(1), table td:nth-child(1) { width: 5%; text-align: center; }
+table th:nth-child(2), table td:nth-child(2) { width: 10%; }
+table th:nth-child(3), table td:nth-child(3) { width: 20%; }
+table th:nth-child(4), table td:nth-child(4) { width: 18%; }
+table th:nth-child(5), table td:nth-child(5) { width: 10%; text-align: right; }
+table th:nth-child(6), table td:nth-child(6) { width: 12%; }
+table th:nth-child(7), table td:nth-child(7) { width: 15%; }

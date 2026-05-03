@@ -1,0 +1,622 @@
+/* ========================================
+   HALAMAN DAFTAR ARTIKEL
+   ======================================== */
+
+.content-header h2 {
+    color: #2e8b57;
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Container utama */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    padding: 20px;
+}
+
+/* Header dengan judul dan tombol */
+.table-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.table-header-title {
+    color: #2e8b57;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Garis hijau di bawah judul */
+.header-divider {
+    border: none;
+    border-top: 2px solid #2e8b57;
+    margin: 10px 0 20px 0;
+}
+
+/* Tombol tambah */
+.btn-tambah-custom {
+    background: #d4edda;
+    color: #2e8b57;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    border: 1px solid #2e8b57;
+}
+
+.btn-tambah-custom:hover {
+    background: #2e8b57;
+    color: white;
+}
+
+.btn-tambah-custom span {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* ========================================
+   TABEL
+   ======================================== */
+
+.table-design {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.table-design th,
+.table-design td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Header tabel abu-abu */
+.table-design thead th {
+    background: #f5f5f5;
+    color: #333;
+    font-weight: 700;
+    text-transform: capitalize;
+    font-size: 14px;
+    border-bottom: 2px solid #ddd;
+}
+
+.table-design tbody tr:hover {
+    background: #fafafa;
+    transition: background 0.2s;
+}
+
+.table-design tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ========================================
+   ACTION BUTTONS
+   ======================================== */
+
+.action-btns {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-action {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+
+.btn-edit {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.btn-edit:hover {
+    background: #ffc107;
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.btn-delete {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.btn-delete:hover {
+    background: #dc3545;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* ========================================
+   MODAL STYLES
+   ======================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.modal-overlay.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+}
+
+.modal-header.error h3 {
+    color: #dc3545;
+}
+
+.modal-body {
+    padding: 25px;
+    text-align: center;
+}
+
+.modal-body p {
+    margin: 0;
+    color: #666;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn-modal {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-batal {
+    background: #e0e0e0;
+    color: #666;
+}
+
+.btn-batal:hover {
+    background: #d0d0d0;
+    transform: translateY(-2px);
+}
+
+.btn-hapus {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-hapus:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.empty-state a {
+    color: #2e8b57;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.empty-state a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+    .table-header-custom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .btn-tambah-custom {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .table-design th,
+    .table-design td {
+        padding: 12px 15px;
+        font-size: 13px;
+    }
+
+    .action-btns {
+        gap: 6px;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+    }
+
+    .toast {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-container {
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .table-design th,
+    .table-design td {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .modal-content {
+        width: 95%;
+    }
+}
+
+/* ========================================
+   SUCCESS MODAL (ELEGAN)
+   ======================================== */
+
+.success-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.success-modal-overlay.show {
+    display: flex;
+    opacity: 1;
+}
+
+.success-modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 40px 30px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.success-modal-overlay.show .success-modal-content {
+    transform: scale(1);
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+}
+
+.success-icon-circle {
+    width: 80px;
+    height: 80px;
+    border: 3px solid #d4edda;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: scaleIn 0.3s ease;
+}
+
+.success-icon-check {
+    width: 40px;
+    height: 40px;
+    stroke: #28a745;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: drawCheck 0.5s ease 0.3s forwards;
+}
+
+@keyframes drawCheck {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+.success-modal-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2e8b57;
+    margin: 0 0 10px 0;
+    font-family: 'Georgia', serif;
+}
+
+.success-modal-message {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 30px 0;
+    line-height: 1.6;
+}
+
+.success-modal-btn {
+    background: #2e8b57;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.success-modal-btn:hover {
+    background: #226b42;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
+}
+
+
+/* ========================================
+   SEARCH BOX COMPACT (KANAN ATAS)
+   ======================================== */
+
+/* Update table-header-custom untuk menampung search */
+.table-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+}
+
+.search-input-compact:focus {
+    border-color: #1e5c39;
+    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+    width: 320px;
+}
+
+.search-btn-compact:hover {
+    background: #1e5c39;
+}
+
+.search-btn-compact svg {
+    color: white;
+    width: 14px;
+    height: 14px;
+}
+
+.search-clear-compact:hover {
+    color: #dc3545;
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 768px) {
+    .table-header-custom {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .search-form-inline {
+        width: 100%;
+    }
+
+    .search-input-compact {
+        width: 100%;
+    }
+
+    .search-input-compact:focus {
+        width: 100%;
+    }
+
+    .btn-tambah-custom {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-input-compact {
+        width: 100%;
+        padding: 8px 35px 8px 10px;
+        font-size: 12px;
+    }
+
+    .search-btn-compact {
+        padding: 5px 8px;
+        right: 3px;
+    }
+
+    .search-clear-compact {
+        right: 40px;
+    }
+}
+
+
+/* ========================================
+   SEARCH BOX TOP RIGHT (TERPISAH)
+   ======================================== */
+
+.search-container-top {
+    display: flex;
+    justify-content: flex-end; /* Rata Kanan */
+    margin-bottom: 15px;
+}
+
+.search-form-top {
+    margin: 0;
+}
+
+.search-wrapper-top {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input-top {
+    width: 250px; /* Ukuran compact */
+    padding: 8px 35px 8px 12px;
+    border: 2px solid #2e8b57;
+    border-radius: 20px;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.search-input-top:focus {
+    border-color: #1e5c39;
+    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+    width: 280px;
+}
+
+.search-btn-top {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #2e8b57;
+    border: none;
+    padding: 5px 9px;
+    border-radius: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.search-btn-top:hover {
+    background: #1e5c39;
+}
+
+.search-btn-top svg {
+    color: white;
+    width: 14px;
+    height: 14px;
+}
+
+.search-clear-top {
+    position: absolute;
+    right: 45px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 20px;
+    text-decoration: none;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.search-clear-top:hover {
+    color: #dc3545;
+}
+
+/* Responsive Mobile */
+@media (max-width: 768px) {
+    .search-container-top {
+        justify-content: center;
+    }
+    
+    .search-input-top,
+    .search-input-top:focus {
+        width: 100%;
+    }
+}
+
+/* Geser posisi Search Box */
+.search-wrapper-top {
+    margin-top: -10px;    /* 📏 Kurangi jarak kosong di atas (negatif = naik) */
+    margin-right: 15px;  /* 📏 Geser ke kanan (tambah px = makin ke kanan) */
+    margin-bottom: 10px; /* 📏 Jarak ke judul "Daftar Artikel" di bawahnya */
+}
+
+/* Jika container utama masih punya padding atas yang terlalu besar */
+.table-container {
+    padding-top: 12px;   /* 📏 Kecilkan dari 20px → 12px (sesuaikan selera) */
+}

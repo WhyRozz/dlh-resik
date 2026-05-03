@@ -1,0 +1,286 @@
+/* --- Gaya Khusus Halaman Kelola TPS --- */
+
+.content-header h2 {
+    color: #2e8b57;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.search-bar {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.table-container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+.header-artikel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.table-title {
+    color: #2e8b57;
+    font-size: 20px;
+    border-bottom: 2px solid #2e8b57;
+    padding-bottom: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th,
+td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+
+tr:hover {
+    background: #f8f9fa;
+}
+
+.action-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.btn-edit {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-edit:hover {
+    background: #e0a800;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #c82333;
+}
+
+.btn-add {
+    background: #2e8b57;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+
+.btn-add:hover {
+    background: #226b42;
+}
+
+.btn-add span {
+    font-size: 16px;
+}
+
+/* Link Maps */
+.maps-link {
+    color: #2e8b57;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.maps-link:hover {
+    text-decoration: underline;
+}
+
+/* Popup Styles */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.popup-overlay.active {
+    display: flex;
+    pointer-events: auto;
+}
+
+.popup-content {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transform: scale(0.8);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.popup-content.show {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.popup-content.success {
+    border-left: 5px solid #28a745;
+}
+
+.popup-content.error {
+    border-left: 5px solid #dc3545;
+}
+
+.popup-content h3 {
+    margin: 0 0 15px 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.popup-content p {
+    margin: 0 0 20px 0;
+    color: #555;
+    font-size: 15px;
+}
+
+.popup-btns {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.popup-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.popup-btn.cancel {
+    background: #6c757d;
+    color: white;
+}
+
+.popup-btn.cancel:hover {
+    background: #5a6268;
+}
+
+.popup-btn.confirm {
+    background: #dc3545;
+    color: white;
+}
+
+.popup-btn.confirm:hover {
+    background: #c82333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-artikel {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+
+    th,
+    td {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+
+    .btn-action {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .table-container {
+        padding: 15px;
+    }
+
+    .table-title {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .popup-content {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .popup-btns {
+        flex-direction: column;
+    }
+
+    .popup-btn {
+        width: 100%;
+    }
+}
