@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\JenisSampahController;
 // ✅ BankSampah Controllers
 use App\Http\Controllers\BankSampah\PenarikanController;
 use App\Http\Controllers\BankSampah\PenjemputanController;
+use App\Http\Controllers\BankSampah\SetorController; 
 
 /*
 |--------------------------------------------------------------------------
@@ -121,6 +122,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::put('/{id}/status', [PenarikanController::class, 'updateStatus'])->name('update-status');
                 Route::delete('/{id}', [PenarikanController::class, 'destroy'])->name('destroy');
             });
+
+            // ✅ SETOR SAMPAH (Routes baru)
+            Route::prefix('setor-sampah')->name('setor.')->group(function () {
+                Route::get('/', [SetorController::class, 'index'])->name('index');
+                Route::get('/{id}', [SetorController::class, 'detail'])->name('detail');
+                Route::post('/', [SetorController::class, 'store'])->name('store');
+            });
+
+    
+
 
             // Shortcut routes untuk sidebar
             Route::get('/setor', [PenarikanController::class, 'setor'])->name('setor');
