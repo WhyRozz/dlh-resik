@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\DataPenggunaController;
 // ✅ BankSampah Controllers
 use App\Http\Controllers\BankSampah\PenarikanController;
 use App\Http\Controllers\BankSampah\PenjemputanController;
+use App\Http\Controllers\BankSampah\SetorController; 
 
 /*
 |--------------------------------------------------------------------------
@@ -140,6 +141,49 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
         }); // ← Tutup group bank-sampah
 
+<<<<<<< HEAD
+=======
+            // Penarikan
+            Route::prefix('penarikan')->name('penarikan.')->group(function () {
+                Route::get('/', [PenarikanController::class, 'index'])->name('index');
+                Route::get('/{id}/detail', [PenarikanController::class, 'show'])->name('show');
+                Route::put('/{id}/status', [PenarikanController::class, 'updateStatus'])->name('update-status');
+                Route::delete('/{id}', [PenarikanController::class, 'destroy'])->name('destroy');
+            });
+
+            // ✅ SETOR SAMPAH (Routes baru)
+            Route::prefix('setor-sampah')->name('setor.')->group(function () {
+                Route::get('/', [SetorController::class, 'index'])->name('index');
+                Route::get('/{id}', [SetorController::class, 'detail'])->name('detail');
+                Route::post('/', [SetorController::class, 'store'])->name('store');
+            });
+
+    
+
+
+            // Shortcut routes untuk sidebar
+            Route::get('/setor', [PenarikanController::class, 'setor'])->name('setor');
+            Route::get('/tarik', [PenarikanController::class, 'index'])->name('tarik');
+            Route::get('/jenis-harga', [JenisSampahController::class, 'index'])->name('index');
+
+            // Penjemputan
+            Route::prefix('penjemputan')->name('penjemputan.')->group(function () {
+                Route::get('/', [PenjemputanController::class, 'index'])->name('index');
+                Route::get('/{id}/detail', [PenjemputanController::class, 'show'])->name('show');
+                Route::patch('/{id}/approve', [PenjemputanController::class, 'approve'])->name('approve');
+                Route::delete('/{id}/reject', [PenjemputanController::class, 'reject'])->name('reject');
+            });
+            // ✅ Jenis Sampah - Resource Routes (PERBAIKAN)
+            Route::prefix('jenis-sampah')->name('jenis-sampah.')->group(function () {
+                Route::get('/', [JenisSampahController::class, 'index'])->name('index');
+                Route::get('/create', [JenisSampahController::class, 'create'])->name('create');
+                Route::post('/', [JenisSampahController::class, 'store'])->name('store');
+                Route::get('/{id}/edit', [JenisSampahController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [JenisSampahController::class, 'update'])->name('update');
+                Route::delete('/{id}', [JenisSampahController::class, 'destroy'])->name('destroy');
+            });
+        });
+>>>>>>> c1f7d3ef682703f91f392ff1d6349c0c0b19cea2
     }); // ← Tutup group auth:admin
 
 }); // ← Tutup group prefix admin
