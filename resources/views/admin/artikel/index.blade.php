@@ -9,32 +9,31 @@
 @endpush
 
 @section('content')
-<div class="table-container">
-    
-    <!-- 🔍 Search Bar Modern (Seperti Halaman Akun) -->
-    <div class="search-wrapper-akun" style="margin-top: 0; margin-right: 0; margin-bottom: 20px;">
-        <i class="fas fa-search search-icon"></i>
-        <input 
-            type="text" 
-            id="searchArtikel" 
-            class="search-input-akun" 
-            placeholder="Cari artikel berdasarkan judul..."
-            value="{{ request('search') }}"
-            onkeyup="filterArtikel()"
-        >
-    </div>
+<!-- 🔍 Search Bar - DIPINDAH KE LUAR -->
+<div class="search-wrapper-akun" style="margin-bottom: 20px; margin-top: -50px;">
+    <i class="fas fa-search search-icon"></i>
+    <input 
+        type="text" 
+        id="searchArtikel" 
+        class="search-input-akun" 
+        placeholder="Cari artikel berdasarkan judul..."
+        value="{{ request('search') }}"
+        onkeyup="filterArtikel()"
+    >
+</div>
 
-    <!-- Header Section (Seperti Halaman Akun) -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+<div class="table-container">
+    <!-- Header Section -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h3 style="color: #20A726; margin: 0; font-size: 20px; font-weight: 600;">
             Daftar Artikel
         </h3>
-    <button type="button" 
-            onclick="location.href='{{ route('admin.artikel.create') }}'"
-            style="background: #20A726; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-        + Tambah Artikel
-    </button>
-</div>
+        <button type="button" 
+                onclick="location.href='{{ route('admin.artikel.create') }}'"
+                style="background: #20A726; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+            + Tambah Artikel
+        </button>
+    </div>
 
     <table class="table-design">
     <thead>

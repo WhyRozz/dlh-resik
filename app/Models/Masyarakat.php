@@ -15,6 +15,7 @@ class Masyarakat extends Authenticatable
     protected $primaryKey = 'id_masyarakat';
     public $incrementing = true;
     protected $keyType = 'int';
+    
 
     // ✅ LENGKAP: Semua field yang bisa di-mass-assign
     protected $fillable = [

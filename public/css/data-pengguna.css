@@ -126,7 +126,7 @@ th {
 }
 
 .btn-icon {
-    background: none;
+    background: none; 
     border: none;
     cursor: pointer;
     color: #2e8b57;
@@ -318,6 +318,11 @@ th {
     border: 2px solid #e9ecef;
 }
 
+/* Warna hijau untuk judul halaman */
+h2, .page-header h2 {
+    color: #2e8b57 !important;
+}
+
 /* ===== Animations ===== */
 @keyframes slideUp {
     from {
@@ -380,3 +385,4 @@ th {
         padding: 8px 15px;
     }
 }
+

@@ -512,3 +512,10 @@
         width: 95%;
     }
 }
+
+/* Posisi search bar di kanan atas */
+.search-wrapper-akun {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}

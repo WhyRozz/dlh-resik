@@ -73,7 +73,7 @@
             <div class="stat-content">
                 <span class="stat-label">Total Laporan Sampah Ilegal</span>
                 <span class="stat-value">{{ number_format($totalLaporan) }}</span>
-                <span class="stat-trend text-green">↑ 12% dari bulan lalu</span>
+                <span class="stat-trend text-green"></span>
             </div>
         </div>
 
@@ -87,7 +87,7 @@
             <div class="stat-content">
                 <span class="stat-label">Total TPS</span>
                 <span class="stat-value">{{ number_format($totalTPS) }}</span>
-                <span class="stat-trend text-green">↑ 3 titik baru</span>
+                <span class="stat-trend text-green"></span>
             </div>
         </div>
 
@@ -101,7 +101,7 @@
             <div class="stat-content">
                 <span class="stat-label">Total Penarikan</span>
                 <span class="stat-value">{{ number_format($totalPenarikan) }}</span>
-                <span class="stat-trend text-green">Rp 2.5Jt minggu ini</span>
+                <span class="stat-trend text-green"></span>
             </div>
         </div>
 
@@ -115,7 +115,7 @@
             <div class="stat-content">
                 <span class="stat-label">Total Setor</span>
                 <span class="stat-value">{{ number_format($totalSetor) }}</span>
-                <span class="stat-trend text-green">↑ 18% dari bulan lalu</span>
+                <span class="stat-trend text-green"></span>
             </div>
         </div>
 
@@ -129,7 +129,7 @@
             <div class="stat-content">
                 <span class="stat-label">Total Artikel</span>
                 <span class="stat-value">{{ number_format($totalArtikel) }}</span>
-                <span class="stat-trend text-gray">Edukasi lingkungan</span>
+                <span class="stat-trend text-gray"></span>
             </div>
         </div>
     </div>
@@ -166,39 +166,49 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($laporanIllegal->take(5) as $index => $laporan)
-                            <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>
-                                    <div class="user-info">
-                                        <div class="user-avatar">{{ substr($laporan->nama ?? 'A', 0, 1) }}</div>
-                                        <span>{{ $laporan->nama ?? 'Anonim' }}</span>
-                                    </div>
-                                </td>
-                                <td>{{ Str::limit($laporan->lokasi ?? '-', 25) }}</td>
-                                <td><span class="badge-type">{{ $laporan->jenis_sampah ?? 'Umum' }}</span></td>
-                                <td>
-                                    @php
-                                        $statusClass = match($laporan->status ?? '') {
-                                            'Diterima' => 'badge-success',
-                                            'Diproses' => 'badge-warning',
-                                            'Ditolak' => 'badge-danger',
-                                            'Selesai' => 'badge-info',
-                                            default => 'badge-secondary'
-                                        };
-                                    @endphp
-                                    <span class="badge {{ $statusClass }}">{{ $laporan->status ?? 'Pending' }}</span>
-                                </td>
-                                <td>{{ \Carbon\Carbon::parse($laporan->created_at ?? now())->format('d M Y') }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="empty-state">
-                                    <div class="empty-icon">📭</div>
-                                    <p>Belum ada laporan sampah illegal</p>
-                                </td>
-                            </tr>
-                        @endforelse
+                        @forelse($laporanIllegal as $index => $laporan)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            
+                            {{-- Nama Pelapor (kolom: nama) --}}
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar">{{ substr($laporan->nama ?? 'A', 0, 1) }}</div>
+                                    <span>{{ $laporan->nama ?? 'Anonim' }}</span>
+                                </div>
+                            </td>
+                            
+                            {{-- Lokasi (kolom: lokasi) --}}
+                            <td>{{ Str::limit($laporan->lokasi ?? '-', 25) }}</td>
+                            
+                            {{-- Keterangan (kolom: keterangan) - bukan jenis_sampah --}}
+                            <td><span class="badge-type">{{ Str::limit($laporan->keterangan ?? 'Umum', 20) }}</span></td>
+                            
+                            {{-- Status (kolom: status) --}}
+                            <td>
+                                @php
+                                    $statusClass = match($laporan->status ?? '') {
+                                        'Diterima' => 'badge-success',
+                                        'Diproses' => 'badge-warning',
+                                        'Ditolak' => 'badge-danger',
+                                        'Ditarik' => 'badge-secondary',
+                                        default => 'badge-secondary'
+                                    };
+                                @endphp
+                                <span class="badge {{ $statusClass }}">{{ $laporan->status ?? 'Pending' }}</span>
+                            </td>
+                            
+                            {{-- Tanggal (kolom: created_at) --}}
+                            <td>{{ \Carbon\Carbon::parse($laporan->created_at ?? now())->format('d M Y') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <p>Belum ada laporan sampah illegal</p>
+                            </td>
+                        </tr>
+                    @endforelse
                     </tbody>
                 </table>
             </div>
@@ -216,53 +226,39 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (ctx) {
         new Chart(ctx, {
-            type: 'line',
+            type: 'line', // Bisa juga 'bar' jika mau bentuk batang
             data: {
-                labels: @json($chartLabels ?: $dateLabels),
+                labels: @json($chartLabels), // Ini akan jadi "Minggu 1", "Minggu 2", dst
                 datasets: [{
                     label: 'Jumlah Laporan',
-                    data: @json($chartData),
-                    borderColor: '#22c55e',
-                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    data: @json($chartData), // Ini angka 10, 20, 30, dst
+                    borderColor: '#22c55e', // Warna Garis Hijau
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)', // Warna Area Transparan
                     borderWidth: 3,
                     fill: true,
                     tension: 0.4,
-                    pointBackgroundColor: '#22c55e',
-                    pointBorderColor: '#fff',
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#22c55e',
                     pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
+                    pointRadius: 5
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#1f2937',
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            label: function(context) {
-                                return 'Laporan: ' + context.parsed.y;
-                            }
-                        }
-                    }
+                    legend: { display: false } // Sembunyikan legend agar bersih
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
+                        // Biarkan Chart.js mengatur sendiri step (10, 20, 30) 
+                        // agar muat sampai 50+
                         grid: { color: 'rgba(0,0,0,0.05)' },
-                        ticks: { stepSize: 1 }
                     },
                     x: {
                         grid: { display: false }
                     }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
                 }
             }
         });
