@@ -16,22 +16,6 @@
     {{-- Wrapper kanan (navbar + konten) --}}
     <div class="main-wrapper" id="mainWrapper">
 
-        {{-- Navbar --}}
-        <nav class="admin-navbar">
-            <button class="menu-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
-                <i class="fas fa-bars"></i>
-            </button>
-
-            <div class="navbar-search">
-                <input type="text" placeholder="Cari data berdasarkan nama atau lokasi...">
-                <button><i class="fas fa-search"></i></button>
-            </div>
-
-            <div class="navbar-user">
-                <span>Admin RESIK</span>
-                <div class="avatar">A</div>
-            </div>
-        </nav>
 
         {{-- Konten Halaman --}}
         <main class="main-content">

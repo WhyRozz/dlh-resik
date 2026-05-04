@@ -1,3 +1,56 @@
+/* Container Search (Ganti yang lama dengan ini) */
+.search-container {
+    position: relative;
+    display: flex;
+    justify-content: flex-end; /* Rata kanan */
+    align-items: center;
+    
+    /* PENGATURAN POSISI */
+    margin-top: -45px;   /* Geser ke atas agar sejajar dengan judul/header */
+    margin-bottom: 30px; /* JARAK KE TABEL - Besarkan angka ini (misal 40px) jika tabel masih terlalu dekat */
+    
+    padding-right: 20px;
+    width: 100%;
+    z-index: 10;
+}
+
+.search-box {
+    position: relative;
+    width: 300px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 14px;
+    outline: none;
+    background: white;
+}
+
+.search-box input:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+}
+
+.search-box button {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #4CAF50;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+}
+
+.search-box button:hover {
+    background: #45a049;
+}
+
 /* ============================================
    penjemputan.css — Admin RESIK
    (Khusus Navbar, Konten, Tabel, & Responsive)
@@ -121,6 +174,7 @@ body {
 .main-content {
     padding: 28px;
     flex: 1;
+    position: relative;
 }
 
 /* ===================================================
@@ -147,8 +201,9 @@ body {
    TABLE
    =================================================== */
 table {
+    clear: both; 
     width: 100%;
-    border-collapse: collapse;
+    
 }
 
 thead th {
