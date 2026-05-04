@@ -9,13 +9,17 @@ use App\Models\Penarikan;
 use App\Models\TransaksiSetor;
 use App\Models\Artikel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+<<<<<<< HEAD
         // ========== 1. FILTER BULAN & TAHUN ==========
+=======
+        // ========== FILTER BULAN & TAHUN (Hanya untuk dropdown) ==========
+>>>>>>> 71e0b2fc491735604765e0f62f2e1aa5303cbb0f
         $bulanList = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
@@ -25,6 +29,7 @@ class DashboardController extends Controller
         $selectedTahun = (int) ($request->input('tahun') ?? date('Y'));
         $selectedBulan = (int) ($request->input('bulan') ?? date('n'));
 
+<<<<<<< HEAD
         // Validasi input
         if ($selectedBulan < 1 || $selectedBulan > 12) $selectedBulan = (int) date('n');
         if ($selectedTahun < 2000 || $selectedTahun > date('Y') + 1) $selectedTahun = (int) date('Y');
@@ -55,13 +60,47 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
+=======
+        // ========== 1. STATISTIK (TOTAL KESELURUHAN - TANPA FILTER!) ==========
+        $totalLaporan = Laporan::count(); // ✅ TOTAL SEMUA
+        $totalTPS = Tps::count(); // ✅ TOTAL SEMUA
+        $totalPenarikan = Penarikan::count(); // ✅ TOTAL SEMUA
+        $totalSetor = TransaksiSetor::count(); // ✅ TOTAL SEMUA
+        $totalArtikel = Artikel::count(); // ✅ TOTAL SEMUA
 
-        $diproses = $statusCounts['Diproses'] ?? 0;
-        $diterima = $statusCounts['Diterima'] ?? 0;
-        $ditolak = $statusCounts['Ditolak'] ?? 0;
-        $selesai_diproses = $diterima;
-        $belum_diproses = $diproses;
+       // Group by minggu dalam bulan
+$chartLabels = ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'];
+$chartData = [];
 
+for ($week = 1; $week <= 4; $week++) {
+    $startOfWeek = Carbon::createFromDate($selectedTahun, $selectedBulan, 1)
+        ->addWeeks($week - 1)
+        ->startOfWeek();
+    
+    $endOfWeek = $startOfWeek->copy()->endOfWeek();
+    
+    // Jangan melebihi akhir bulan
+    $endOfMonth = Carbon::createFromDate($selectedTahun, $selectedBulan, 1)->endOfMonth();
+    if ($endOfWeek > $endOfMonth) {
+        $endOfWeek = $endOfMonth;
+    }
+    
+    $count = Laporan::whereBetween('created_at', [
+        $startOfWeek->format('Y-m-d 00:00:00'),
+        $endOfWeek->format('Y-m-d 23:59:59')
+    ])->count();
+    
+    $chartData[] = $count;
+}
+>>>>>>> 71e0b2fc491735604765e0f62f2e1aa5303cbb0f
+
+// Hapus minggu kosong di akhir (jika bulan tidak penuh 4 minggu)
+$daysInMonth = Carbon::createFromDate($selectedTahun, $selectedBulan, 1)->daysInMonth;
+$weeksInMonth = ceil($daysInMonth / 7);
+$chartLabels = array_slice($chartLabels, 0, $weeksInMonth);
+$chartData = array_slice($chartData, 0, $weeksInMonth);
+
+<<<<<<< HEAD
         // ========== 3. STATS CARDS (TOTAL DATA REAL) ==========
         $totalLaporan = Laporan::count();
         $totalTPS = Tps::count();
@@ -120,12 +159,32 @@ class DashboardController extends Controller
         rsort($tahunOptions);
 
         // ========== 8. KIRIM SEMUA VARIABLE KE VIEW ==========
+=======
+        // ========== 3. LIST LAPORAN TERBARU (10 DATA) ==========
+        $laporan = Laporan::latest()
+            ->take(10)
+            ->get();
+
+        // ========== 4. TAHUN OPTIONS (UNTUK DROPDOWN) ==========
+        $tahunOptions = Laporan::selectRaw('DISTINCT YEAR(created_at) as tahun')
+            ->orderByDesc('tahun')
+            ->pluck('tahun')
+            ->filter()
+            ->toArray();
+
+        if (empty($tahunOptions)) {
+            $tahunOptions = [date('Y')];
+        }
+
+        // ========== 5. RETURN VIEW ==========
+>>>>>>> 71e0b2fc491735604765e0f62f2e1aa5303cbb0f
         return view('admin.dashboard', compact(
             // Filter
             'bulanList',
             'selectedTahun',
             'selectedBulan',
             'tahunOptions',
+<<<<<<< HEAD
             
             // Stats Lama
             'total',
@@ -134,11 +193,14 @@ class DashboardController extends Controller
             'ditolak',
             
             // Stats Cards Baru
+=======
+>>>>>>> 71e0b2fc491735604765e0f62f2e1aa5303cbb0f
             'totalLaporan',
             'totalTPS',
             'totalPenarikan',
             'totalSetor',
             'totalArtikel',
+<<<<<<< HEAD
             
             // Chart Data
             'chartLabels',
@@ -148,6 +210,11 @@ class DashboardController extends Controller
             // Tabel Data
             'recentReports',
             'laporanIllegal'
+=======
+            'chartLabels',
+            'chartData',
+            'laporan'
+>>>>>>> 71e0b2fc491735604765e0f62f2e1aa5303cbb0f
         ));
     }
 }
