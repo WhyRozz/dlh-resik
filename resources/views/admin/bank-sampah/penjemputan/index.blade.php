@@ -4,8 +4,18 @@
 @section('content')
 <div class="content-card">
     <h2>Daftar Penjemputan</h2>
+
+    {{-- Search Bar --}}
+<div class="search-container">
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Cari penjemputan..." onkeyup="searchTable()">
+        <button type="button" onclick="searchTable()">
+            <i class="fas fa-search"></i>
+        </button>
+    </div>
+</div>
     
-    <table>
+        <table id="penjemputanTable">
         <thead>
             <tr>
                 <th>No</th>
@@ -156,6 +166,34 @@
 
 
 <script>
+// ================= SEARCH FUNCTION =================
+function searchTable() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById('penjemputanTable');
+    const tr = table.getElementsByTagName('tr');
+    
+    for (let i = 1; i < tr.length; i++) {
+        const tdNamaAdmin = tr[i].getElementsByTagName('td')[2];
+        const tdWaktu = tr[i].getElementsByTagName('td')[3];
+        const tdStatus = tr[i].getElementsByTagName('td')[5];
+        
+        if (tdNamaAdmin || tdWaktu || tdStatus) {
+            const namaValue = tdNamaAdmin.textContent || tdNamaAdmin.innerText;
+            const waktuValue = tdWaktu.textContent || tdWaktu.innerText;
+            const statusValue = tdStatus.textContent || tdStatus.innerText;
+            
+            if (namaValue.toLowerCase().indexOf(filter) > -1 || 
+                waktuValue.toLowerCase().indexOf(filter) > -1 ||
+                statusValue.toLowerCase().indexOf(filter) > -1) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+    }
+}
+
 // ================= MODAL DETAIL =================
 function showDetail(id) {
     fetch(`/admin/bank-sampah/penjemputan/${id}/detail`)
