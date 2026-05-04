@@ -4,115 +4,95 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Laporan;
+use App\Models\Tps;
+use App\Models\Penarikan;
+use App\Models\TransaksiSetor;
+use App\Models\Artikel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // Definisi bulan
+        // ========== FILTER BULAN & TAHUN (Hanya untuk dropdown) ==========
         $bulanList = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember'
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
 
-        // Ambil input dengan default
         $selectedTahun = (int) ($request->input('tahun') ?? date('Y'));
         $selectedBulan = (int) ($request->input('bulan') ?? date('n'));
 
-        // Validasi
-        if ($selectedBulan < 1 || $selectedBulan > 12) {
-            $selectedBulan = (int) date('n');
-        }
-        if ($selectedTahun < 2000 || $selectedTahun > date('Y') + 1) {
-            $selectedTahun = (int) date('Y');
-        }
+        // ========== 1. STATISTIK (TOTAL KESELURUHAN - TANPA FILTER!) ==========
+        $totalLaporan = Laporan::count(); // ✅ TOTAL SEMUA
+        $totalTPS = Tps::count(); // ✅ TOTAL SEMUA
+        $totalPenarikan = Penarikan::count(); // ✅ TOTAL SEMUA
+        $totalSetor = TransaksiSetor::count(); // ✅ TOTAL SEMUA
+        $totalArtikel = Artikel::count(); // ✅ TOTAL SEMUA
 
-        // Query total laporan
-        $total = Laporan::where(function ($query) use ($selectedTahun, $selectedBulan) {
-            $query->whereNotNull('tanggal')
-                ->whereYear('tanggal', $selectedTahun)
-                ->whereMonth('tanggal', $selectedBulan);
-        })
-            ->orWhere(function ($query) use ($selectedTahun, $selectedBulan) {
-                $query->whereNull('tanggal')
-                    ->whereYear('created_at', $selectedTahun)
-                    ->whereMonth('created_at', $selectedBulan);
-            })
-            ->count();
+       // Group by minggu dalam bulan
+$chartLabels = ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'];
+$chartData = [];
 
-        // Query status counts
-        $statusCounts = Laporan::selectRaw('status, COUNT(*) as total')
-            ->where(function ($query) use ($selectedTahun, $selectedBulan) {
-                $query->whereNotNull('tanggal')
-                    ->whereYear('tanggal', $selectedTahun)
-                    ->whereMonth('tanggal', $selectedBulan);
-            })
-            ->orWhere(function ($query) use ($selectedTahun, $selectedBulan) {
-                $query->whereNull('tanggal')
-                    ->whereYear('created_at', $selectedTahun)
-                    ->whereMonth('created_at', $selectedBulan);
-            })
-            ->groupBy('status')
-            ->pluck('total', 'status')
-            ->toArray();
+for ($week = 1; $week <= 4; $week++) {
+    $startOfWeek = Carbon::createFromDate($selectedTahun, $selectedBulan, 1)
+        ->addWeeks($week - 1)
+        ->startOfWeek();
+    
+    $endOfWeek = $startOfWeek->copy()->endOfWeek();
+    
+    // Jangan melebihi akhir bulan
+    $endOfMonth = Carbon::createFromDate($selectedTahun, $selectedBulan, 1)->endOfMonth();
+    if ($endOfWeek > $endOfMonth) {
+        $endOfWeek = $endOfMonth;
+    }
+    
+    $count = Laporan::whereBetween('created_at', [
+        $startOfWeek->format('Y-m-d 00:00:00'),
+        $endOfWeek->format('Y-m-d 23:59:59')
+    ])->count();
+    
+    $chartData[] = $count;
+}
 
-        $diproses = $statusCounts['Diproses'] ?? 0;
-        $diterima = $statusCounts['Diterima'] ?? 0;
-        $ditolak = $statusCounts['Ditolak'] ?? 0;
-        $selesai_diproses = $diterima;
-        $belum_diproses = $diproses;
+// Hapus minggu kosong di akhir (jika bulan tidak penuh 4 minggu)
+$daysInMonth = Carbon::createFromDate($selectedTahun, $selectedBulan, 1)->daysInMonth;
+$weeksInMonth = ceil($daysInMonth / 7);
+$chartLabels = array_slice($chartLabels, 0, $weeksInMonth);
+$chartData = array_slice($chartData, 0, $weeksInMonth);
 
-        // Trend 7 hari terakhir
-        $dateLabels = [];
-        $counts = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $dateLabels[] = date('D', strtotime("-$i days"));
-            $counts[] = 0; // Default 0
-        }
-
-        // Laporan terbaru (4 item)
-        $recentReports = Laporan::select('lokasi as alamat', 'status', 'created_at')
-            ->orderBy('created_at', 'desc')
-            ->limit(4)
+        // ========== 3. LIST LAPORAN TERBARU (10 DATA) ==========
+        $laporan = Laporan::latest()
+            ->take(10)
             ->get();
 
-        // ✅ TAHUN OPTIONS - Ambil tahun unik dari database
-        $tahunOptions = Laporan::selectRaw('DISTINCT YEAR(COALESCE(tanggal, created_at)) as tahun')
+        // ========== 4. TAHUN OPTIONS (UNTUK DROPDOWN) ==========
+        $tahunOptions = Laporan::selectRaw('DISTINCT YEAR(created_at) as tahun')
             ->orderByDesc('tahun')
             ->pluck('tahun')
             ->filter()
             ->toArray();
 
-        // Jika tidak ada data, gunakan tahun sekarang
         if (empty($tahunOptions)) {
             $tahunOptions = [date('Y')];
         }
 
-        // ✅ KIRIM SEMUA VARIABLE KE VIEW
+        // ========== 5. RETURN VIEW ==========
         return view('admin.dashboard', compact(
             'bulanList',
             'selectedTahun',
             'selectedBulan',
-            'total',
-            'selesai_diproses',
-            'belum_diproses',
-            'ditolak',
-            'dateLabels',
-            'counts',
-            'recentReports',
-            'tahunOptions'  // ✅ PASTIKAN INI ADA
+            'tahunOptions',
+            'totalLaporan',
+            'totalTPS',
+            'totalPenarikan',
+            'totalSetor',
+            'totalArtikel',
+            'chartLabels',
+            'chartData',
+            'laporan'
         ));
     }
 }
