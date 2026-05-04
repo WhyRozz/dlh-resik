@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -137,38 +139,41 @@ class AuthController extends Controller
                 'status' => 'success',
                 'timestamp' => now()->format('Y-m-d H:i:s'),
                 'data' => [
-                    'tipe' => 'masyarakat',
-                    'user' => $user
+                    'tipe' => 'masyarakat',  // ← Role: masyarakat
+                    'user' => $user,
+                    'redirect' => '/home-user'  // ← Redirect ke home user
                 ],
                 'message' => 'Login berhasil'
             ]);
         }
 
-        // 2. Cek tabel PNS (dengan relasi dinas)
+        // 2. Cek tabel PNS (ASN)
         $user = Pns::with('dinas')->where('email', $email)->first();
         if ($user && Hash::check($password, $user->password)) {
             return response()->json([
                 'status' => 'success',
                 'timestamp' => now()->format('Y-m-d H:i:s'),
                 'data' => [
-                    'tipe' => 'pns',
-                    'user' => $user
+                    'tipe' => 'pns',  // ← Role: pns (ASN)
+                    'user' => $user,
+                    'redirect' => '/home-user'  // ← Redirect ke home user (sama dengan masyarakat)
                 ],
                 'message' => 'Login berhasil'
             ]);
         }
 
-        // 3. Cek tabel Petugas (username atau email)
-        $user = Petugas::where('username', $email)
-            ->orWhere('email', $email)
+        // 3. Cek tabel Petugas (Admin)
+        $user = Petugas::where('email', $email)
+            ->orWhere('username', $email)
             ->first();
         if ($user && Hash::check($password, $user->password)) {
             return response()->json([
                 'status' => 'success',
                 'timestamp' => now()->format('Y-m-d H:i:s'),
                 'data' => [
-                    'tipe' => 'petugas',
-                    'user' => $user
+                    'tipe' => 'petugas',  // ← Role: petugas (admin)
+                    'user' => $user,
+                    'redirect' => '/home-admin'  // ← Redirect ke home admin
                 ],
                 'message' => 'Login berhasil'
             ]);
@@ -180,7 +185,6 @@ class AuthController extends Controller
         ], 401);
     }
 
-    // ✅ FORGOT PASSWORD (Generate 4-digit OTP)
     public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -195,55 +199,75 @@ class AuthController extends Controller
         }
 
         $email = trim($request->email);
-        $user_found = false;
-        $user_type = '';
 
-        // Cek di tabel masyarakat
+        // ✅ Set timezone ke WIB (seperti kode lama)
+        date_default_timezone_set('Asia/Jakarta');
+        DB::statement("SET time_zone = '+07:00'");
+
+        // ✅ Cek email di tabel masyarakat
         $user = Masyarakat::where('email', $email)->first();
-        if ($user) {
-            $user_found = true;
-            $user_type = 'masyarakat';
-        }
 
-        // Cek di tabel pns
-        if (!$user_found) {
+        // ✅ Kalau tidak ada, cek di tabel pns
+        if (!$user) {
             $user = Pns::where('email', $email)->first();
-            if ($user) {
-                $user_found = true;
-                $user_type = 'pns';
-            }
         }
 
-        if ($user_found) {
-            // ✅ Generate 4-digit OTP numeric (0000 - 9999)
-            $otp = str_pad(random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
-            $otp_expires = now()->addMinutes(10); // Valid 10 menit
-
-            if ($user_type === 'masyarakat') {
-                Masyarakat::where('email', $email)->update([
-                    'otp' => $otp,
-                    'otp_expires' => $otp_expires
-                ]);
-            } else {
-                Pns::where('email', $email)->update([
-                    'otp' => $otp,
-                    'otp_expires' => $otp_expires
-                ]);
-            }
-
-            // TODO: Nanti integrasi kirim email/SMS OTP
+        if (!$user) {
+            // Untuk keamanan, tetap return success agar tidak bisa enumerate email
             return response()->json([
                 'status' => 'success',
                 'timestamp' => now()->format('Y-m-d H:i:s'),
-                'message' => 'Kode verifikasi telah dikirim ke email Anda'
+                'message' => 'Jika email terdaftar, kode verifikasi telah dikirim'
             ]);
         }
 
-        // Keamanan: tetap return success agar tidak bisa enumerate email
+        // ✅ Generate OTP 4 digit (sama seperti kode lama)
+        $otp = str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT);
+        $otp_expires = date('Y-m-d H:i:s', strtotime('+10 minutes'));
+
+        // ✅ Simpan OTP ke database
+        if ($user instanceof Masyarakat) {
+            Masyarakat::where('email', $email)->update([
+                'otp' => $otp,
+                'otp_expires' => $otp_expires
+            ]);
+        } else {
+            Pns::where('email', $email)->update([
+                'otp' => $otp,
+                'otp_expires' => $otp_expires
+            ]);
+        }
+
+        // ✅ KIRIM EMAIL VIA LARAVEL MAIL
+        try {
+            Mail::raw("
+            🔐 KODE VERIFIKASI RESIK APP
+
+            Halo,
+
+            Kode OTP Anda adalah: {$otp}
+
+            ⏰ Berlaku selama 10 menit.
+
+            🔒 Jangan bagikan kode ini kepada siapa pun.
+            Jika Anda tidak meminta reset password, abaikan email ini.
+
+            Terima kasih,
+            Tim RESIK App
+            ", function ($message) use ($email) {
+                $message->to($email)
+                    ->subject('🔐 Kode Verifikasi - RESIK App')
+                    ->from('simpelsi2025@gmail.com', 'RESIK App');
+            });
+        } catch (\Exception $e) {
+            // Log error tapi tetap return success (agar tidak crash di production)
+            \Log::error('Gagal kirim email: ' . $e->getMessage());
+        }
+
         return response()->json([
             'status' => 'success',
             'timestamp' => now()->format('Y-m-d H:i:s'),
-            'message' => 'Jika email terdaftar, kode verifikasi telah dikirim'
+            'message' => 'OTP berhasil dikirim ke email Anda.'
         ]);
     }
     // ✅ VERIFY OTP
@@ -379,5 +403,66 @@ class AuthController extends Controller
             'timestamp' => now()->format('Y-m-d H:i:s'),
             'message' => 'Password berhasil direset'
         ]);
+    }
+    public function updateProfile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'tipe' => 'required|in:masyarakat,pns',
+            'nama' => 'required|string|max:100',
+            'no_telepon' => 'required|string|max:15',
+            'tanggal_lahir' => 'nullable|date',
+            'alamat' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        $userId = $request->user_id;
+        $tipe = $request->tipe;
+
+        try {
+            if ($tipe == 'masyarakat') {
+                $user = Masyarakat::find($userId);
+                if (!$user) {
+                    return response()->json(['status' => 'error', 'message' => 'User tidak ditemukan'], 404);
+                }
+                $user->update([
+                    'nama' => $request->nama,
+                    'no_telepon' => $request->no_telepon,
+                    'tanggal_lahir' => $request->tanggal_lahir,
+                    'alamat' => $request->alamat,
+                ]);
+            } elseif ($tipe == 'pns') {
+                $user = Pns::find($userId);
+                if (!$user) {
+                    return response()->json(['status' => 'error', 'message' => 'User tidak ditemukan'], 404);
+                }
+                $user->update([
+                    'nama' => $request->nama,
+                    'no_telepon' => $request->no_telepon,
+                    'tanggal_lahir' => $request->tanggal_lahir,
+                    'alamat' => $request->alamat,
+                ]);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Tipe user tidak valid'], 422);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Profil berhasil diupdate',
+                'data' => ['user' => $user]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal update profil',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

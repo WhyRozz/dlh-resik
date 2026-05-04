@@ -30,6 +30,8 @@ class Masyarakat extends Authenticatable
         'saldo',
         'otp',
         'otp_expires',
+        'reset_token',
+        'reset_token_expires',
     ];
 
     protected $hidden = [

@@ -23,15 +23,17 @@ class Pns extends Authenticatable
         'email',
         'password',
         'no_telepon',
-        'tanggal_lahir',
         'jenis_kelamin',
-        'foto',
+        'tanggal_lahir',
         'alamat',
+        'foto',
         'id_dinas',
         'barcode_id',
         'saldo',
         'otp',
         'otp_expires',
+        'reset_token',
+        'reset_token_expires',
     ];
 
     protected $hidden = [
