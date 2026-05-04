@@ -35,9 +35,11 @@
                         <div class="upload-text">Klik untuk upload foto artikel</div>
                         <div class="upload-hint">Format: JPG, JPEG, PNG. Maksimal 2MB.</div>
                     </div>
-                    <div class="upload-preview" id="uploadPreview">
-                        <img id="previewImage" src="" alt="Preview foto artikel">
-                        <button type="button" class="remove-image" onclick="removeImage()" title="Hapus gambar">×</button>
+<div class="upload-preview {{ isset($artikel) && $artikel->foto ? 'show' : '' }}" id="uploadPreview">
+    <img id="previewImage" 
+     src="{{ isset($artikel) && $artikel->foto ? asset('storage/' . $artikel->foto) : '' }}" 
+     alt="Preview foto artikel">
+                             <button type="button" class="remove-image" onclick="removeImage()" title="Hapus gambar">×</button>
                     </div>
                     <input type="file" 
                            id="fotoInput" 
