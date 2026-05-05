@@ -15,13 +15,13 @@ class PenarikanController extends Controller
     /**
      * Tampilkan daftar penarikan (Admin)
      */
-    
+
     public function index()
     {
         $penarikans = Penarikan::with(['masyarakat', 'pns'])
             ->orderBy('tanggal_penarikan', 'desc')
             ->paginate(15);
-        
+
         return view('admin.bank-sampah.penarikan.index', compact('penarikans'));
     }
 
@@ -39,7 +39,7 @@ class PenarikanController extends Controller
         // Deteksi user yang login
         $user = Auth::guard('masyarakat')->user() ?? Auth::guard('pns')->user();
         $guard = Auth::guard('masyarakat')->check() ? 'masyarakat' : 'pns';
-        
+
         $jumlah = $validated['jumlah_uang'];
 
         // Cek saldo
@@ -51,7 +51,7 @@ class PenarikanController extends Controller
         try {
             // 1. Potong saldo
             $saldoBaru = $user->saldo - $jumlah;
-            
+
             if ($guard === 'masyarakat') {
                 Masyarakat::where('id_masyarakat', $user->id_masyarakat)->update(['saldo' => $saldoBaru]);
                 $idMasyarakat = $user->id_masyarakat;
@@ -76,7 +76,6 @@ class PenarikanController extends Controller
             DB::commit();
 
             return redirect()->back()->with('success', '✅ Penarikan berhasil diajukan! Saldo terpotong Rp ' . number_format($jumlah, 0, ',', '.'));
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', '❌ Gagal mengajukan penarikan: ' . $e->getMessage());
@@ -89,13 +88,13 @@ class PenarikanController extends Controller
     public function show($id)
     {
         $penarikan = Penarikan::with(['masyarakat', 'pns'])->findOrFail($id);
-        
+
         $userName = $penarikan->masyarakat->nama ?? $penarikan->pns->nama ?? 'Unknown';
-        
-        return response()->json([
-            ...$penarikan->toArray(),
-            'nama_user' => $userName,
-        ]);
+
+        // ✅ Gabungkan array dengan benar menggunakan array_merge
+        return response()->json(
+            array_merge($penarikan->toArray(), ['nama_user' => $userName])
+        );
     }
 
     /**
@@ -122,18 +121,17 @@ class PenarikanController extends Controller
         DB::beginTransaction();
         try {
             if ($statusBaru === 'ditolak') {
-            // === DITOLAK: KEMBALIKAN SALDO ===
-            // Langsung increment saldo tanpa perlu ambil data user dulu
-            if ($penarikan->id_masyarakat) {
-                Masyarakat::where('id_masyarakat', $penarikan->id_masyarakat)
-                    ->increment('saldo', $penarikan->jumlah_uang);
-            } else {
-                Pns::where('id_pns', $penarikan->id_pns)
-                    ->increment('saldo', $penarikan->jumlah_uang);
-            }
+                // === DITOLAK: KEMBALIKAN SALDO ===
+                // Langsung increment saldo tanpa perlu ambil data user dulu
+                if ($penarikan->id_masyarakat) {
+                    Masyarakat::where('id_masyarakat', $penarikan->id_masyarakat)
+                        ->increment('saldo', $penarikan->jumlah_uang);
+                } else {
+                    Pns::where('id_pns', $penarikan->id_pns)
+                        ->increment('saldo', $penarikan->jumlah_uang);
+                }
 
-            $message = '❌ Penarikan ditolak. Saldo Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.') . ' dikembalikan.';
-
+                $message = '❌ Penarikan ditolak. Saldo Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.') . ' dikembalikan.';
             } elseif ($statusBaru === 'berhasil') {
                 // === BERHASIL: SALDO TETAP TERPOTONG ===
                 $message = '✅ Penarikan disetujui. Silakan transfer ke rekening anggota.';
@@ -155,7 +153,6 @@ class PenarikanController extends Controller
                 'message' => $message,
                 'status_baru' => $statusBaru
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -196,7 +193,6 @@ class PenarikanController extends Controller
             DB::commit();
 
             return redirect()->back()->with('success', 'Data penarikan berhasil dihapus');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal menghapus: ' . $e->getMessage());

@@ -73,7 +73,8 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn-action btn-view"
+                            <button
+                                class="btn-action btn-view"
                                 onclick="showDetail({{ $penarikan->id_penarikan }})"
                                 title="Lihat Detail">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,22 +214,37 @@
     function showDetail(id) {
         currentId = id;
 
-        fetch(`/admin/bank-sampah/penarikan/${id}`)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('detail-id').value = `#TRX-${String(data.id_penarikan).padStart(5, '0')}`;
-                document.getElementById('detail-nama').value = data.nama_user || 'Unknown';
-                document.getElementById('detail-tanggal').value = new Date(data.tanggal_penarikan).toLocaleString('id-ID');
-                document.getElementById('detail-jumlah').value = formatRupiah(data.jumlah_uang);
-                document.getElementById('detail-jenis').value = (data.jenis_ewallet || '-').toUpperCase();
-                document.getElementById('detail-ewallet').value = data.nomor_ewallet || '-';
-                document.getElementById('detail-status-text').value = data.status.toUpperCase();
-                document.getElementById('detail-status').value = data.status;
+        fetch('/admin/bank-sampah/penarikan/' + id)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                // ✅ Tambah null check untuk setiap elemen
+                var elId = document.getElementById('detail-id');
+                var elNama = document.getElementById('detail-nama');
+                var elTanggal = document.getElementById('detail-tanggal');
+                var elJumlah = document.getElementById('detail-jumlah');
+                var elJenis = document.getElementById('detail-jenis');
+                var elEwallet = document.getElementById('detail-ewallet');
+                var elStatusText = document.getElementById('detail-status-text');
+                var elStatus = document.getElementById('detail-status');
+
+                if (elId) elId.value = '#TRX-' + String(data.id_penarikan).padStart(5, '0');
+                if (elNama) elNama.value = data.nama_user || 'Unknown';
+                if (elTanggal) elTanggal.value = new Date(data.tanggal_penarikan).toLocaleString('id-ID');
+                if (elJumlah) elJumlah.value = formatRupiah(data.jumlah_uang);
+                if (elJenis) elJenis.value = (data.jenis_ewallet || '-').toUpperCase();
+                if (elEwallet) elEwallet.value = data.nomor_ewallet || '-';
+                if (elStatusText) elStatusText.value = data.status.toUpperCase();
+                if (elStatus) elStatus.value = data.status;
 
                 toggleStatusInfo();
-                document.getElementById('detailModal').classList.add('active');
-            })
-            .catch(error => {
+
+                var modal = document.getElementById('detailModal');
+                if (modal) {
+                    modal.classList.add('active');
+                }
+            })['catch'](function(error) {
                 console.error('Error:', error);
                 alert('Gagal mengambil data detail');
             });
@@ -261,9 +277,8 @@
         };
 
         infoBox.textContent = messages[status].text;
-        infoBox.className = `status-info active ${messages[status].class}`;
+        infoBox.className = 'status-info active ' + messages[status].class;
     }
-
 
     // Update Status
     function updateStatus() {
@@ -272,49 +287,45 @@
             return;
         }
 
-        const status = document.getElementById('detail-status').value;
+        var status = document.getElementById('detail-status').value;
 
-        if (!confirm(`Yakin ingin mengubah status menjadi ${status.toUpperCase()}?`)) {
+        if (!confirm('Yakin ingin mengubah status menjadi ' + status.toUpperCase() + '?')) {
             return;
         }
 
-        // ✅ Ambil CSRF token dengan benar
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        // ✅ Cara yang lebih aman mengambil CSRF token
+        var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        if (!csrfToken) {
+        if (!csrfToken || csrfToken === '') {
             alert('CSRF token tidak ditemukan. Silakan refresh halaman.');
+            location.reload();
             return;
         }
 
-        fetch(`/admin/bank-sampah/penarikan/${currentId}/status`, {
-                method: 'POST', // ✅ 1. Pakai POST (bukan PUT langsung)
+        fetch('/admin/bank-sampah/penarikan/' + currentId + '/status', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken, // ✅ 2. Token sudah diambil di atas
+                    'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     status: status,
-                    _method: 'PUT' // ✅ 3. Laravel method spoofing
+                    _method: 'PUT'
                 })
             })
-            .then(async response => {
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.message || 'Request gagal');
-                }
-                return data;
+            .then(function(response) {
+                return response.json();
             })
-            .then(data => {
+            .then(function(data) {
                 if (data.success) {
                     alert('✅ ' + data.message);
                     location.reload();
                 } else {
                     alert('❌ ' + data.message);
                 }
-            })
-            .catch(error => {
+            })['catch'](function(error) {
                 console.error('Error:', error);
                 alert('❌ Gagal: ' + error.message);
             });
@@ -324,7 +335,7 @@
     function deleteData(id) {
         if (confirm('⚠️ Yakin ingin menghapus data penarikan ini?\n\nSaldo akan dikembalikan ke anggota.')) {
             const form = document.getElementById('deleteForm');
-            form.action = `/admin/bank-sampah/penarikan/${id}`;
+            form.action = '/admin/bank-sampah/penarikan/' + id;
             form.submit();
         }
     }
@@ -338,7 +349,7 @@
 
     // Live Search
     let searchTimeout;
-    document.getElementById('searchInput')?.addEventListener('input', function(e) {
+    document.getElementById('searchInput').addEventListener('input', function(e) {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             const term = e.target.value.toLowerCase().trim();
@@ -361,7 +372,3 @@
     });
 </script>
 @endpush
-<<<<<<< HEAD
-=======
-
->>>>>>> 6b4bdac3caacc718407ba679e655b5691e1de1f2
