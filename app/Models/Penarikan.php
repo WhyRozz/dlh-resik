@@ -9,6 +9,8 @@ class Penarikan extends Model
 {
     protected $table = 'penarikan';
     protected $primaryKey = 'id_penarikan';
+
+    public $timestamps = false;
     
     protected $fillable = [
         'id_masyarakat',

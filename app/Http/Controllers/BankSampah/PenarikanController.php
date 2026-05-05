@@ -121,27 +121,17 @@ class PenarikanController extends Controller
         DB::beginTransaction();
         try {
             if ($statusBaru === 'ditolak') {
-                // === DITOLAK: KEMBALIKAN SALDO ===
-                
-                if ($penarikan->id_masyarakat) {
-                    $user = Masyarakat::findOrFail($penarikan->id_masyarakat);
-                    $userType = 'masyarakat';
-                } else {
-                    $user = Pns::findOrFail($penarikan->id_pns);
-                    $userType = 'pns';
-                }
+            // === DITOLAK: KEMBALIKAN SALDO ===
+            // Langsung increment saldo tanpa perlu ambil data user dulu
+            if ($penarikan->id_masyarakat) {
+                Masyarakat::where('id_masyarakat', $penarikan->id_masyarakat)
+                    ->increment('saldo', $penarikan->jumlah_uang);
+            } else {
+                Pns::where('id_pns', $penarikan->id_pns)
+                    ->increment('saldo', $penarikan->jumlah_uang);
+            }
 
-                $saldoKembali = $user->saldo + $penarikan->jumlah_uang;
-
-                if ($userType === 'masyarakat') {
-                    Masyarakat::where('id_masyarakat', $user->id_masyarakat)
-                        ->update(['saldo' => $saldoKembali]);
-                } else {
-                    Pns::where('id_pns', $user->id_pns)
-                        ->update(['saldo' => $saldoKembali]);
-                }
-
-                $message = '❌ Penarikan ditolak. Saldo Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.') . ' dikembalikan.';
+            $message = '❌ Penarikan ditolak. Saldo Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.') . ' dikembalikan.';
 
             } elseif ($statusBaru === 'berhasil') {
                 // === BERHASIL: SALDO TETAP TERPOTONG ===

@@ -35,6 +35,46 @@
     margin-bottom: 2rem;
 }
 
+/* 🔹 Top Search - Posisi di atas sendiri, rata kanan */
+.top-search {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+}
+
+.search-wrapper {
+    position: relative;
+    width: 350px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.7rem 1rem 0.7rem 2.75rem;
+    border: 2px solid var(--gray-200);
+    border-radius: 50px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    background: var(--gray-50);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
 /* Header Section */
 .page-header {
     display: flex;
@@ -71,42 +111,6 @@
     background: var(--orange-dark);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(255, 129, 20, 0.3);
-}
-
-/* Search Box */
-.search-container {
-    margin-bottom: 1.5rem;
-}
-
-.search-wrapper {
-    position: relative;
-    max-width: 400px;
-}
-
-.search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gray-400);
-    pointer-events: none;
-}
-
-.search-input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.75rem;
-    border: 2px solid var(--gray-200);
-    border-radius: var(--radius);
-    font-size: 0.9rem;
-    transition: var(--transition);
-    background: var(--gray-50);
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: var(--primary-green);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 /* Green Line Divider */
@@ -463,73 +467,56 @@
 
 /* Animations */
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @keyframes slideUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .page-container {
-        padding: 1rem;
+    .page-container { padding: 1rem; }
+    
+    .top-search {
+        justify-content: center;
+        margin-bottom: 0.5rem;
     }
-
+    
+    .search-wrapper { width: 100%; max-width: 400px; }
+    
     .page-header {
         flex-direction: column;
         align-items: flex-start;
     }
-
+    
     .btn-cetak {
         width: 100%;
         justify-content: center;
     }
-
-    .search-wrapper {
-        max-width: 100%;
-    }
-
-    .data-table {
-        font-size: 0.8rem;
-    }
-
+    
+    .data-table { font-size: 0.8rem; }
+    
     .data-table thead th,
-    .data-table tbody td {
-        padding: 0.75rem 0.5rem;
-    }
-
-    .action-buttons {
-        flex-direction: column;
-    }
+    .data-table tbody td { padding: 0.75rem 0.5rem; }
+    
+    .action-buttons { flex-direction: column; }
 }
 
 /* Print Styles */
 @media print {
-    .search-container,
+    .top-search,
     .btn-cetak,
     .btn-action {
         display: none !important;
     }
-
+    
     .page-container {
         box-shadow: none;
         padding: 0;
     }
-
-    .data-table {
-        font-size: 0.8rem;
-    }
+    
+    .data-table { font-size: 0.8rem; }
 }
