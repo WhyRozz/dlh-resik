@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DinasController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ArtikelController;
+use App\Http\Controllers\Api\PenarikanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,3 +27,11 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/dinas', [DinasController::class, 'index']);
 Route::post('/profile/update', [AuthController::class, 'updateProfile']);
 Route::put('/profile', [AuthController::class, 'updateProfile']);
+Route::get('/get-saldo', [AuthController::class, 'getSaldo']);
+
+// Route Artikel
+Route::get('/artikel', [ArtikelController::class, 'index']);
+
+// Route Penarikan
+Route::post('/penarikan', [PenarikanController::class, 'store']);
+Route::get('/penarikan', [PenarikanController::class, 'index']);

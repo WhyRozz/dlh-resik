@@ -428,9 +428,14 @@ class AuthController extends Controller
         try {
             if ($tipe == 'masyarakat') {
                 $user = Masyarakat::find($userId);
+
                 if (!$user) {
-                    return response()->json(['status' => 'error', 'message' => 'User tidak ditemukan'], 404);
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'User tidak ditemukan'
+                    ], 404);
                 }
+
                 $user->update([
                     'nama' => $request->nama,
                     'no_telepon' => $request->no_telepon,
@@ -439,9 +444,14 @@ class AuthController extends Controller
                 ]);
             } elseif ($tipe == 'pns') {
                 $user = Pns::find($userId);
+
                 if (!$user) {
-                    return response()->json(['status' => 'error', 'message' => 'User tidak ditemukan'], 404);
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'User tidak ditemukan'
+                    ], 404);
                 }
+
                 $user->update([
                     'nama' => $request->nama,
                     'no_telepon' => $request->no_telepon,
@@ -449,13 +459,19 @@ class AuthController extends Controller
                     'alamat' => $request->alamat,
                 ]);
             } else {
-                return response()->json(['status' => 'error', 'message' => 'Tipe user tidak valid'], 422);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tipe user tidak valid'
+                ], 422);
             }
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Profil berhasil diupdate',
-                'data' => ['user' => $user]
+                'timestamp' => now()->format('Y-m-d H:i:s'),
+                'data' => [
+                    'user' => $user
+                ],
+                'message' => 'Profil berhasil diupdate'
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -464,5 +480,42 @@ class AuthController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+    public function getSaldo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'tipe' => 'required|in:masyarakat,pns',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        $userId = $request->user_id;
+        $tipe = $request->tipe;
+
+        if ($tipe == 'masyarakat') {
+            $user = Masyarakat::find($userId);
+        } else {
+            $user = Pns::find($userId);
+        }
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'saldo' => $user->saldo
+            ]
+        ]);
     }
 }

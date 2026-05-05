@@ -1,30 +1,38 @@
-<?php
-
+// app/Models/Penarikan.php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Penarikan extends Model
 {
-    use HasFactory;
+    protected $table = 'penarikans';
 
-    protected $table = 'penarikan';
-    protected $primaryKey = 'id_penarikan';
-    public $timestamps = false;
-    
     protected $fillable = [
-        'id_masyarakat',
-        'id_pns',
-        'jumlah_uang',
-        'jenis_ewallet',
-        'nomor_ewallet',
+        'user_id',
+        'tipe_user',
+        'nama',
+        'e_wallet',
+        'nomor_e_wallet',
+        'nominal',
         'status',
-        'tanggal_penarikan',
+        'id_transaksi',
+        'catatan_admin',
+        'diproses_at',
+        'selesai_at',
     ];
-    
+
     protected $casts = [
-        'jumlah_uang' => 'decimal:2',
-        'tanggal_penarikan' => 'datetime',
+        'nominal' => 'decimal:2',
+        'diproses_at' => 'datetime',
+        'selesai_at' => 'datetime',
     ];
-} 
+
+    // Scope untuk filter status
+    public function scopePending($query) {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeSelesai($query) {
+        return $query->where('status', 'selesai');
+    }
+}
