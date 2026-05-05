@@ -15,6 +15,7 @@ class PenarikanController extends Controller
     /**
      * Tampilkan daftar penarikan (Admin)
      */
+    
     public function index()
     {
         $penarikans = Penarikan::with(['masyarakat', 'pns'])

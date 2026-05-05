@@ -311,6 +311,7 @@
     animation: fadeIn 0.3s ease;
 }
 
+
 .modal-overlay.active {
     display: flex;
 }
