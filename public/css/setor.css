@@ -1,5 +1,5 @@
 /* =========================================
-   HALAMAN DATA SETOR SAMPAH
+   HALAMAN DATA SETOR SAMPAH + MODAL POPUP
    ========================================= */
 
 /* === Top Header dengan Search Kanan === */
@@ -23,7 +23,6 @@
     gap: 10px;
 }
 
-/* Style Search Bar Mirip Laporan */
 .search-wrapper {
     display: flex;
     align-items: center;
@@ -61,77 +60,12 @@
     transition: color 0.2s;
 }
 
-.search-wrapper button:hover {
-    color: #257046;
-}
+.search-wrapper button:hover { color: #257046; }
 
-/* Responsive: Search turun ke bawah di HP */
 @media (max-width: 768px) {
     .top-header { flex-direction: column; align-items: flex-start; }
     .search-wrapper { width: 100%; }
 }
-
-/* === Filter Box === */
-.filter-box {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    margin: 0 10px 20px;
-}
-
-.filter-box .filter-row {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    align-items: flex-end;
-}
-
-.filter-box .filter-item { flex: 1; min-width: 180px; }
-
-.filter-box label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-    color: #333;
-    font-size: 0.9rem;
-}
-
-.filter-box input,
-.filter-box select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    background: #fafafa;
-    transition: border-color 0.2s;
-}
-
-.filter-box input:focus,
-.filter-box select:focus {
-    outline: none;
-    border-color: #2e8b57;
-    background: white;
-}
-
-.filter-box .btn-search {
-    background: #2e8b57;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: background 0.2s;
-    min-width: 120px;
-    justify-content: center;
-}
-
-.filter-box .btn-search:hover { background: #257046; }
 
 /* === Data Table === */
 .data-table-container {
@@ -142,18 +76,12 @@
     margin: 0 10px 20px;
 }
 
-.data-table-container .table-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: #333;
-}
-
 .data-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.data-table thead { background: #e6f2e6;; }
+.data-table thead { background: #e6f2e6; }
 
 .data-table th {
     padding: 14px 20px;
@@ -221,7 +149,6 @@
 
 .data-table .btn-action:hover { background: #257046; }
 
-/* === Empty State === */
 .empty-state {
     text-align: center;
     padding: 50px 20px;
@@ -236,7 +163,6 @@
 
 .empty-state p { margin: 0; font-size: 1rem; }
 
-/* === Pagination === */
 .pagination-wrapper {
     padding: 15px 20px;
     display: flex;
@@ -275,33 +201,14 @@
     color: #2e8b57;
 }
 
-/* === General Responsive === */
 @media (max-width: 768px) {
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0;
-    }
-    
-    .filter-box {
-        margin: 0 0 20px;
-        padding: 15px;
-    }
-    
-    .filter-box .filter-row { flex-direction: column; }
-    .filter-box .filter-item { width: 100%; }
-    .filter-box .btn-search { width: 100%; justify-content: center; }
-    
-    .data-table-container { margin: 0 0 20px; }
     .data-table { font-size: 0.85rem; }
     .data-table th, .data-table td { padding: 10px 12px; }
 }
 
 @media (max-width: 480px) {
-    .stats-grid { grid-template-columns: 1fr; }
     .data-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
-
 
 /* =========================================
    MODAL POPUP DETAIL
@@ -388,10 +295,7 @@
 .modal-footer .btn i { font-size: 0.95rem; }
 .modal-footer .btn-secondary { background: #f0f0f0; color: #333; }
 .modal-footer .btn-secondary:hover { background: #e0e0e0; }
-.modal-footer .btn-primary { background: #2e8b57; color: white; }
-.modal-footer .btn-primary:hover { background: #257046; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(46,139,87,0.3); }
 
-/* === Modal Responsive === */
 @media (max-width: 600px) {
     .modal-box { max-width: 100%; max-height: 95vh; border-radius: 12px; }
     .modal-header { padding: 15px 20px; }
@@ -402,10 +306,81 @@
     .modal-footer .btn { width: 100%; justify-content: center; }
 }
 
-/* === Print Styles === */
-@media print {
-    .modal-backdrop, .modal-close, .modal-footer { display: none !important; }
-    .modal-box { position: static; box-shadow: none; max-width: 100%; max-height: none; border-radius: 0; }
-    .modal-header { background: white !important; color: #2e8b57 !important; border-bottom: 2px solid #2e8b57; }
-    .form-group input { border: none; border-bottom: 1px dashed #ccc; background: transparent; padding: 5px 0; }
+/* =========================================
+   FILTER BOX (Bulan & Tahun)
+   ========================================= */
+.filter-box {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin: 0 10px 20px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filter-item {
+    flex: 1;
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-item label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #555;
+}
+
+.filter-item select,
+.filter-item input {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: #fafafa;
+    transition: border-color 0.2s;
+}
+
+.filter-item select:focus,
+.filter-item input:focus {
+    outline: none;
+    border-color: #2e8b57;
+    background: white;
+}
+
+.filter-btn {
+    background: #2e8b57;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.filter-btn:hover { background: #257046; }
+
+.filter-btn.reset {
+    background: #6c757d;
+}
+.filter-btn.reset:hover { background: #5a6268; }
+
+/* Responsive Filter */
+@media (max-width: 768px) {
+    .filter-row { flex-direction: column; }
+    .filter-item { width: 100%; }
+    .filter-btn { width: 100%; justify-content: center; }
 }

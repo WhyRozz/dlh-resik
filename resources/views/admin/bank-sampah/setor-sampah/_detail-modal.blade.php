@@ -1,6 +1,3 @@
-{{-- Load CSS Khusus Modal --}}
-<link rel="stylesheet" href="{{ asset('css/modal-detail.css') }}">
-
 {{-- Popup Modal Detail Setor Sampah --}}
 <div id="detailModal" class="modal-popup" style="display: none;">
     <div class="modal-backdrop" onclick="closeDetailModal()"></div>
@@ -89,69 +86,111 @@
         const modalBody = document.getElementById('detailModalBody');
         const template = document.getElementById('detailModalTemplate');
         
+        // Tampilkan loading
         modalBody.innerHTML = `<div class="modal-loading"><div class="spinner"></div><p>Memuat data...</p></div>`;
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         
-        fetch(`/admin/bank-sampah/setor-sampah/${id}`, {
+        // ✅ ENDPOINT YANG BENAR (Sesuai Route)
+        fetch(`/admin/bank-sampah/setor/${id}`, {
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                 'Accept': 'application/json'
             }
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Data tidak ditemukan');
+            return res.json();
+        })
         .then(data => {
-    const content = template.content.cloneNode(true);
-    modalBody.innerHTML = '';
-    modalBody.appendChild(content);
-    
-    document.getElementById('d_no').value = data.id_transaksi || '-';
-    
-    // ✅ PERBAIKAN: Ambil nama dari masyarakat atau pns
-    const namaPengsetor = data.masyarakat?.nama || data.pns?.nama || '-';
-    document.getElementById('d_nama').value = namaPengsetor;
-    
-    document.getElementById('d_email').value = data.masyarakat?.email || data.pns?.email || '-';
-    
-    // ✅ HAPUS/COMMENT pekerjaan jika tidak ada di DB
-    // document.getElementById('d_pekerjaan').value = data.masyarakat?.pekerjaan || '-';
-    document.getElementById('d_pekerjaan').value = data.tipe_pengsetor || '-';
-    
-    document.getElementById('d_alamat').value = data.masyarakat?.alamat || data.pns?.alamat || '-';
-    
-    // ✅ PERBAIKAN: jenisSampah (bukan jenis_sampah) dan kolom 'jenis' (bukan 'nama')
-    document.getElementById('d_jenis').value = data.jenisSampah?.jenisdocument.getElementById('d_jenis').value = data.jenisSampah?.jenis || '-'; || '-';
-    document.getElementById('d_kategori').value = data.jenisSampah?.satuan || '-';
-    
-    document.getElementById('d_berat').value = data.berat ? data.berat + ' Kg' : '-';
-    document.getElementById('d_harga').value = data.harga_per_kg ? 'Rp ' + formatRupiah(data.harga_per_kg) : '-';
-    document.getElementById('d_total').value = data.total_rupiah ? 'Rp ' + formatRupiah(data.total_rupiah) : '-';
-    
-    // ✅ Petugas
-    document.getElementById('d_petugas').value = data.petugas?.nama_lengkap || '-';
-    document.getElementById('d_waktu').value = data.tanggal_transaksi ? new Date(data.tanggal_transaksi).toLocaleString('id-ID') : '-';
-})
+            // Debug Console (Bisa dihapus nanti jika sudah stabil)
+            console.log('✅ Data dari server:', data);
+            console.log('🗑️ Jenis sampah object:', data.jenisSampah);
+            
+            const content = template.content.cloneNode(true);
+            modalBody.innerHTML = '';
+            modalBody.appendChild(content);
+            
+            // Helper function aman
+            const setValue = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.value = value ?? '-';
+            };
+            
+            setValue('d_no', data.id_transaksi);
+            
+            // Nama
+            const namaPengsetor = data.masyarakat?.nama || data.pns?.nama || '-';
+            setValue('d_nama', namaPengsetor);
+            
+            // Tipe
+            const tipePengsetor = data.masyarakat ? 'Masyarakat' : (data.pns ? 'PNS' : '-');
+            setValue('d_pekerjaan', tipePengsetor);
+            
+            // ✅ JENIS SAMPAH (Fallback lengkap)
+            const jenisObj = data.jenisSampah || data.jenis_sampah || {};
+            const jenisNama = jenisObj.jenis || jenisObj.nama || '-';
+            console.log('🏷️ Jenis yang ditampilkan:', jenisNama);
+            setValue('d_jenis', jenisNama);
+            
+            // Berat
+            const berat = data.berat ? parseFloat(data.berat).toFixed(2) + ' Kg' : '-';
+            setValue('d_berat', berat);
+            
+            // Harga
+            const harga = data.harga_per_kg ? 'Rp ' + formatRupiah(data.harga_per_kg) : '-';
+            setValue('d_harga', harga);
+            
+            // Total
+            const total = data.total_rupiah ? 'Rp ' + formatRupiah(data.total_rupiah) : '-';
+            setValue('d_total', total);
+            
+            // Petugas
+            setValue('d_petugas', data.petugas?.nama_lengkap);
+            
+            // Waktu
+            const waktu = data.tanggal_transaksi ? new Date(data.tanggal_transaksi).toLocaleString('id-ID') : '-';
+            setValue('d_waktu', waktu);
+        })
         .catch(err => {
-            modalBody.innerHTML = `<div style="text-align:center;color:#e74c3c;padding:30px 20px;"><i class="fas fa-exclamation-triangle" style="font-size:2.5rem;margin-bottom:15px;opacity:0.7;"></i><p style="margin:0;font-weight:500;">Gagal memuat data</p><small style="color:#888;">Silakan coba lagi</small></div>`;
-            console.error('Error:', err);
+            console.error('❌ Error:', err);
+            modalBody.innerHTML = `
+                <div style="text-align:center;color:#e74c3c;padding:30px 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:2.5rem;margin-bottom:15px;opacity:0.7;"></i>
+                    <p style="margin:0;font-weight:500;">Gagal memuat data</p>
+                    <small style="color:#888;">${err.message}</small>
+                </div>`;
         });
     }
     
     function closeDetailModal() {
-        document.getElementById('detailModal').style.display = 'none';
-        document.body.style.overflow = '';
+        const modal = document.getElementById('detailModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
     }
     
     function formatRupiah(angka) {
+        if (!angka && angka !== 0) return '-';
         return new Intl.NumberFormat('id-ID').format(angka);
     }
     
+    // Keyboard & Click outside
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             const modal = document.getElementById('detailModal');
-            if (modal.style.display === 'flex') closeDetailModal();
+            if (modal && modal.style.display === 'flex') closeDetailModal();
         }
     });
     
-    document.querySelector('.modal-box')?.addEventListener('click', function(e) { e.stopPropagation(); });
+    document.addEventListener('click', function(e) {
+        const modalBox = document.querySelector('.modal-box');
+        const modal = document.getElementById('detailModal');
+        if (modalBox && modal && modal.style.display === 'flex') {
+            if (!modalBox.contains(e.target) && e.target.classList.contains('modal-backdrop')) {
+                closeDetailModal();
+            }
+        }
+    });
 </script>

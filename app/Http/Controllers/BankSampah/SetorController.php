@@ -21,15 +21,32 @@ class SetorController extends Controller
         if ($request->filled('search')) {
             $keyword = $request->search;
             $query->where(function($q) use ($keyword) {
+                // Cari berdasarkan NAMA (Masyarakat / PNS / Petugas)
                 $q->whereHas('masyarakat', function($sub) use ($keyword) {
-                    $sub->where('nama', 'like', '%' . $keyword . '%');
-                })->orWhereHas('pns', function($sub) use ($keyword) {
-                    $sub->where('nama', 'like', '%' . $keyword . '%');
-                })->orWhereHas('petugas', function($sub) use ($keyword) {
-                    $sub->where('nama_lengkap', 'like', '%' . $keyword . '%');
-                });
+                        $sub->where('nama', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhereHas('pns', function($sub) use ($keyword) {
+                        $sub->where('nama', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhereHas('petugas', function($sub) use ($keyword) {
+                        $sub->where('nama_lengkap', 'like', '%' . $keyword . '%');
+                    })
+                    // ✅ TAMBAHAN: Cari berdasarkan JENIS SAMPAH
+                    ->orWhereHas('jenisSampah', function($sub) use ($keyword) {
+                        $sub->where('jenis', 'like', '%' . $keyword . '%');
+                    });
             });
+        
+        // ✅ Filter Bulan
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal_transaksi', $request->bulan);
         }
+
+        // ✅ Filter Tahun
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal_transaksi', $request->tahun);
+        }
+    }
 
         $setorData = $query->paginate(15);
 
@@ -44,6 +61,13 @@ class SetorController extends Controller
             ->value('total') ?? 0;
 
         $jenisSampah = JenisSampah::all();
+
+        // ✅ AJAX RESPONSE (TANPA FILE TAMBAHAN)
+        if ($request->ajax()) {
+            return response()->json([
+                'table' => view('admin.bank-sampah.setor-sampah.index', compact('setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah'))->render()
+            ]);
+        }
 
         return view('admin.bank-sampah.setor-sampah.index', compact(
             'setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah'
