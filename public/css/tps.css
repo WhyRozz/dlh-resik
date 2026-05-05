@@ -373,3 +373,20 @@ tr:hover {
 .popup-btn.confirm:hover {
     background: #c82333;
 }
+
+/* Perbesar dan hijaukan judul Daftar Informasi TPS */
+.table-title, 
+h2, 
+h3 {
+    color: #2e8b57 !important;
+    font-size: 24px !important;
+    font-weight: 600 !important;
+}
+
+/* Jika judul ada di dalam .tps-header */
+.tps-header h2,
+.tps-header h3 {
+    color: #2e8b57 !important;
+    font-size: 24px !important;
+    margin: 0 !important;
+}

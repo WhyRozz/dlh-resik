@@ -104,9 +104,9 @@
 
         {{-- Action Buttons --}}
         <div class="action-buttons">
-            <a href="{{ route('admin.tps.index') }}" class="btn btn-secondary">❌ BATAL</a>
+            <a href="{{ route('admin.tps.index') }}" class="btn btn-secondary">Batal</a>
             <button type="submit" class="btn btn-primary">
-                {{ isset($tps) ? '💾 SIMPAN PERUBAHAN' : '📤 SIMPAN TPS' }}
+                {{ isset($tps) ? 'SIMPAN PERUBAHAN' : 'SIMPAN TPS' }}
             </button>
         </div>
     </form>

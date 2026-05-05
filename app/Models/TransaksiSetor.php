@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TransaksiSetor extends Model
 {
@@ -12,10 +11,8 @@ class TransaksiSetor extends Model
 
     protected $table = 'transaksi_setor';
     protected $primaryKey = 'id_transaksi';
-    
-    // ⚠️ PENTING: Tabel TIDAK punya created_at & updated_at
-    // Jadi kita matikan timestamps
-    public $timestamps = false;
+    public $incrementing = true;
+    public $timestamps = false; // ✅ Sesuai DB: tidak ada created_at/updated_at
 
     protected $fillable = [
         'id_masyarakat',
@@ -35,27 +32,64 @@ class TransaksiSetor extends Model
         'tanggal_transaksi' => 'datetime',
     ];
 
-    // Relasi ke tabel masyarakat
-    public function masyarakat(): BelongsTo
+    // ✅ RELASI
+    public function masyarakat()
     {
-        return $this->belongsTo(Masyarakat::class, 'id_masyarakat', 'id');
+        return $this->belongsTo(Masyarakat::class, 'id_masyarakat', 'id_masyarakat');
     }
 
-    // Relasi ke tabel pns (jika ada)
-    public function pns(): BelongsTo
+    public function pns()
     {
-        return $this->belongsTo(Pns::class, 'id_pns', 'id');
+        return $this->belongsTo(Pns::class, 'id_pns', 'id_pns');
     }
 
-    // Relasi ke tabel jenis_sampah
-    public function jenisSampah(): BelongsTo
+    public function jenisSampah()
     {
-        return $this->belongsTo(JenisSampah::class, 'id_jenis_sampah', 'id');
+        return $this->belongsTo(JenisSampah::class, 'id_jenis_sampah', 'id_jenis_sampah');
     }
 
-    // Relasi ke tabel petugas
-    public function petugas(): BelongsTo
+    public function petugas()
     {
-        return $this->belongsTo(Petugas::class, 'id_petugas', 'id');
+        return $this->belongsTo(Petugas::class, 'id_petugas', 'id_petugas');
+    }
+
+    // ✅ ACCESSOR: Ambil nama pengsetor (Masyarakat atau PNS)
+    public function getNamaPengsetorAttribute()
+    {
+        if ($this->masyarakat) {
+            return $this->masyarakat->nama;
+        }
+        if ($this->pns) {
+            return $this->pns->nama;
+        }
+        return '-';
+    }
+
+    // ✅ ACCESSOR: Tipe pengsetor
+    public function getTipePengsetorAttribute()
+    {
+        if ($this->id_masyarakat) return 'Masyarakat';
+        if ($this->id_pns) return 'PNS';
+        return '-';
+    }
+
+    // ✅ BOOT METHOD: Update saldo otomatis saat transaksi dibuat
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($transaksi) {
+            // Update saldo masyarakat
+            if ($transaksi->id_masyarakat) {
+                Masyarakat::where('id_masyarakat', $transaksi->id_masyarakat)
+                    ->increment('saldo', $transaksi->total_rupiah);
+            }
+
+            // Update saldo PNS
+            if ($transaksi->id_pns) {
+                Pns::where('id_pns', $transaksi->id_pns)
+                    ->increment('saldo', $transaksi->total_rupiah);
+            }
+        });
     }
 }

@@ -115,16 +115,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // ✅ BANK SAMPAH ROUTES - FINAL FIX
 Route::prefix('bank-sampah')->name('bank-sampah.')->group(function () {
     
-    // ── Placeholder: Data Setor ──
-    Route::get('/setor', function() {
-        return redirect()->back()->with('info', 'Fitur Data Setor belum tersedia.');
-    })->name('setor');
-    
-    // ── Penarikan (Resource-style) ──
+    // ── Penarikan (Withdrawal) ──
     Route::prefix('penarikan')->name('penarikan.')->group(function () {
+        // Admin: List & Manage
         Route::get('/', [PenarikanController::class, 'index'])->name('index');
         Route::get('/{id}', [PenarikanController::class, 'show'])->name('show');
-        Route::get('/{id}/detail', [PenarikanController::class, 'show']); // alias
         Route::put('/{id}/status', [PenarikanController::class, 'updateStatus'])->name('update-status');
         Route::delete('/{id}', [PenarikanController::class, 'destroy'])->name('destroy');
     });
@@ -147,16 +142,16 @@ Route::prefix('bank-sampah')->name('bank-sampah.')->group(function () {
         Route::delete('/{id}/reject', [PenjemputanController::class, 'reject'])->name('reject');
     });
     
-    // ── Setor Sampah ──
-    Route::prefix('setor-sampah')->name('setor.')->group(function () {
-        Route::get('/', [SetorController::class, 'index'])->name('index');
-        Route::get('/{id}', [SetorController::class, 'detail'])->name('detail');
-        Route::post('/', [SetorController::class, 'store'])->name('store');
+        // ✅ SETOR SAMPAH - Route yang BENAR (prefix konsisten)
+    Route::prefix('setor')->name('setor.')->group(function () {
+        Route::get('/', [SetorController::class, 'index'])->name('index');        // GET /admin/bank-sampah/setor
+        Route::get('/{id}', [SetorController::class, 'detail'])->name('detail');  // GET /admin/bank-sampah/setor/123
+        Route::post('/', [SetorController::class, 'store'])->name('store');       // POST /admin/bank-sampah/setor
     });
     
-    // ── Shortcut Sidebar (opsional, name unik) ──
+    // ── Shortcut Sidebar (opsional) ──
     Route::get('/tarik', [PenarikanController::class, 'index'])->name('shortcut.tarik');
-    });
+});
 }); // ← TUTUP group bank-sampah (semua route bank sampah HARUS di dalam sini)
 });
 

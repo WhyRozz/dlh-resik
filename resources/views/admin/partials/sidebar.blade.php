@@ -34,7 +34,13 @@
                     <i class="fas fa-chevron-down arrow"></i>
                 </a>
                 <ul class="sub-menu">
-                    <li><a href="{{ route('admin.bank-sampah.setor') }}" class="{{ request()->routeIs('admin.bank-sampah.setor') ? 'active' : '' }}">Data Setor</a></li>
+                    <!-- ✅ Menjadi: route('admin.bank-sampah.setor.index') -->
+                    <li>
+                    <a href="{{ route('admin.bank-sampah.setor.index') }}" 
+                    class="{{ request()->routeIs('admin.bank-sampah.setor.index') ? 'active' : '' }}">
+                        Data Setor
+                    </a>
+                    </li>
                     <li><a href="{{ route('admin.bank-sampah.penarikan.index') }}" class="{{ request()->routeIs('admin.bank-sampah.penarikan.index') ? 'active' : '' }}">Data Penarikan</a></li>
                     <li><a href="{{ route('admin.bank-sampah.jenis-sampah.index') }}" class="{{ request()->routeIs('admin.bank-sampah.jenis-sampah.index') ? 'active' : '' }}">Jenis & Harga Sampah</a></li>
                     <li>
