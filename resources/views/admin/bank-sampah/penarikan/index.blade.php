@@ -11,29 +11,27 @@
 
 <div class="page-container">
     
-    {{-- Header: Judul & Tombol Cetak --}}
-    <div class="page-header">
-        <h1 class="page-title">Data Penarikan</h1>
-        <button class="btn-cetak" onclick="window.print()">
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-            </svg>
-            Cetak PDF
-        </button>
+{{-- Search Box - Di atas sendiri, kanan --}}
+<div class="top-search">
+    <div class="search-wrapper">
+        <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" id="searchInput" class="search-input" placeholder="Cari nama, status, atau tanggal...">
     </div>
+</div>
 
-    {{-- Search Box --}}
-    <div class="search-container">
-        <div class="search-wrapper">
-            <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <input type="text" id="searchInput" class="search-input" placeholder="Cari nama, status, atau tanggal...">
-        </div>
-    </div>
+{{-- Header: Judul & Tombol Cetak --}}
+<div class="page-header">
+    <h1 class="page-title">Data Penarikan</h1>
+    <button class="btn-cetak" onclick="window.print()">
+        <!-- ... icon ... -->
+        Cetak PDF
+    </button>
+</div>
 
-    {{-- Green Divider Line --}}
-    <div class="green-divider"></div>
+{{-- Green Divider --}}
+<div class="green-divider"></div>
 
     {{-- Table Container --}}
     <div class="table-container">
@@ -265,9 +263,13 @@
         infoBox.className = `status-info active ${messages[status].class}`;
     }
 
+    
     // Update Status
     function updateStatus() {
-        if (!currentId) return;
+        if (!currentId) {
+            alert('ID penarikan tidak ditemukan');
+            return;
+        }
         
         const status = document.getElementById('detail-status').value;
         
@@ -275,15 +277,34 @@
             return;
         }
         
+        // ✅ Ambil CSRF token dengan benar
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        
+        if (!csrfToken) {
+            alert('CSRF token tidak ditemukan. Silakan refresh halaman.');
+            return;
+        }
+        
         fetch(`/admin/bank-sampah/penarikan/${currentId}/status`, {
-            method: 'PUT',
+            method: 'POST',              // ✅ 1. Pakai POST (bukan PUT langsung)
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                'X-CSRF-TOKEN': csrfToken,  // ✅ 2. Token sudah diambil di atas
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({ status: status })
+            body: JSON.stringify({ 
+                status: status,
+                _method: 'PUT'           // ✅ 3. Laravel method spoofing
+            })
         })
-        .then(response => response.json())
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Request gagal');
+            }
+            return data;
+        })
         .then(data => {
             if (data.success) {
                 alert('✅ ' + data.message);
@@ -294,7 +315,7 @@
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('❌ Terjadi kesalahan saat update status');
+            alert('❌ Gagal: ' + error.message);
         });
     }
 
