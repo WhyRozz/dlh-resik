@@ -1,5 +1,4 @@
-<?php
-
+// app/Models/Penarikan.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -7,6 +6,39 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Penarikan extends Model
 {
+<<<<<<< HEAD
+    protected $table = 'penarikans';
+
+    protected $fillable = [
+        'user_id',
+        'tipe_user',
+        'nama',
+        'e_wallet',
+        'nomor_e_wallet',
+        'nominal',
+        'status',
+        'id_transaksi',
+        'catatan_admin',
+        'diproses_at',
+        'selesai_at',
+    ];
+
+    protected $casts = [
+        'nominal' => 'decimal:2',
+        'diproses_at' => 'datetime',
+        'selesai_at' => 'datetime',
+    ];
+
+    // Scope untuk filter status
+    public function scopePending($query) {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeSelesai($query) {
+        return $query->where('status', 'selesai');
+    }
+}
+=======
     protected $table = 'penarikan';
     protected $primaryKey = 'id_penarikan';
 
@@ -53,3 +85,4 @@ class Penarikan extends Model
         return 'Rp ' . number_format($this->jumlah_uang, 0, ',', '.');
     }
 }
+>>>>>>> 4915c6c75eb064aefe4b06734d4c4f1e990f8350
