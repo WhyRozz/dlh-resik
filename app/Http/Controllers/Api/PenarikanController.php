@@ -150,6 +150,7 @@ class PenarikanController extends Controller
                     'nomor_ewallet' => $p->nomor_ewallet,
                     'status' => ucfirst($p->status),
                     'tanggal_penarikan' => $p->tanggal_penarikan,
+                    'tanggal_disetujui' => $p->tanggal_disetujui,
                 ];
             });
 
