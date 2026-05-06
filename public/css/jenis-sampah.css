@@ -1,9 +1,14 @@
+/* ========================================
+   DAFTAR JENIS & HARGA SAMPAH (UPDATED)
+   ======================================== */
+
 /* Page Container */
 .page-container {
     background: white;
     border-radius: 12px;
     padding: 25px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-top: -40px; /* ✅ Tarik ke atas agar sejajar menu */
 }
 
 /* Header */
@@ -11,35 +16,37 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
     gap: 15px;
 }
 
 .page-title {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 28px; /* ✅ Diperbesar */
+    font-weight: 700; /* ✅ Dipertebal */
     color: #2e8b57;
     margin: 0;
 }
 
+/* Tombol Tambah (Pill Hijau) */
 .btn-add {
     background: #2e8b57;
     color: white;
     border: none;
     padding: 10px 20px;
-    border-radius: 25px;
+    border-radius: 6px; /* ← UBAH KE 6px atau 8px */
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s;
+    transition: all 0.2s;
+    text-decoration: none; /* ← TAMBAH INI */
 }
 
 .btn-add:hover {
-    background: #247a46;
+    background: #257046;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
 }
@@ -59,7 +66,7 @@ thead {
 }
 
 th {
-    padding: 12px 15px;
+    padding: 12px 50px;
     text-align: left;
     font-weight: 600;
     color: #333;
@@ -68,7 +75,7 @@ th {
 }
 
 td {
-    padding: 12px 15px;
+    padding: 12px 50px;
     border-bottom: 1px solid #f0f0f0;
     font-size: 14px;
     color: #555;
@@ -113,38 +120,55 @@ tbody tr:hover {
     margin: 0;
 }
 
-/* Action Buttons */
+/* ========================================
+   ACTION BUTTONS (STYLE ROUNDED PASTEL)
+   ======================================== */
 .action-buttons {
     display: flex;
     gap: 8px;
 }
 
 .btn-icon {
-    background: none;
+    width: 38px; /* ✅ Ukuran fix */
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: none;
     cursor: pointer;
-    padding: 8px;
-    border-radius: 6px;
-    transition: all 0.3s;
+    padding: 0;
+    border-radius: 8px; /* ✅ Kotak rounded */
+    transition: all 0.2s;
+    background: transparent;
 }
 
+/* Edit: Kuning Cream */
 .btn-edit {
-    color: #3b82f6;
+    background-color: #FEF3C7;
+    color: #D97706;
 }
 
 .btn-edit:hover {
-    background: #eff6ff;
+    background-color: #FDE68A;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.2);
 }
 
+/* Hapus: Merah Muda */
 .btn-delete {
-    color: #ef4444;
+    background-color: #FEE2E2;
+    color: #DC2626;
 }
 
 .btn-delete:hover {
-    background: #fef2f2;
+    background-color: #FECACA;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
 }
 
-/* Modal */
+/* ========================================
+   MODAL & FORM STYLES (TETAP SAMA)
+   ======================================== */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -364,25 +388,13 @@ input[type="file"] {
 
 /* Animations */
 @keyframes slideUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes slideIn {
-    from {
-        transform: translateX(400px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }
 
 /* Responsive */
@@ -391,11 +403,9 @@ input[type="file"] {
         flex-direction: column;
         align-items: flex-start;
     }
-
     .form-row {
         grid-template-columns: 1fr;
     }
-
     .modal-card {
         max-width: 95%;
     }
