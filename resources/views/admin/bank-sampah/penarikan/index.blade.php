@@ -11,25 +11,78 @@
 
 <div class="page-container">
 
-    {{-- Search Box - Di atas sendiri, kanan --}}
-    <div class="top-search">
-        <div class="search-wrapper">
-            <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input type="text" id="searchInput" class="search-input" placeholder="Cari nama, status, atau tanggal...">
+    {{-- ✅ HEADER WRAPPER: Judul + Filter + Search dalam 1 baris --}}
+    <div class="header-wrapper">
+        
+        {{-- 1. Judul --}}
+        <div class="page-title-wrapper">
+            <h1 class="page-title">Data Penarikan</h1>
+        </div>
+
+        {{-- 2. Filter --}}
+        <div class="filter-section">
+            <form method="GET" action="{{ route('admin.bank-sampah.penarikan.index') }}" id="filterForm">
+                <div class="filter-group">
+                    <select name="bulan" class="filter-select">
+                        <option value="">Semua Bulan</option>
+                        <option value="1" {{ request('bulan')=='1'?'selected':'' }}>Januari</option>
+                        <option value="2" {{ request('bulan')=='2'?'selected':'' }}>Februari</option>
+                        <option value="3" {{ request('bulan')=='3'?'selected':'' }}>Maret</option>
+                        <option value="4" {{ request('bulan')=='4'?'selected':'' }}>April</option>
+                        <option value="5" {{ request('bulan')=='5'?'selected':'' }}>Mei</option>
+                        <option value="6" {{ request('bulan')=='6'?'selected':'' }}>Juni</option>
+                        <option value="7" {{ request('bulan')=='7'?'selected':'' }}>Juli</option>
+                        <option value="8" {{ request('bulan')=='8'?'selected':'' }}>Agustus</option>
+                        <option value="9" {{ request('bulan')=='9'?'selected':'' }}>September</option>
+                        <option value="10" {{ request('bulan')=='10'?'selected':'' }}>Oktober</option>
+                        <option value="11" {{ request('bulan')=='11'?'selected':'' }}>November</option>
+                        <option value="12" {{ request('bulan')=='12'?'selected':'' }}>Desember</option>
+                    </select>
+
+                    <select name="tahun" class="filter-select">
+                        <option value="">Semua Tahun</option>
+                        @foreach($tahunList as $tahun)
+                            <option value="{{ $tahun }}" {{ request('tahun')==$tahun?'selected':'' }}>{{ $tahun }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="status" class="filter-select">
+                        <option value="">Semua Status</option>
+                        <option value="diproses" {{ request('status')=='diproses'?'selected':'' }}>Diproses</option>
+                        <option value="berhasil" {{ request('status')=='berhasil'?'selected':'' }}>Berhasil</option>
+                        <option value="ditolak" {{ request('status')=='ditolak'?'selected':'' }}>Ditolak</option>
+                    </select>
+
+                    <button type="submit" class="btn-filter">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {{-- 3. Search --}}
+        <div class="top-search">
+            <div class="search-wrapper">
+                <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Cari nama, status, atau tanggal...">
+            </div>
         </div>
     </div>
 
-    {{-- Header: Judul & Tombol Cetak --}}
-    <div class="page-header">
-        <h1 class="page-title">Data Penarikan</h1>
+    {{-- Tombol Cetak (di bawah header wrapper) --}}
+    <div class="page-header" style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
         <button class="btn-cetak" onclick="window.print()">
-            <!-- ... icon ... -->
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
             Cetak PDF
         </button>
     </div>
-
 
     {{-- Green Divider --}}
     <div class="green-divider"></div>
@@ -82,22 +135,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                             </button>
-
-                            @if($penarikan->status !== 'berhasil')
-                            <button class="btn-action btn-delete"
-                                onclick="deleteData({{ $penarikan->id_penarikan }})"
-                                title="Hapus">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
-                            @else
-                            <button class="btn-action btn-disabled" disabled title="Sudah Disetujui">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </button>
-                            @endif
                         </div>
                     </td>
                 </tr>
@@ -179,27 +216,32 @@
                     </select>
                 </div>
 
+                {{-- 2. ✅ TEMPEL INI TEPAT DI BAWAHNYA (KODE BARU) --}}
+                <div id="alasanPenolakanGroup" class="form-group" style="display:none; margin-top:1rem;">
+                    <label class="form-label" style="color:var(--red);">Alasan Penolakan <span style="color:var(--red);">*</span></label>
+                    <textarea id="detail-alasan" class="form-input" rows="3" placeholder="Masukkan alasan mengapa penarikan ditolak..."></textarea>
+                </div>
+
+                <div id="statusFinalInfo" class="status-info success" style="display:none;">
+                    <strong>ℹ️ Status Sudah Final</strong><br>
+                    Status penarikan ini sudah tidak dapat diubah lagi.
+                </div>
+
                 <div id="statusInfo" class="status-info"></div>
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
-            <button class="btn btn-primary" onclick="updateStatus()">Simpan Perubahan</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+        <button id="btnSimpan" class="btn btn-primary" onclick="updateStatus()" style="display:none;">Simpan Perubahan</button>
         </div>
     </div>
 </div>
-
-{{-- Form Delete (Hidden) --}}
-<form id="deleteForm" method="POST" style="display: none;">
-    @csrf
-    @method('DELETE')
-</form>
-
 @endsection
 
 @push('scripts')
 <script>
     let currentId = null;
+    let currentStatus = null;
 
     // Format Rupiah
     const formatRupiah = (angka) => {
@@ -209,6 +251,14 @@
             minimumFractionDigits: 0
         }).format(angka);
     };
+
+    // ✅ TAMBAH FUNGSI INI
+    function resetFilter() {
+        document.getElementById('filterBulan').value = '';
+        document.getElementById('filterTahun').value = '';
+        document.getElementById('filterStatus').value = '';
+        document.getElementById('filterForm').submit();
+    }
 
     // Show Detail Modal
     function showDetail(id) {
@@ -238,6 +288,31 @@
                 if (elStatusText) elStatusText.value = data.status.toUpperCase();
                 if (elStatus) elStatus.value = data.status;
 
+                // ✅✅✅ TAMBAH KODE BARU DI SINI (SETELAH set value, SEBELUM toggleStatusInfo) ✅✅✅
+                
+                // 1. Simpan status saat ini ke variable global
+                currentStatus = data.status;
+                
+                // 2. Ambil elemen-elemen yang perlu di-show/hide
+                const statusFinalInfo = document.getElementById('statusFinalInfo');
+                const btnSimpan = document.getElementById('btnSimpan');
+                const alasanGroup = document.getElementById('alasanPenolakanGroup');
+                
+                // 3. Jika status sudah final (bukan diproses), sembunyikan form update
+                if (data.status !== 'diproses') {
+                    if (statusFinalInfo) statusFinalInfo.style.display = 'block';
+                    if (btnSimpan) btnSimpan.style.display = 'none';
+                } else {
+                    // Jika masih diproses, tampilkan tombol simpan
+                    if (statusFinalInfo) statusFinalInfo.style.display = 'none';
+                    if (btnSimpan) btnSimpan.style.display = 'inline-block';
+                }
+                
+                // 4. Isi field alasan jika ada datanya
+                if (alasanGroup && data.alasan_penolakan) {
+                    document.getElementById('detail-alasan').value = data.alasan_penolakan;
+                }
+
                 toggleStatusInfo();
 
                 var modal = document.getElementById('detailModal');
@@ -260,6 +335,12 @@
     function toggleStatusInfo() {
         const status = document.getElementById('detail-status').value;
         const infoBox = document.getElementById('statusInfo');
+
+        // ✅✅✅ TAMBAH 4 BARIS INI ✅✅✅
+        const alasanGroup = document.getElementById('alasanPenolakanGroup');
+        if (alasanGroup) {
+            alasanGroup.style.display = (status === 'ditolak') ? 'block' : 'none';
+        }
 
         const messages = {
             'diproses': {
@@ -289,6 +370,13 @@
 
         var status = document.getElementById('detail-status').value;
 
+        // ✅ TAMBAH INI
+        if (status === 'ditolak' && !document.getElementById('detail-alasan').value.trim()) {
+            alert('❌ Alasan penolakan wajib diisi!');
+            document.getElementById('detail-alasan').focus();
+            return;
+        }
+
         if (!confirm('Yakin ingin mengubah status menjadi ' + status.toUpperCase() + '?')) {
             return;
         }
@@ -312,6 +400,7 @@
                 },
                 body: JSON.stringify({
                     status: status,
+                    alasan_penolakan: document.getElementById('detail-alasan').value, // ✅ TAMBAH BARIS INI
                     _method: 'PUT'
                 })
             })
@@ -331,14 +420,6 @@
             });
     }
 
-    // Delete Data
-    function deleteData(id) {
-        if (confirm('⚠️ Yakin ingin menghapus data penarikan ini?\n\nSaldo akan dikembalikan ke anggota.')) {
-            const form = document.getElementById('deleteForm');
-            form.action = '/admin/bank-sampah/penarikan/' + id;
-            form.submit();
-        }
-    }
 
     // Close modal when clicking outside
     document.getElementById('detailModal').addEventListener('click', function(e) {

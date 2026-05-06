@@ -121,7 +121,6 @@ Route::prefix('bank-sampah')->name('bank-sampah.')->group(function () {
         Route::get('/', [PenarikanController::class, 'index'])->name('index');
         Route::get('/{id}', [PenarikanController::class, 'show'])->name('show');
         Route::put('/{id}/status', [PenarikanController::class, 'updateStatus'])->name('update-status');
-        Route::delete('/{id}', [PenarikanController::class, 'destroy'])->name('destroy');
     });
     
     // ── Jenis Sampah ──

@@ -1,5 +1,5 @@
 /* ========================================
-   DATA PENARIKAN - STYLES
+   DATA PENARIKAN - STYLES (UPDATED COMPACT)
    ======================================== */
 
 :root {
@@ -35,17 +35,101 @@
     margin-bottom: 2rem;
 }
 
-/* 🔹 Top Search - Posisi di atas sendiri, rata kanan */
+/* 🔹 HEADER WRAPPER - Judul + Filter + Search dalam 1 baris */
+.header-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: nowrap;
+}
+
+/* Judul Halaman */
+.page-title-wrapper {
+    flex-shrink: 0;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-green);
+    white-space: nowrap;
+}
+
+/* Filter Section - Compact Inline */
+.filter-section {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    margin: 0;
+    border: none;
+    flex-shrink: 0;
+}
+
+.filter-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.filter-select {
+    padding: 0.6rem 0.9rem;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    background: white;
+    min-width: 130px;
+    cursor: pointer;
+    transition: var(--transition);
+    height: 40px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.btn-filter {
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    transition: var(--transition);
+    height: 40px;
+}
+
+.btn-filter:hover {
+    background: var(--dark-green);
+}
+
+.btn-reset {
+    display: none;
+}
+
+/* Search Box - Compact Inline */
 .top-search {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 1rem;
-    padding: 0.5rem 0;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
 }
 
 .search-wrapper {
     position: relative;
-    width: 350px;
+    width: 280px;
 }
 
 .search-icon {
@@ -60,12 +144,14 @@
 
 .search-input {
     width: 100%;
-    padding: 0.7rem 1rem 0.7rem 2.75rem;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
     border: 2px solid var(--gray-200);
     border-radius: 50px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     transition: var(--transition);
     background: var(--gray-50);
+    height: 40px;
+    box-sizing: border-box;
 }
 
 .search-input:focus {
@@ -75,41 +161,34 @@
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
-/* Header Section */
+/* Header Section (Original) - Kita sembunyikan atau override */
 .page-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.page-title {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-green);
+    margin-bottom: 1rem;
+    margin-top: -0.5rem;
 }
 
 .btn-cetak {
     background: var(--orange);
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1.2rem;
     border-radius: var(--radius);
     display: flex;
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     transition: var(--transition);
+    height: 40px;
 }
 
 .btn-cetak:hover {
     background: var(--orange-dark);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(255, 129, 20, 0.3);
 }
 
@@ -118,7 +197,7 @@
     height: 3px;
     background: var(--primary-green);
     border-radius: 99px;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 /* Table Styles */
@@ -311,7 +390,6 @@
     animation: fadeIn 0.3s ease;
 }
 
-
 .modal-overlay.active {
     display: flex;
 }
@@ -478,39 +556,89 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-    .page-container { padding: 1rem; }
+@media (max-width: 1200px) {
+    .search-wrapper {
+        width: 240px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .header-wrapper {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
     
-    .top-search {
+    .filter-section {
+        order: 3;
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    
+    .filter-group {
+        flex-wrap: wrap;
         justify-content: center;
-        margin-bottom: 0.5rem;
     }
     
-    .search-wrapper { width: 100%; max-width: 400px; }
+    .search-wrapper {
+        width: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-container { 
+        padding: 1rem; 
+    }
     
-    .page-header {
+    .header-wrapper {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
     }
     
+    .page-title-wrapper,
+    .filter-section,
+    .top-search,
+    .page-header {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .search-wrapper {
+        width: 100%;
+        max-width: none;
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-select,
+    .btn-filter,
     .btn-cetak {
         width: 100%;
         justify-content: center;
     }
     
-    .data-table { font-size: 0.8rem; }
+    .data-table { 
+        font-size: 0.8rem; 
+    }
     
     .data-table thead th,
-    .data-table tbody td { padding: 0.75rem 0.5rem; }
+    .data-table tbody td { 
+        padding: 0.75rem 0.5rem; 
+    }
     
-    .action-buttons { flex-direction: column; }
+    .action-buttons { 
+        flex-direction: column; 
+    }
 }
 
 /* Print Styles */
 @media print {
     .top-search,
     .btn-cetak,
-    .btn-action {
+    .btn-action,
+    .filter-section {
         display: none !important;
     }
     
@@ -519,5 +647,7 @@
         padding: 0;
     }
     
-    .data-table { font-size: 0.8rem; }
+    .data-table { 
+        font-size: 0.8rem; 
+    }
 }

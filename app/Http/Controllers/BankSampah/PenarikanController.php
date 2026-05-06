@@ -16,14 +16,34 @@ class PenarikanController extends Controller
      * Tampilkan daftar penarikan (Admin)
      */
 
-    public function index()
-    {
-        $penarikans = Penarikan::with(['masyarakat', 'pns'])
-            ->orderBy('tanggal_penarikan', 'desc')
-            ->paginate(15);
-
-        return view('admin.bank-sampah.penarikan.index', compact('penarikans'));
+    public function index(Request $request)  // ✅ Pastikan ada $request
+{
+    // ✅ LANGKAH 1: Ubah jadi $query dulu (JANGAN langsung paginate)
+    $query = Penarikan::with(['masyarakat', 'pns']);
+    
+    // ✅ LANGKAH 2: ➕ TAMBAH FILTER DI SINI (setelah $query, sebelum paginate)
+    if ($request->filled('bulan')) {
+        $query->whereMonth('tanggal_penarikan', $request->bulan);
     }
+    if ($request->filled('tahun')) {
+        $query->whereYear('tanggal_penarikan', $request->tahun);
+    }
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+    
+    // ✅ LANGKAH 3: Baru paginate setelah filter
+    $penarikans = $query->orderBy('tanggal_penarikan', 'desc')->paginate(15);
+
+    // ✅ LANGKAH 4: ➕ Ambil tahun list (sebelum return)
+    $tahunList = Penarikan::selectRaw('YEAR(tanggal_penarikan) as tahun')
+        ->distinct()
+        ->orderBy('tahun', 'desc')
+        ->pluck('tahun');
+
+    // ✅ LANGKAH 5: ➕ Tambah 'tahunList' di compact
+    return view('admin.bank-sampah.penarikan.index', compact('penarikans', 'tahunList'));
+}
 
     /**
      * User ajukan penarikan (Masyarakat/PNS)
@@ -85,38 +105,46 @@ class PenarikanController extends Controller
     /**
      * Detail penarikan (AJAX)
      */
-    public function show($id)
-    {
-        $penarikan = Penarikan::with(['masyarakat', 'pns'])->findOrFail($id);
+public function show($id)
+{
+    $penarikan = Penarikan::with(['masyarakat', 'pns'])->findOrFail($id);
+    
+    $userName = $penarikan->masyarakat->nama ?? $penarikan->pns->nama ?? 'Unknown';
 
-        $userName = $penarikan->masyarakat->nama ?? $penarikan->pns->nama ?? 'Unknown';
-
-        // ✅ Gabungkan array dengan benar menggunakan array_merge
-        return response()->json(
-            array_merge($penarikan->toArray(), ['nama_user' => $userName])
-        );
-    }
+    return response()->json(
+        array_merge($penarikan->toArray(), ['nama_user' => $userName])
+    );
+}   
 
     /**
      * Admin update status
      */
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
-            'status' => 'required|in:diproses,berhasil,ditolak',
-        ]);
+    $request->validate([
+        'alasan_penolakan' => 'nullable|string|max:255',
+        'status' => 'required|in:diproses,berhasil,ditolak',
+    ]);
 
-        $penarikan = Penarikan::findOrFail($id);
-        $statusBaru = $request->status;
-        $statusLama = $penarikan->status;
+    $penarikan = Penarikan::findOrFail($id);
+    $statusBaru = $request->status;
+    $statusLama = $penarikan->status;
 
-        // Tidak boleh ubah yang sudah berhasil
-        if ($statusLama === 'berhasil') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Penarikan sudah disetujui dan tidak bisa diubah'
-            ], 422);
-        }
+    // ✅ 1. Cek: Tidak boleh ubah yang sudah berhasil
+    if ($statusLama === 'berhasil') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Penarikan sudah disetujui dan tidak bisa diubah'
+        ], 422);
+    } // ← ✅ TUTUP IF DI SINI (PENTING!)
+
+    // ✅ 2. Validasi alasan jika ditolak (DI LUAR if sebelumnya)
+    if ($statusBaru === 'ditolak' && empty($request->alasan_penolakan)) {
+        return response()->json([
+            'success' => false,
+            'message' => '❌ Alasan penolakan wajib diisi!'
+        ], 422);
+    }
 
         DB::beginTransaction();
         try {
@@ -142,6 +170,7 @@ class PenarikanController extends Controller
             // Update data penarikan
             $penarikan->update([
                 'status' => $statusBaru,
+                    'alasan_penolakan' => $request->alasan_penolakan,  // ✅ TAMBAH INI
                 'updated_by' => Auth::id(),
                 'tanggal_disetujui' => now(),
             ]);
@@ -159,43 +188,6 @@ class PenarikanController extends Controller
                 'success' => false,
                 'message' => 'Gagal update status: ' . $e->getMessage()
             ], 500);
-        }
-    }
-
-    /**
-     * Hapus penarikan
-     */
-    public function destroy($id)
-    {
-        $penarikan = Penarikan::findOrFail($id);
-
-        // Tidak boleh hapus jika sudah berhasil
-        if ($penarikan->status === 'berhasil') {
-            return redirect()->back()->with('error', 'Tidak dapat menghapus penarikan yang sudah disetujui');
-        }
-
-        DB::beginTransaction();
-        try {
-            // Kembalikan saldo jika masih diproses
-            if ($penarikan->status === 'diproses') {
-                if ($penarikan->id_masyarakat) {
-                    $user = Masyarakat::findOrFail($penarikan->id_masyarakat);
-                    Masyarakat::where('id_masyarakat', $user->id_masyarakat)
-                        ->increment('saldo', $penarikan->jumlah_uang);
-                } else {
-                    $user = Pns::findOrFail($penarikan->id_pns);
-                    Pns::where('id_pns', $user->id_pns)
-                        ->increment('saldo', $penarikan->jumlah_uang);
-                }
-            }
-
-            $penarikan->delete();
-            DB::commit();
-
-            return redirect()->back()->with('success', 'Data penarikan berhasil dihapus');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menghapus: ' . $e->getMessage());
         }
     }
 }

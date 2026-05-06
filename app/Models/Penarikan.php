@@ -9,17 +9,18 @@ class Penarikan extends Model
     protected $table = 'penarikan';
     protected $primaryKey = 'id_penarikan';
 
-    public $timestamps = false;
+    public $timestamps = false;    // TERUS IKI SEHARUSE FALSE/TRUE?
     
     protected $fillable = [
         'id_masyarakat',
         'id_pns',
-        'updated_by',           // ✅ BARU
         'jumlah_uang',
         'jenis_ewallet',
         'nomor_ewallet',
         'status',
+        'alasan_penolakan',     // AKU NAMBAH IKI
         'tanggal_penarikan',
+        'updated_by',           // ✅ BARU
         'tanggal_disetujui',    // ✅ BARU
     ];
 
