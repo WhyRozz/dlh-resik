@@ -31,8 +31,11 @@
     background: white;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    padding: 2rem;
-    margin-bottom: 2rem;
+    /* --- PERUBAHAN DISINI --- */
+    margin-top: -50px;      /* Tarik ke atas agar sejajar logo */
+    padding-top: 5px;       /* Jarak sangat tipis agar tidak nempel batas */
+    padding-bottom: 2rem;
+    margin-bottom: 0;       /* Hapus jarak bawah */
 }
 
 /* 🔹 HEADER WRAPPER - Judul + Filter + Search dalam 1 baris */
@@ -40,8 +43,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
     flex-wrap: nowrap;
 }
 
@@ -197,7 +200,8 @@
     height: 3px;
     background: var(--primary-green);
     border-radius: 99px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 0.5rem; 
 }
 
 /* Table Styles */

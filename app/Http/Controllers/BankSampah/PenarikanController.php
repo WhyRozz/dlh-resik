@@ -41,6 +41,15 @@ class PenarikanController extends Controller
         ->orderBy('tahun', 'desc')
         ->pluck('tahun');
 
+    // ✅(UNTUK NAMA USER) 
+    foreach ($penarikans as $penarikan) {
+        if ($penarikan->id_masyarakat) {
+            $penarikan->nama_user = $penarikan->masyarakat->nama ?? 'Unknown';
+        } else {
+            $penarikan->nama_user = $penarikan->pns->nama ?? 'Unknown';
+        }
+    }    
+
     // ✅ LANGKAH 5: ➕ Tambah 'tahunList' di compact
     return view('admin.bank-sampah.penarikan.index', compact('penarikans', 'tahunList'));
 }
