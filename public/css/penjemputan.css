@@ -1,20 +1,74 @@
-/* Tambahkan ini di bawah CSS yang sudah ada */
+/* ============================================
+   ✅ FIX HEADER: Judul & Search Sejajar di Atas Garis
+   ============================================ */
+.card-header-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-bottom: 0 !important;
+}
+
+/* Matikan total border & margin bawaan h2 */
+.card-header-row h2 {
+    margin: 0 !important;
+    padding: 0 !important;
+    border-bottom: none !important;
+    line-height: 1.2 !important;
+}
+
+.search-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.search-wrapper .search-box {
+    width: 320px;
+    position: relative;
+}
+
+/* Garis hijau terpisah di bawah header */
+.green-line {
+    height: 2px;
+    background: #4caf50;
+    margin: 16px 0 24px 0 !important;
+    width: 100%;
+    border-radius: 2px;
+}
+
+/* Responsive Mobile */
+@media (max-width: 768px) {
+    .card-header-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 15px !important;
+    }
+    .search-wrapper .search-box {
+        width: 100% !important;
+    }
+}
+/* ============================================ */
+
+/* ============================================
+   penjemputan.css — Admin RESIK (FIXED)
+   Khusus Komponen: Card, Tabel, Search, Modal, Badge
+   ============================================ */
+
+/* ============================================
+   SEARCH CONTAINER
+   ============================================ */
 #confirmModal .modal-container {
     text-align: center;
 }
 
-/* Container Search (Ganti yang lama dengan ini) */
 .search-container {
     position: relative;
     display: flex;
-    justify-content: flex-end; /* Rata kanan */
+    justify-content: flex-end;
     align-items: center;
-    
-    /* PENGATURAN POSISI */
-    margin-top: -45px;   /* Geser ke atas agar sejajar dengan judul/header */
-    margin-bottom: 30px; /* JARAK KE TABEL - Besarkan angka ini (misal 40px) jika tabel masih terlalu dekat */
-    
-    padding-right: 20px;
+    margin-top: 0; /* ✅ FIX: Hapus margin negatif biar nggak geser */
+    margin-bottom: 24px;
+    padding-right: 0;
     width: 100%;
     z-index: 10;
 }
@@ -57,134 +111,52 @@
 }
 
 /* ============================================
-   penjemputan.css — Admin RESIK
-   (Khusus Navbar, Konten, Tabel, & Responsive)
+   ✅ HEADER LAYOUT: Judul & Search Sejajar (BARU)
    ============================================ */
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+}
 
-* {
+/* Hapus border bawah dari h2 */
+.card-header-row h2 {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    border-bottom: none !important;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f0f2f0;
-    min-height: 100vh;
+/* Garis hijau sebagai elemen terpisah */
+.header-divider {
+    height: 2px;
+    background: #4caf50;
+    margin: 16px 0 24px 0;
+    border-radius: 2px;
 }
 
-/* ===================================================
-   MAIN WRAPPER
-   =================================================== */
-.main-wrapper {
-    margin-left: 260px; /* Sesuai dengan --sidebar-width di sidebar.css */
-    flex: 1;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    transition: margin-left 0.3s ease;
+/* Search inline wrapper */
+.search-inline {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto;
 }
 
-/* ===================================================
-   NAVBAR
-   =================================================== */
-.admin-navbar {
-    height: 65px;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 28px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-    position: sticky;
-    top: 0;
-    z-index: 900;
-    gap: 16px;
+/* Responsive untuk mobile */
+@media (max-width: 768px) {
+    .card-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .search-inline .search-box {
+        width: 100%;
+    }
 }
+/* ============================================
 
-.menu-toggle-btn {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #333;
-    padding: 5px;
-}
-
-.navbar-search {
-    background: #f0f0f0;
-    border-radius: 25px;
-    padding: 8px 18px;
-    display: flex;
-    align-items: center;
-    width: 340px;
-    gap: 8px;
-    transition: background 0.2s;
-}
-
-.navbar-search:focus-within {
-    background: #e8f5e9;
-    outline: 1px solid #a5d6a7;
-}
-
-.navbar-search input {
-    border: none;
-    background: transparent;
-    width: 100%;
-    outline: none;
-    font-size: 13.5px;
-    color: #333;
-}
-
-.navbar-search input::placeholder {
-    color: #aaa;
-}
-
-.navbar-search button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #888;
-    font-size: 14px;
-}
-
-.navbar-user {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-    white-space: nowrap;
-}
-
-.avatar {
-    width: 36px;
-    height: 36px;
-    background: #2e7d32;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 15px;
-    flex-shrink: 0;
-}
-
-/* ===================================================
-   MAIN CONTENT
-   =================================================== */
-.main-content {
-    padding: 28px;
-    flex: 1;
-    position: relative;
-}
-
-/* ===================================================
-   CONTENT CARD
-   =================================================== */
+   CONTENT CARD & TYPOGRAPHY
+   ============================================ */
 .content-card {
     background: #ffffff;
     border-radius: 12px;
@@ -202,13 +174,12 @@ body {
     letter-spacing: 0.3px;
 }
 
-/* ===================================================
+/* ============================================
    TABLE
-   =================================================== */
+   ============================================ */
 table {
     clear: both; 
     width: 100%;
-    
 }
 
 thead th {
@@ -294,52 +265,18 @@ tbody td img {
     font-size: 14px;
 }
 
-/* ===================================================
-   RESPONSIVE (Khusus Konten & Navbar)
-   =================================================== */
+/* Responsive Table */
 @media (max-width: 768px) {
-    .main-wrapper {
-        margin-left: 0;
-    }
-
-    .menu-toggle-btn {
-        display: block;
-    }
-
-    .navbar-search {
-        display: none;
-    }
-
-    .main-content {
-        padding: 16px;
-    }
-
-    .content-card {
-        padding: 18px;
-    }
-
-    table {
-        font-size: 12px;
-    }
-
-    thead th,
-    tbody td {
-        padding: 10px 10px;
-    }
-
-    tbody td img {
-        width: 48px;
-        height: 40px;
-    }
+    .main-content { padding: 16px !important; }
+    .content-card { padding: 18px; }
+    table { font-size: 12px; }
+    thead th, tbody td { padding: 10px 8px; }
+    tbody td img { width: 48px; height: 40px; }
 }
 
-
-
-/* ===================================================
+/* ============================================
    MODAL DETAIL PENJEMPUTAN
-   =================================================== */
-
-/* Overlay */
+   ============================================ */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -354,7 +291,6 @@ tbody td img {
     backdrop-filter: blur(2px);
 }
 
-/* Container Modal */
 .modal-container {
     background: #fff;
     border-radius: 12px;
@@ -367,17 +303,10 @@ tbody td img {
 }
 
 @keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Header Modal */
 .modal-header {
     padding: 18px 24px;
     border-bottom: 1px solid #eee;
@@ -411,7 +340,6 @@ tbody td img {
     color: #e53935;
 }
 
-/* Body Modal */
 .modal-body {
     padding: 24px;
 }
@@ -423,7 +351,6 @@ tbody td img {
     align-items: start;
 }
 
-/* Foto */
 .detail-image img {
     width: 100%;
     border-radius: 10px;
@@ -433,7 +360,6 @@ tbody td img {
     background: #f5f5f5;
 }
 
-/* Form Detail */
 .detail-form {
     display: flex;
     flex-direction: column;
@@ -484,7 +410,6 @@ tbody td img {
     min-height: 80px;
 }
 
-/* Footer Modal */
 .modal-footer {
     padding: 16px 24px;
     border-top: 1px solid #eee;
@@ -510,43 +435,16 @@ tbody td img {
     background: #5a6268;
 }
 
-/* Scrollbar halus */
-.modal-container::-webkit-scrollbar {
-    width: 6px;
-}
+.modal-container::-webkit-scrollbar { width: 6px; }
+.modal-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+.modal-container::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+.modal-container::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
-.modal-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.modal-container::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-.modal-container::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* Responsive Modal */
 @media (max-width: 768px) {
-    .detail-content {
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-
-    .detail-image img {
-        max-height: 220px;
-    }
-
-    .modal-header h3 {
-        font-size: 1.1rem;
-    }
-
-    .modal-body {
-        padding: 18px;
-    }
+    .detail-content { grid-template-columns: 1fr; gap: 18px; }
+    .detail-image img { max-height: 220px; }
+    .modal-header h3 { font-size: 1.1rem; }
+    .modal-body { padding: 18px; }
 }
 
 /* ============================================
@@ -587,5 +485,3 @@ table th:nth-child(4), table td:nth-child(4) { width: 18%; }
 table th:nth-child(5), table td:nth-child(5) { width: 10%; text-align: right; }
 table th:nth-child(6), table td:nth-child(6) { width: 12%; }
 table th:nth-child(7), table td:nth-child(7) { width: 15%; }
-
-
