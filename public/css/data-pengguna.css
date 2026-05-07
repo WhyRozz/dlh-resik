@@ -65,6 +65,12 @@
     transition: 0.2s;
 }
 
+.btn-export img {
+    width: 25px;        /* Lebar icon */
+    height: 25px;       /* Tinggi icon */
+    object-fit: contain; /* Agar tidak gepeng */
+}
+
 .btn-export:hover {
     background: #144a18;
     transform: translateY(-1px);
