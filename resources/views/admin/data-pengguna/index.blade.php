@@ -7,6 +7,32 @@
 @endpush
 
 @section('content')
+
+<!-- Search Box - PALING ATAS, POJOK KANAN -->
+<div class="search-top-row">
+    <div class="search-wrapper">
+        <form method="GET" action="{{ route('admin.data-pengguna.index') }}" class="search-form">
+            <input type="hidden" name="filter" value="{{ $filter }}">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input 
+                    type="text" 
+                    name="search" 
+                    class="search-input" 
+                    placeholder="Cari berdasarkan nama..." 
+                    value="{{ request('search') }}"
+                >
+                @if(request('search'))
+                    <a href="{{ route('admin.data-pengguna.index', ['filter' => $filter]) }}" class="search-clear">
+                        <i class="fas fa-times"></i>
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Row 1: Judul & Export Excel -->
 <div class="page-header">
     <div>
         <h2>Daftar Data Pengguna</h2>
@@ -19,7 +45,7 @@
     </div>
 </div>
 
-<!-- Filter Buttons -->
+<!-- Row 2: Filter Buttons -->
 <div class="filter-group">
     <a href="{{ route('admin.data-pengguna.index', ['filter' => 'all']) }}"
         class="filter-btn {{ $filter == 'all' ? 'active' : '' }}">
@@ -161,4 +187,69 @@
 
 @push('scripts')
 <script src="{{ asset('js/data-pengguna.js') }}"></script>
+@push('scripts')
+<script src="{{ asset('js/data-pengguna.js') }}"></script>
+
+{{-- ✅ LIVE SEARCH JAVASCRIPT --}}
+<script>
+(function() {
+    const searchInput = document.querySelector('.search-input');
+    const tableContainer = document.querySelector('.table-container');
+    let timeout = null;
+
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', function(e) {
+        const searchValue = e.target.value.trim();
+        const currentFilter = document.querySelector('input[name="filter"]')?.value || 'all';
+        
+        // Clear timeout sebelumnya
+        clearTimeout(timeout);
+        
+        // Tunggu 500ms setelah user berhenti mengetik
+        timeout = setTimeout(function() {
+            performSearch(searchValue, currentFilter);
+        }, 500);
+    });
+
+    function performSearch(search, filter) {
+        // Tampilkan loading
+        const originalContent = tableContainer.innerHTML;
+        tableContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #2e8b57;"></i>
+                <p style="margin-top: 15px; color: #666;">Mencari...</p>
+            </div>
+        `;
+
+        // Fetch data via AJAX
+        const url = `{{ route('admin.data-pengguna.index') }}?search=${encodeURIComponent(search)}&filter=${filter}`;
+        
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Parse HTML response
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTableContainer = doc.querySelector('.table-container');
+            
+            if (newTableContainer) {
+                tableContainer.innerHTML = newTableContainer.innerHTML;
+            } else {
+                tableContainer.innerHTML = originalContent;
+            }
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            // Kembalikan konten asli jika error
+            tableContainer.innerHTML = originalContent;
+        });
+    }
+})();
+</script>
 @endpush

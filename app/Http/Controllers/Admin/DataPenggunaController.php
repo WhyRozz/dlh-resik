@@ -15,22 +15,25 @@ class DataPenggunaController extends Controller
     public function index(Request $request)
     {
         $filter = $request->query('filter', 'all');
-        $query = $this->getUsersQuery($filter);
-
+        $search = $request->query('search', '');
+        
+        $query = $this->getUsersQuery($filter, $search);
+        
         $users = $query->paginate(15);
 
-        return view('admin.data-pengguna.index', compact('users', 'filter'));
+        return view('admin.data-pengguna.index', compact('users', 'filter', 'search'));
     }
 
-    private function getUsersQuery($filter)
+    private function getUsersQuery($filter, $search = '')
     {
         if ($filter === 'masyarakat') {
-            return DB::table('masyarakat')
+            // ✅ Simpan ke variabel $query dulu
+            $query = DB::table('masyarakat')
                 ->select(
                     'masyarakat.id_masyarakat as id',
                     'masyarakat.nama',
                     'masyarakat.email',
-                    DB::raw("'Masyarakat' as jenis_pengguna"), // ✅ Penting!
+                    DB::raw("'Masyarakat' as jenis_pengguna"),
                     DB::raw('NULL as no_telepon'),
                     DB::raw('NULL as jenis_kelamin'),
                     DB::raw('NULL as tanggal_lahir'),
@@ -41,16 +44,25 @@ class DataPenggunaController extends Controller
                     DB::raw('NULL as nama_dinas'),
                     'masyarakat.created_at',
                     'masyarakat.updated_at'
-                )
-                ->orderBy('masyarakat.created_at', 'desc');
+                );
+
+            // ✅ Tambah filter search DI SINI (setelah select, sebelum return)
+            if ($search) {
+                $query->where('masyarakat.nama', 'LIKE', "%{$search}%");
+            }
+
+            // ✅ Return query yang sudah lengkap
+            return $query->orderBy('masyarakat.created_at', 'desc');
+
         } elseif ($filter === 'asn') {
-            return DB::table('pns')
+            // ✅ Simpan ke variabel $query dulu
+            $query = DB::table('pns')
                 ->leftJoin('dinas', 'pns.id_dinas', '=', 'dinas.id_dinas')
                 ->select(
                     'pns.id_pns as id',
                     'pns.nama',
                     'pns.email',
-                    DB::raw("'PNS' as jenis_pengguna"), // ✅ Penting!
+                    DB::raw("'PNS' as jenis_pengguna"),
                     'pns.no_telepon',
                     'pns.jenis_kelamin',
                     'pns.tanggal_lahir',
@@ -61,10 +73,20 @@ class DataPenggunaController extends Controller
                     'dinas.nama_dinas',
                     'pns.created_at',
                     'pns.updated_at'
-                )
-                ->orderBy('pns.created_at', 'desc');
+                );
+
+            // ✅ Tambah filter search DI SINI
+            if ($search) {
+                $query->where('pns.nama', 'LIKE', "%{$search}%");
+            }
+
+            // ✅ Return query yang sudah lengkap
+            return $query->orderBy('pns.created_at', 'desc');
+
         } else {
             // UNION untuk semua
+            
+            //  Query Masyarakat
             $masyarakatQuery = DB::table('masyarakat')
                 ->select(
                     'masyarakat.id_masyarakat as id',
@@ -83,6 +105,12 @@ class DataPenggunaController extends Controller
                     'masyarakat.updated_at'
                 );
 
+            // ✅ Tambah filter search untuk masyarakat
+            if ($search) {
+                $masyarakatQuery->where('masyarakat.nama', 'LIKE', "%{$search}%");
+            }
+
+            // ✅ Query PNS
             $pnsQuery = DB::table('pns')
                 ->leftJoin('dinas', 'pns.id_dinas', '=', 'dinas.id_dinas')
                 ->select(
@@ -102,6 +130,12 @@ class DataPenggunaController extends Controller
                     'pns.updated_at'
                 );
 
+            // ✅ Tambah filter search untuk pns
+            if ($search) {
+                $pnsQuery->where('pns.nama', 'LIKE', "%{$search}%");
+            }
+
+            // ✅ Return hasil union
             return $masyarakatQuery->union($pnsQuery)
                 ->orderBy('created_at', 'desc');
         }

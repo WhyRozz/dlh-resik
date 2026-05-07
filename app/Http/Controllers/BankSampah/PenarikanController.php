@@ -9,6 +9,8 @@ use App\Models\Pns;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PenarikanExport;
 
 class PenarikanController extends Controller
 {
@@ -128,38 +130,34 @@ public function show($id)
     /**
      * Admin update status
      */
-    public function updateStatus(Request $request, $id)
+     public function updateStatus(Request $request, $id)
     {
-    $request->validate([
-        'alasan_penolakan' => 'nullable|string|max:255',
-        'status' => 'required|in:diproses,berhasil,ditolak',
-    ]);
+        $request->validate([
+            'alasan_penolakan' => 'nullable|string|max:255',
+            'status' => 'required|in:diproses,berhasil,ditolak',
+        ]);
 
-    $penarikan = Penarikan::findOrFail($id);
-    $statusBaru = $request->status;
-    $statusLama = $penarikan->status;
+        $penarikan = Penarikan::findOrFail($id);
+        $statusBaru = $request->status;
+        $statusLama = $penarikan->status;
 
-    // ✅ 1. Cek: Tidak boleh ubah yang sudah berhasil
-    if ($statusLama === 'berhasil') {
-        return response()->json([
-            'success' => false,
-            'message' => 'Penarikan sudah disetujui dan tidak bisa diubah'
-        ], 422);
-    } // ← ✅ TUTUP IF DI SINI (PENTING!)
+        if ($statusLama === 'berhasil') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Penarikan sudah disetujui dan tidak bisa diubah'
+            ], 422);
+        }
 
-    // ✅ 2. Validasi alasan jika ditolak (DI LUAR if sebelumnya)
-    if ($statusBaru === 'ditolak' && empty($request->alasan_penolakan)) {
-        return response()->json([
-            'success' => false,
-            'message' => '❌ Alasan penolakan wajib diisi!'
-        ], 422);
-    }
+        if ($statusBaru === 'ditolak' && empty($request->alasan_penolakan)) {
+            return response()->json([
+                'success' => false,
+                'message' => '❌ Alasan penolakan wajib diisi!'
+            ], 422);
+        }
 
         DB::beginTransaction();
         try {
             if ($statusBaru === 'ditolak') {
-                // === DITOLAK: KEMBALIKAN SALDO ===
-                // Langsung increment saldo tanpa perlu ambil data user dulu
                 if ($penarikan->id_masyarakat) {
                     Masyarakat::where('id_masyarakat', $penarikan->id_masyarakat)
                         ->increment('saldo', $penarikan->jumlah_uang);
@@ -167,19 +165,16 @@ public function show($id)
                     Pns::where('id_pns', $penarikan->id_pns)
                         ->increment('saldo', $penarikan->jumlah_uang);
                 }
-
                 $message = '❌ Penarikan ditolak. Saldo Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.') . ' dikembalikan.';
             } elseif ($statusBaru === 'berhasil') {
-                // === BERHASIL: SALDO TETAP TERPOTONG ===
                 $message = '✅ Penarikan disetujui. Silakan transfer ke rekening anggota.';
             } else {
                 $message = '🔄 Status diupdate.';
             }
 
-            // Update data penarikan
             $penarikan->update([
                 'status' => $statusBaru,
-                    'alasan_penolakan' => $request->alasan_penolakan,  // ✅ TAMBAH INI
+                'alasan_penolakan' => $request->alasan_penolakan,
                 'updated_by' => Auth::id(),
                 'tanggal_disetujui' => now(),
             ]);
@@ -198,5 +193,28 @@ public function show($id)
                 'message' => 'Gagal update status: ' . $e->getMessage()
             ], 500);
         }
-    }
+    } // ← ✅ updateStatus() DITUTUP DI SINI
+
+    /**
+     * ✅ Export to Excel - METHOD TERPISAH
+     */
+    public function export(Request $request)
+    {
+        $filter = [];
+        
+        if ($request->filled('bulan')) {
+            $filter['bulan'] = $request->bulan;
+        }
+        if ($request->filled('tahun')) {
+            $filter['tahun'] = $request->tahun;
+        }
+        if ($request->filled('status')) {
+            $filter['status'] = $request->status;
+        }
+
+        $filename = 'Data_Penarikan_' . date('Y-m-d_His') . '.xlsx';
+        
+        return Excel::download(new PenarikanExport($filter), $filename);
+    } // ← ✅ export() DITUTUP DI SINI
+
 }
