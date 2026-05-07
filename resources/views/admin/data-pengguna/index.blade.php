@@ -39,9 +39,10 @@
         <p class="text-muted">Kelola data pengguna ASN dan Masyarakat</p>
     </div>
     <div class="header-actions">
-        <a href="{{ route('admin.data-pengguna.export', ['filter' => $filter]) }}" class="btn-export">
-            <i class="fas fa-file-excel"></i> Export Excel
-        </a>
+    <a href="{{ route('admin.data-pengguna.export', ['filter' => $filter]) }}" class="btn-export">
+        <img src="{{ asset('assets/icons/excel.png') }}" alt="Export Excel" class="btn-icon">
+        Export Excel
+    </a>
     </div>
 </div>
 

@@ -174,11 +174,11 @@
 }
 
 .btn-cetak {
-    background: var(--orange);
+    background: #1b5e20;;
     color: white;
     border: none;
     padding: 0.6rem 1.2rem;
-    border-radius: var(--radius);
+    border-radius: 25px;   
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -528,6 +528,19 @@
     border: none;
     font-size: 0.9rem;
     transition: var(--transition);
+}
+
+.icon-excel {
+    width: 25px;           /* Sesuaikan ukuran yang kamu mau */
+    height: 25px;
+    object-fit: contain;   /* Agar gambar tidak gepeng */
+    display: block;
+}
+
+.btn-export img {
+    width: 25px;        /* Lebar icon */
+    height: 25px;       /* Tinggi icon */
+    object-fit: contain; /* Agar tidak gepeng */
 }
 
 .btn-secondary {
