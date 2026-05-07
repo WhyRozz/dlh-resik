@@ -164,7 +164,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 }); // ← Tutup prefix admin
 
-// ✅ API Route untuk detail user (di luar group admin agar URL konsisten)
+// API Route untuk detail user (di luar group admin agar URL konsisten)
 Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/api/users/{id}', function ($id) {
         $user = DB::table('masyarakat')
