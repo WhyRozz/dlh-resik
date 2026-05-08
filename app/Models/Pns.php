@@ -30,6 +30,7 @@ class Pns extends Authenticatable
         'id_dinas',
         'barcode_id',
         'saldo',
+        'total_setoran',
         'otp',
         'otp_expires',
         'reset_token',

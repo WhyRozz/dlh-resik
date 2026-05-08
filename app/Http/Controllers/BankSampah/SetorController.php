@@ -124,6 +124,17 @@ class SetorController extends Controller
                     ->increment('saldo', $selisihSaldo);
             }
 
+            // Hitung selisih berat untuk adjust total_setoran
+            $selisihBerat = $beratBaru - $beratLama;
+
+            if ($transaksi->id_pns) {
+                Pns::where('id_pns', $transaksi->id_pns)
+                    ->increment('total_setoran', $selisihBerat);
+            }
+            if ($transaksi->id_masyarakat) {
+                Masyarakat::where('id_masyarakat', $transaksi->id_masyarakat)
+                    ->increment('total_setoran', $selisihBerat);
+            }
             DB::commit();
             
             return response()->json([
@@ -176,9 +187,17 @@ class SetorController extends Controller
                 'status_transaksi' => 'selesai',                  // ✅ Default status
             ]);
 
-            // ✅ FIX 2: HAPUS manual increment saldo di sini!
-            // Model::boot() sudah handle otomatis via event 'created'
-            // Jika tetap dipaksa di sini → SALDO DOUBLE! 🚨
+
+            // Update total_setoran untuk PNS/Masyarakat
+            if ($validated['id_pns']) {
+                Pns::where('id_pns', $validated['id_pns'])
+                    ->increment('total_setoran', $validated['berat']);
+            }
+            if ($validated['id_masyarakat']) {
+                Masyarakat::where('id_masyarakat', $validated['id_masyarakat'])
+                    ->increment('total_setoran', $validated['berat']);
+            }
+
 
             DB::commit();
             return redirect()->back()->with('success', '✅ Data setoran berhasil disimpan! Saldo pengguna telah ditambahkan.');
