@@ -39,6 +39,7 @@
     <thead>
         <tr>
             <th style="width: 5%; font-weight: bold;">No</th>
+            <th style="width: 15%; font-weight: bold;">Gambar</th>
             <th style="width: 55%; font-weight: bold;">Judul</th>
             <th style="width: 20%; font-weight: bold;">Tanggal</th>
             <th style="width: 20%; font-weight: bold;">Aksi</th>
@@ -48,6 +49,15 @@
             @forelse($artikelList as $index => $artikel)
             <tr>
                 <td>{{ $index + 1 }}</td>
+                <td>
+                    @if($artikel->foto)
+                        <img src="{{ asset('storage/' . $artikel->foto) }}" 
+                            alt="{{ $artikel->judul }}" 
+                            style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">
+                    @else
+                        <span style="color: #999;">-</span>
+                    @endif
+                </td>
                 <td>{{ Str::limit($artikel->judul, 80) }}</td>
                 <td>{{ $artikel->tanggal->format('d-m-Y') }}</td>
                 <td>

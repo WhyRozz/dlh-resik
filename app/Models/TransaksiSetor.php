@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+// ✅ FIX: Tambahkan use statements untuk class yang dipanggil
+use App\Models\Masyarakat;
+use App\Models\Pns;
+
 class TransaksiSetor extends Model
 {
     use HasFactory;
@@ -12,7 +16,7 @@ class TransaksiSetor extends Model
     protected $table = 'transaksi_setor';
     protected $primaryKey = 'id_transaksi';
     public $incrementing = true;
-    public $timestamps = false; // ✅ Sesuai DB: tidak ada created_at/updated_at
+    public $timestamps = false;
 
     protected $fillable = [
         'id_masyarakat',
@@ -23,6 +27,11 @@ class TransaksiSetor extends Model
         'total_rupiah',
         'id_petugas',
         'tanggal_transaksi',
+        'berat_asli',
+        'status_transaksi',
+        'catatan_koreksi',
+        'dikoreksi_oleh',
+        'tanggal_koreksi',
     ];
 
     protected $casts = [
@@ -30,6 +39,7 @@ class TransaksiSetor extends Model
         'harga_per_kg' => 'decimal:2',
         'total_rupiah' => 'decimal:2',
         'tanggal_transaksi' => 'datetime',
+        'tanggal_koreksi' => 'datetime',
     ];
 
     // ✅ RELASI
@@ -53,7 +63,7 @@ class TransaksiSetor extends Model
         return $this->belongsTo(Petugas::class, 'id_petugas', 'id_petugas');
     }
 
-    // ✅ ACCESSOR: Ambil nama pengsetor (Masyarakat atau PNS)
+    // ✅ ACCESSOR
     public function getNamaPengsetorAttribute()
     {
         if ($this->masyarakat) {
@@ -65,7 +75,6 @@ class TransaksiSetor extends Model
         return '-';
     }
 
-    // ✅ ACCESSOR: Tipe pengsetor
     public function getTipePengsetorAttribute()
     {
         if ($this->id_masyarakat) return 'Masyarakat';
@@ -73,19 +82,18 @@ class TransaksiSetor extends Model
         return '-';
     }
 
-    // ✅ BOOT METHOD: Update saldo otomatis saat transaksi dibuat
+    // ✅ BOOT METHOD: Update saldo otomatis
     protected static function boot()
     {
         parent::boot();
 
         static::created(function ($transaksi) {
-            // Update saldo masyarakat
+            // ✅ Sekarang tidak merah karena sudah di-use di atas
             if ($transaksi->id_masyarakat) {
                 Masyarakat::where('id_masyarakat', $transaksi->id_masyarakat)
                     ->increment('saldo', $transaksi->total_rupiah);
             }
 
-            // Update saldo PNS
             if ($transaksi->id_pns) {
                 Pns::where('id_pns', $transaksi->id_pns)
                     ->increment('saldo', $transaksi->total_rupiah);

@@ -21,7 +21,6 @@ class SetorController extends Controller
         if ($request->filled('search')) {
             $keyword = $request->search;
             $query->where(function($q) use ($keyword) {
-                // Cari berdasarkan NAMA (Masyarakat / PNS / Petugas)
                 $q->whereHas('masyarakat', function($sub) use ($keyword) {
                         $sub->where('nama', 'like', '%' . $keyword . '%');
                     })
@@ -31,23 +30,23 @@ class SetorController extends Controller
                     ->orWhereHas('petugas', function($sub) use ($keyword) {
                         $sub->where('nama_lengkap', 'like', '%' . $keyword . '%');
                     })
-                    // ✅ TAMBAHAN: Cari berdasarkan JENIS SAMPAH
                     ->orWhereHas('jenisSampah', function($sub) use ($keyword) {
                         $sub->where('jenis', 'like', '%' . $keyword . '%');
                     });
             });
+        } // ✅ FIX 1: Closing brace untuk if search
         
-        // ✅ Filter Bulan
+        // Filter Bulan
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal_transaksi', $request->bulan);
         }
 
-        // ✅ Filter Tahun
+        // Filter Tahun
         if ($request->filled('tahun')) {
             $query->whereYear('tanggal_transaksi', $request->tahun);
         }
-    }
 
+        // Pagination & Statistik
         $setorData = $query->paginate(15);
 
         // Statistik
@@ -62,7 +61,7 @@ class SetorController extends Controller
 
         $jenisSampah = JenisSampah::all();
 
-        // ✅ AJAX RESPONSE (TANPA FILE TAMBAHAN)
+        // AJAX Response
         if ($request->ajax()) {
             return response()->json([
                 'table' => view('admin.bank-sampah.setor-sampah.index', compact('setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah'))->render()
@@ -79,6 +78,65 @@ class SetorController extends Controller
         $data = TransaksiSetor::with(['masyarakat', 'pns', 'jenisSampah', 'petugas'])
             ->findOrFail($id);
         return response()->json($data);
+    }
+
+    // ✅ METHOD UPDATE: Untuk koreksi transaksi (hanya 1x)
+    public function update(Request $request, $id): JsonResponse
+    {
+        $transaksi = TransaksiSetor::findOrFail($id);
+
+        // Validasi: hanya bisa koreksi jika status 'selesai'
+        if ($transaksi->status_transaksi !== 'selesai') {
+            return response()->json([
+                'error' => '❌ Transaksi sudah dikoreksi atau dibatalkan'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'berat' => 'required|numeric|min:0.1',
+            'catatan_koreksi' => 'required|string|max:255',
+        ]);
+
+        $beratLama = $transaksi->berat;
+        $beratBaru = $validated['berat'];
+        $selisihBerat = $beratBaru - $beratLama;
+        $selisihSaldo = $selisihBerat * $transaksi->harga_per_kg;
+
+        DB::beginTransaction();
+        try {
+            // Update data transaksi
+            $transaksi->update([
+                'berat' => $beratBaru,
+                'total_rupiah' => $beratBaru * $transaksi->harga_per_kg,
+                'status_transaksi' => 'dikoreksi',
+                'catatan_koreksi' => $validated['catatan_koreksi'],
+                'dikoreksi_oleh' => auth()->user()->id_petugas ?? auth()->id(),
+                'tanggal_koreksi' => now(),
+            ]);
+
+            // Auto update saldo (tambah/kurangi sesuai selisih)
+            if ($transaksi->id_masyarakat) {
+                Masyarakat::where('id_masyarakat', $transaksi->id_masyarakat)
+                    ->increment('saldo', $selisihSaldo);
+            }
+            if ($transaksi->id_pns) {
+                Pns::where('id_pns', $transaksi->id_pns)
+                    ->increment('saldo', $selisihSaldo);
+            }
+
+            DB::commit();
+            
+            return response()->json([
+                'success' => '✅ Koreksi berhasil!',
+                'data' => $transaksi->load(['masyarakat', 'pns', 'jenisSampah'])
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => '❌ ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request)
@@ -106,25 +164,21 @@ class SetorController extends Controller
         try {
             // Buat transaksi
             TransaksiSetor::create([
-                'id_masyarakat'   => $validated['id_masyarakat'] ?? null,
-                'id_pns'          => $validated['id_pns'] ?? null,
-                'id_jenis_sampah' => $validated['id_jenis_sampah'],
-                'id_petugas'      => $idPetugas,
-                'berat'           => $validated['berat'],
-                'harga_per_kg'    => $harga_per_kg,
-                'total_rupiah'    => $total,
+                'id_masyarakat'    => $validated['id_masyarakat'] ?? null,
+                'id_pns'           => $validated['id_pns'] ?? null,
+                'id_jenis_sampah'  => $validated['id_jenis_sampah'],
+                'id_petugas'       => $idPetugas,
+                'berat'            => $validated['berat'],
+                'berat_asli'       => $validated['berat'],        // ✅ Simpan berat original
+                'harga_per_kg'     => $harga_per_kg,
+                'total_rupiah'     => $total,
                 'tanggal_transaksi' => now(),
+                'status_transaksi' => 'selesai',                  // ✅ Default status
             ]);
 
-            // ✅ Update saldo (jika model boot() tidak jalan, ini backup)
-            if ($validated['id_masyarakat']) {
-                Masyarakat::where('id_masyarakat', $validated['id_masyarakat'])
-                    ->increment('saldo', $total);
-            }
-            if ($validated['id_pns']) {
-                Pns::where('id_pns', $validated['id_pns'])
-                    ->increment('saldo', $total);
-            }
+            // ✅ FIX 2: HAPUS manual increment saldo di sini!
+            // Model::boot() sudah handle otomatis via event 'created'
+            // Jika tetap dipaksa di sini → SALDO DOUBLE! 🚨
 
             DB::commit();
             return redirect()->back()->with('success', '✅ Data setoran berhasil disimpan! Saldo pengguna telah ditambahkan.');
