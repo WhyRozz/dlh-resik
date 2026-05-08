@@ -2,29 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class JenisSampah extends Model
 {
-    use HasFactory;
-
     protected $table = 'jenis_sampah';
-
-    // Set primary key
     protected $primaryKey = 'id_jenis_sampah';
-
-    // Disable timestamps jika tidak ada created_at dan updated_at
-    public $timestamps = false;
+    public $timestamps = false; // Karena di screenshot tidak ada created_at/updated_at
 
     protected $fillable = [
-        'gambar',
         'jenis',
         'satuan',
         'harga',
+        'gambar',
     ];
 
+    // ✅ Otomatis convert 'harga' jadi angka desimal saat dibaca
     protected $casts = [
-        'harga' => 'integer',
+        'harga' => 'decimal:2',
     ];
 }
