@@ -55,61 +55,106 @@
    ============================================ */
 
 /* ============================================
-   SEARCH CONTAINER
+   ✅ SEARCH BAR (FIX TOTAL - Copy Data Setor)
    ============================================ */
-#confirmModal .modal-container {
-    text-align: center;
-}
 
-.search-container {
-    position: relative;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 0; /* ✅ FIX: Hapus margin negatif biar nggak geser */
-    margin-bottom: 24px;
-    padding-right: 0;
-    width: 100%;
-    z-index: 10;
-}
-
-.search-box {
-    position: relative;
-    width: 300px;
-}
-
-.search-box input {
-    width: 100%;
-    padding: 10px 40px 10px 15px;
-    border: 2px solid #ddd;
-    border-radius: 25px;
-    font-size: 14px;
-    outline: none;
-    background: white;
-}
-
-.search-box input:focus {
-    border-color: #4CAF50;
-    box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
-}
-
+/* 1. MATIKAN SEMUA STYLE LAMA YANG GANJU */
+.search-box, 
+.search-container,
+.search-wrapper .search-box,
+.search-box input,
 .search-box button {
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #4CAF50;
-    border: none;
-    padding: 6px 15px;
-    border-radius: 20px;
-    color: white;
+    all: unset;
+    display: none !important;
+}
+
+/* 2. WRAPPER UTAMA - Pastikan Flexbox Bener */
+.top-search {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto;
+}
+
+/* 3. KOTAK SEARCH - Ini yang ngatur bentuk & border */
+.search-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    position: relative;
+    width: 280px;
+    height: 38px;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 25px;
+    padding: 0 12px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* Efek saat diklik */
+.search-wrapper:focus-within {
+    border-color: #2e8b57;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+}
+
+/* 4. ICON KACA PEMBESAR - Fix Alignment */
+.search-icon {
+    color: #2e8b57;
+    font-size: 14px;
+    margin-left: 10px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* 5. INPUT FIELD - Fix Text Alignment */
+.search-input {
+    border: none !important;
+    background: transparent !important;
+    outline: none !important;
+    flex: 1;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.5;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.search-input::placeholder {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* 6. TOMBOL CLEAR (X) */
+#clearSearch {
+    background: none !important;
+    border: none !important;
+    color: #888;
     cursor: pointer;
+    padding: 0 5px !important;
+    margin: 0 0 0 5px !important;
+    display: none;
+    flex-shrink: 0;
+    line-height: 1;
 }
+#clearSearch:hover { color: #555; }
 
-.search-box button:hover {
-    background: #45a049;
+/* 7. RESPONSIVE */
+@media (max-width: 768px) {
+    .search-wrapper { width: 100%; }
+    .top-search { justify-content: center; }
 }
-
 /* ============================================
    ✅ HEADER LAYOUT: Judul & Search Sejajar (BARU)
    ============================================ */
@@ -485,3 +530,4 @@ table th:nth-child(4), table td:nth-child(4) { width: 18%; }
 table th:nth-child(5), table td:nth-child(5) { width: 10%; text-align: right; }
 table th:nth-child(6), table td:nth-child(6) { width: 12%; }
 table th:nth-child(7), table td:nth-child(7) { width: 15%; }
+

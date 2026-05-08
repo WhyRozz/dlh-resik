@@ -33,12 +33,13 @@
    ============================================ */
 .card-header-wrapper {
     display: flex !important;
-    justify-content: flex-start !important; /* ✅ Ubah dari space-between ke flex-start */
+    justify-content: space-between !important; /* ✅ Judul kiri, search kanan */
     align-items: center !important;
     width: 100% !important;
-    gap: 20px !important; /* ✅ Jarak antara judul dan search box */
+    gap: 16px !important;
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
+    flex-wrap: wrap; /* ✅ Agar responsive */
 }
 
 .card-header-wrapper .page-title {
@@ -49,69 +50,6 @@
     font-weight: 700 !important;
     color: #2e7d32 !important;
     white-space: nowrap; /* ✅ Judul tidak turun ke bawah */
-}
-
-/* ✅ Wrapper Search Box - Posisi ke Kiri */
-.search-box-wrapper {
-    margin: 0 !important;
-    padding: 0 !important;
-    display: flex;
-    justify-content: flex-start !important; /* ✅ Pastikan align ke kiri */
-}
-
-.search-box-wrapper .search-box {
-    position: relative;
-    width: 260px;
-    margin-left: 260px !important; /* ✅ Pastikan tidak ada margin kiri */
-}
-
-.search-box-wrapper .search-box input {
-    width: 100%;
-    padding: 8px 40px 8px 16px; /* ✅ Padding kanan diperbesar untuk tombol */
-    border: 2px solid #ddd;
-    border-radius: 25px;
-    font-size: 14px;
-    outline: none;
-    background: white;
-    box-sizing: border-box; /* ✅ Agar padding tidak melebarkan input */
-}
-
-.search-box-wrapper .search-box input:focus {
-    border-color: #4CAF50;
-    box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
-}
-
-/* ✅ Tombol Search Hijau - Posisi Mentok Kanan dalam Input */
-.search-box-wrapper .search-box button {
-    position: absolute;
-    right: 3px !important; /* ✅ Lebih mentok ke kanan */
-    top: 50%;
-    transform: translateY(-50%) !important; /* ✅ Vertikal benar-benar tengah */
-    background: #4CAF50;
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-    font-size: 14px;
-    padding: 0 !important; /* ✅ Reset padding */
-    line-height: 1 !important; /* ✅ Reset line-height */
-}
-
-.search-box-wrapper .search-box button:hover {
-    background: #45a049;
-}
-
-.search-box-wrapper .search-box button i {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1; /* ✅ Icon kaca pembesar benar-benar tengah */
 }
 
         /* Garis hijau pindah ke elemen terpisah */
@@ -148,15 +86,18 @@
             <div class="card-header-wrapper">
                 <h2 class="page-title">Daftar Penjemputan</h2>
                 
-                <div class="search-box-wrapper">
-                    <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="Cari penjemputan..." onkeyup="searchTable()">
-                        <button type="button" onclick="searchTable()">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+                               <div class="top-search">
+    <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="liveSearchInput" class="search-input" 
+               placeholder="Cari penjemputan..." 
+               value="{{ request('search') }}">
+        <button type="button" id="clearSearch" 
+                style="display: none; background:none; border:none; color:#888; cursor:pointer; padding:0 5px;">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
             
             {{-- ✅ GARIS HIJAU PINDAH KE SINI (di bawah header) --}}
             <div class="green-line"></div>
@@ -285,26 +226,55 @@
 </div>
 
 <script>
-// ================= SEARCH FUNCTION =================
-function searchTable() {
-    const input = document.getElementById('searchInput');
-    const filter = input.value.toLowerCase();
+// ================= LIVE SEARCH FUNCTION =================
+(function() {
+    const input = document.getElementById('liveSearchInput');
+    const clearBtn = document.getElementById('clearSearch');
     const table = document.getElementById('penjemputanTable');
-    const tr = table.getElementsByTagName('tr');
-    for (let i = 1; i < tr.length; i++) {
-        const tdNamaAdmin = tr[i].getElementsByTagName('td')[2];
-        const tdWaktu = tr[i].getElementsByTagName('td')[3];
-        const tdStatus = tr[i].getElementsByTagName('td')[5];
-        if (tdNamaAdmin || tdWaktu || tdStatus) {
-            const namaValue = tdNamaAdmin.textContent || tdNamaAdmin.innerText;
-            const waktuValue = tdWaktu.textContent || tdWaktu.innerText;
-            const statusValue = tdStatus.textContent || tdStatus.innerText;
-            if (namaValue.toLowerCase().indexOf(filter) > -1 || waktuValue.toLowerCase().indexOf(filter) > -1 || statusValue.toLowerCase().indexOf(filter) > -1) {
-                tr[i].style.display = '';
-            } else { tr[i].style.display = 'none'; }
+    let timer = null;
+
+    // Show/hide clear button
+    if (input && clearBtn) {
+        if (input.value.trim() !== '') clearBtn.style.display = 'inline-block';
+
+        input.addEventListener('input', function() {
+            const val = this.value.trim();
+            clearBtn.style.display = val ? 'inline-block' : 'none';
+            
+            // Debounce 300ms agar tidak berat saat typing
+            clearTimeout(timer);
+            timer = setTimeout(() => filterTable(val), 300);
+        });
+
+        // Clear button functionality
+        clearBtn.addEventListener('click', () => {
+            input.value = '';
+            clearBtn.style.display = 'none';
+            filterTable('');
+            input.focus();
+        });
+    }
+
+    // Filter table client-side
+    function filterTable(query) {
+        if (!table) return;
+        const filter = query.toLowerCase();
+        const rows = table.getElementsByTagName('tr');
+        
+        for (let i = 1; i < rows.length; i++) {
+            const tdNama = rows[i].getElementsByTagName('td')[2];   // Nama Admin
+            const tdWaktu = rows[i].getElementsByTagName('td')[3];  // Waktu
+            const tdStatus = rows[i].getElementsByTagName('td')[5]; // Status
+            
+            const namaVal = tdNama?.textContent.toLowerCase() || '';
+            const waktuVal = tdWaktu?.textContent.toLowerCase() || '';
+            const statusVal = tdStatus?.textContent.toLowerCase() || '';
+            
+            const match = namaVal.includes(filter) || waktuVal.includes(filter) || statusVal.includes(filter);
+            rows[i].style.display = match ? '' : 'none';
         }
     }
-}
+})();
 // ================= MODAL DETAIL =================
 function showDetail(id) {
     fetch(`/admin/bank-sampah/penjemputan/${id}/detail`)
