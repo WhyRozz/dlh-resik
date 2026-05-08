@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\BarcodeHelper;
 
 class AuthController extends Controller
 {
@@ -38,7 +39,7 @@ class AuthController extends Controller
         }
 
         // Generate barcode ID (15 karakter alphanumeric uppercase)
-        $barcode_id = 'RK' . strtoupper(Str::random(13));
+        $barcode_id = BarcodeHelper::generate(13, 'RK');
 
         // Hash password
         $hashedPassword = Hash::make($request->password);
