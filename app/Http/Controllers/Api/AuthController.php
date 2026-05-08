@@ -163,9 +163,7 @@ class AuthController extends Controller
         }
 
         // 3. Cek tabel Petugas (Admin)
-        $user = Petugas::where('email', $email)
-            ->orWhere('username', $email)
-            ->first();
+        $user = Petugas::where('email', $request->email)->first();
         if ($user && Hash::check($password, $user->password)) {
             return response()->json([
                 'status' => 'success',
@@ -483,39 +481,57 @@ class AuthController extends Controller
     }
     public function getSaldo(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|integer',
-            'tipe' => 'required|in:masyarakat,pns',
-        ]);
+        // Debug: catat request masuk
+        \Log::info('=== GET SALDO DIPANGGIL ===');
+        \Log::info('Query: ' . json_encode($request->query()));
 
-        if ($validator->fails()) {
+        $userId = $request->query('user_id');
+        $tipe = $request->query('tipe');
+
+        if (!$userId || !$tipe) {
+            \Log::error('Parameter tidak lengkap');
             return response()->json([
                 'status' => 'error',
-                'message' => $validator->errors()->first()
+                'message' => 'Parameter user_id dan tipe wajib diisi'
             ], 422);
         }
 
-        $userId = $request->user_id;
-        $tipe = $request->tipe;
+        try {
+            $user = null;
+            if ($tipe === 'masyarakat') {
+                $user = \App\Models\Masyarakat::find($userId);
+            } elseif ($tipe === 'pns') {
+                $user = \App\Models\Pns::find($userId);
+            }
 
-        if ($tipe == 'masyarakat') {
-            $user = Masyarakat::find($userId);
-        } else {
-            $user = Pns::find($userId);
-        }
+            if (!$user) {
+                \Log::error("User $userId tidak ditemukan");
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User tidak ditemukan'
+                ], 404);
+            }
 
-        if (!$user) {
+            // ✅ RETURN JSON MURNI
+            $response = [
+                'status' => 'success',
+                'data' => [
+                    'saldo' => $user->saldo ?? 0,
+                    'total_setoran' => $user->total_setoran ?? 0,
+                ]
+            ];
+
+            \Log::info('Response: ' . json_encode($response));
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            \Log::error('ERROR getSaldo: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+
+            // ✅ Return JSON walau error (jangan return view!)
             return response()->json([
                 'status' => 'error',
-                'message' => 'User tidak ditemukan'
-            ], 404);
+                'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'saldo' => $user->saldo
-            ]
-        ]);
     }
 }

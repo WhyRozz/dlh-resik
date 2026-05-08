@@ -7,123 +7,43 @@ use App\Models\Masyarakat;
 use App\Models\Pns;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    /**
-     * Update profile user
-     */
     public function update(Request $request)
     {
+        \Log::info('=== PROFILE UPDATE DIPANGGIL ===');
+        \Log::info('Request: ' . json_encode($request->all()));
+
+        // ✅ Validasi
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
             'tipe' => 'required|in:masyarakat,pns',
             'nama' => 'required|string|max:100',
-            'no_telepon' => 'required|string|max:15',
+            'no_telepon' => 'nullable|string|max:15',
             'tanggal_lahir' => 'nullable|date',
-            'alamat' => 'nullable|string',
+            'alamat' => 'nullable|string|max:255',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'message' => $validator->errors()->first()
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
             ], 422);
         }
 
-        $userId = $request->user_id;
-        $tipe = $request->tipe;
-
         try {
-            if ($tipe == 'masyarakat') {
-                $user = Masyarakat::find($userId);
+            $userId = $request->user_id;
+            $tipe = $request->tipe;
 
-                if (!$user) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'User tidak ditemukan'
-                    ], 404);
-                }
-
-                $user->update([
-                    'nama' => $request->nama,
-                    'no_telepon' => $request->no_telepon,
-                    'tanggal_lahir' => $request->tanggal_lahir,
-                    'alamat' => $request->alamat,
-                ]);
-
-            } elseif ($tipe == 'pns') {
-                $user = Pns::find($userId);
-
-                if (!$user) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'User tidak ditemukan'
-                    ], 404);
-                }
-
-                $user->update([
-                    'nama' => $request->nama,
-                    'no_telepon' => $request->no_telepon,
-                    'tanggal_lahir' => $request->tanggal_lahir,
-                    'alamat' => $request->alamat,
-                ]);
-
+            // ✅ Cari user berdasarkan tipe
+            if ($tipe === 'masyarakat') {
+                $user = Masyarakat::where('id_masyarakat', $userId)->first();
             } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Tipe user tidak valid'
-                ], 422);
-            }
-
-            return response()->json([
-                'status' => 'success',
-                'timestamp' => now()->format('Y-m-d H:i:s'),
-                'data' => [
-                    'user' => $user
-                ],
-                'message' => 'Profil berhasil diupdate'
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal update profil',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Get profile user by ID
-     */
-    public function show(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|integer',
-            'tipe' => 'required|in:masyarakat,pns',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first()
-            ], 422);
-        }
-
-        $userId = $request->user_id;
-        $tipe = $request->tipe;
-
-        try {
-            if ($tipe == 'masyarakat') {
-                $user = Masyarakat::find($userId);
-            } elseif ($tipe == 'pns') {
-                $user = Pns::with('dinas')->find($userId);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Tipe user tidak valid'
-                ], 422);
+                $user = Pns::where('id_pns', $userId)->first();
             }
 
             if (!$user) {
@@ -133,20 +53,64 @@ class ProfileController extends Controller
                 ], 404);
             }
 
+            // ✅ Handle upload foto jika ada
+            // ✅ LOGIC URL FOTO YANG AMAN (tidak akan dobel)
+            $fotoUrl = null;
+
+            if ($request->hasFile('foto')) {
+                // Hapus foto lama jika ada
+                if ($user->foto && !str_starts_with($user->foto, 'http')) {
+                    if (Storage::disk('public')->exists($user->foto)) {
+                        Storage::disk('public')->delete($user->foto);
+                    }
+                }
+
+                // Upload foto baru → simpan path relatif saja
+                $path = $request->file('foto')->store('profile', 'public');
+                $fotoUrl = asset('storage/' . $path); // ✅ Jadikan URL lengkap DI SINI
+            }
+
+            // Update data user
+            $updateData = [
+                'nama' => $request->nama,
+                'no_telepon' => $request->no_telepon,
+                'tanggal_lahir' => $request->tanggal_lahir ?: null,
+                'alamat' => $request->alamat ?: null,
+            ];
+
+            // Tambahkan foto jika ada upload baru
+            if ($fotoUrl) {
+                $updateData['foto'] = $fotoUrl; // ✅ Simpan URL lengkap ke DB
+            }
+
+            $user->update($updateData);
+
+            // ✅ RESPONSE: Kirim URL yang sudah jadi (jangan di-asset() lagi!)
             return response()->json([
                 'status' => 'success',
-                'timestamp' => now()->format('Y-m-d H:i:s'),
+                'message' => 'Profil berhasil diupdate',
                 'data' => [
-                    'user' => $user
-                ],
-                'message' => 'Data profil berhasil diambil'
-            ]);
+                    'id_masyarakat' => $user->id_masyarakat ?? null,
+                    'id_pns' => $user->id_pns ?? null,
+                    'nama' => $user->nama,
+                    'email' => $user->email ?? '',
+                    'no_telepon' => $user->no_telepon,
+                    'tanggal_lahir' => $user->tanggal_lahir,
+                    'alamat' => $user->alamat,
 
+                    // ✅ PASTIKAN TIDAK DOBEL:
+                    'foto' => $fotoUrl ?? $user->foto, // ← Jangan pakai asset() lagi di sini!
+
+                    'tipe' => $tipe,
+                ]
+            ], 200);
         } catch (\Exception $e) {
+            \Log::error('Profile Update Error: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal mengambil data profil',
-                'error' => $e->getMessage()
+                'message' => 'Server error: ' . $e->getMessage()
             ], 500);
         }
     }

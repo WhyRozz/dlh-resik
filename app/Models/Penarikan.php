@@ -10,7 +10,7 @@ class Penarikan extends Model
     protected $primaryKey = 'id_penarikan';
 
     public $timestamps = false;    // TERUS IKI SEHARUSE FALSE/TRUE?
-    
+
     protected $fillable = [
         'id_masyarakat',
         'id_pns',

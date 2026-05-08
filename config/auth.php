@@ -16,6 +16,7 @@ return [
         'admin' => [
             'driver' => 'session',
             'provider' => 'admins',
+            'username' => 'email',
         ],
 
         'api' => [
@@ -29,11 +30,13 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+            'column' => 'email',
         ],
 
         'admins' => [
             'driver' => 'eloquent',
             'model' => App\Models\Admin::class,
+            'column' => 'email',
         ],
     ],
 
