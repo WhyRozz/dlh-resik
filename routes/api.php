@@ -12,6 +12,10 @@ use App\Http\Controllers\Api\TpsController;
 use App\Http\Controllers\Api\JenisSampahController;
 use App\Http\Controllers\Api\SetorController;
 use App\Http\Controllers\Api\PenjemputanController;
+use App\Http\Controllers\Api\RiwayatSetorAdminController;
+use App\Http\Controllers\Api\RiwayatPenjemputanController;
+use App\Http\Controllers\Api\KonfirmasiSetorController;
+
 
 // ==================== 🔓 PUBLIC ROUTES (Tanpa Login) ====================
 
@@ -31,6 +35,7 @@ Route::post('/profile', [ProfileController::class, 'updateWithPhoto']); // Untuk
 // Data Publik
 Route::get('/dinas', [DinasController::class, 'index']);
 Route::get('/artikel', [ArtikelController::class, 'index']);
+Route::get('/jenis-sampah', [JenisSampahController::class, 'index']);
 
 Route::post('/profile', [ProfileController::class, 'update']);
 
@@ -40,11 +45,26 @@ Route::post('/cari-pengguna', [SetorController::class, 'cariPengguna']);
 Route::post('/transaksi-setor', [SetorController::class, 'store']);
 Route::get('/riwayat-setor', [SetorController::class, 'riwayatSetor']);
 // Penjemputan
-Route::post('/penjemputan', [PenjemputanController::class, 'store']);
+Route::post('/penjemputan/store', [PenjemputanController::class, 'store']);
 Route::get('/riwayat-penjemputan/{admin_id}', [PenjemputanController::class, 'index']);
 
-// List jenis sampah
-Route::get('/jenis-sampah', [JenisSampahController::class, 'index']);
+// ==================== KONFIRMASI SETOR ADMIN ====================
+Route::get('/setor-need-confirmation/{id_petugas}', [KonfirmasiSetorController::class, 'getNeedConfirmation']);
+Route::get('/jenis-sampah-list', [KonfirmasiSetorController::class, 'getJenisSampah']);
+Route::put('/konfirmasi-setor/{id_transaksi}', [KonfirmasiSetorController::class, 'confirm']);
+Route::delete('/tolak-setor/{id_transaksi}', [KonfirmasiSetorController::class, 'reject']);
+Route::post('/auto-confirm-setor', [KonfirmasiSetorController::class, 'autoConfirm']);
+Route::get('/setor-statistics/{id_petugas}', [KonfirmasiSetorController::class, 'getStatistics']);
+Route::get('/setor-history/{id_petugas}', [KonfirmasiSetorController::class, 'getHistory']);
+
+
+// ==================== PENJEMPUTAN (Form/Submit) ====================
+Route::post('/penjemputan/store', [PenjemputanController::class, 'store']);
+
+// ==================== RIWAYAT ADMIN (TERPISAH) ====================
+Route::get('/riwayat-setor-admin/{id_petugas}', [RiwayatSetorAdminController::class, 'index']);
+Route::get('/riwayat-penjemputan-admin/{id_petugas}', [RiwayatPenjemputanController::class, 'index']);
+
 
 
 // ==================== 🔐 PROTECTED ROUTES (Butuh Login - Sanctum) ====================

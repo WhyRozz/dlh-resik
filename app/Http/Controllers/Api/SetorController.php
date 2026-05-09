@@ -10,6 +10,7 @@ use App\Models\TransaksiSetor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache; // ✅ TAMBAH INI
 
 class SetorController extends Controller
 {
@@ -75,6 +76,36 @@ class SetorController extends Controller
      */
     public function store(Request $request)
     {
+        // ✅ DEDUPLICATION: Generate unique hash untuk request ini
+        $requestHash = md5(json_encode([
+            'id_masyarakat' => $request->id_masyarakat,
+            'id_pns' => $request->id_pns,
+            'id_jenis_sampah' => $request->id_jenis_sampah,
+            'berat' => $request->berat,
+            'total_rupiah' => $request->total_rupiah,
+            'id_petugas' => $request->id_petugas,
+            // Group by 5-second windows to allow same user to submit again after 5 sec
+            'time_window' => floor(now()->timestamp / 5),
+        ]));
+
+        $cacheKey = "processed_transaction_$requestHash";
+
+        // ✅ CEK apakah request ini sudah diproses dalam 30 detik terakhir
+        if (Cache::has($cacheKey)) {
+            \Log::warning('⚠️ DUPLICATE REQUEST DETECTED');
+            \Log::warning('   Hash: ' . $requestHash);
+            \Log::warning('   Returning cached response...');
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaksi sudah diproses sebelumnya',
+                'data' => [
+                    'duplicate' => true,
+                    'request_hash' => $requestHash
+                ]
+            ], 200);
+        }
+
         // Validasi input
         $validator = Validator::make($request->all(), [
             'id_masyarakat' => 'nullable|integer|exists:masyarakat,id_masyarakat',
@@ -105,38 +136,91 @@ class SetorController extends Controller
                 ], 404);
             }
 
-            $hargaPerKg = $jenisSampah->harga; // Ambil dari kolom 'harga'
+            $hargaPerKg = $jenisSampah->harga;
             $berat = $request->berat;
-
-            // 2. Hitung total = berat × harga
             $totalRupiah = $berat * $hargaPerKg;
 
-            // 3. Simpan transaksi ke tabel transaksi_setor
+            // 2. Simpan transaksi ke tabel transaksi_setor
             $transaksi = TransaksiSetor::create([
                 'id_masyarakat' => $request->id_masyarakat,
                 'id_pns' => $request->id_pns,
                 'id_jenis_sampah' => $request->id_jenis_sampah,
                 'berat' => $berat,
-                'harga_per_kg' => $hargaPerKg,      // Sesuai kolom di DB
-                'total_rupiah' => $totalRupiah,     // Sesuai kolom di DB
+                'harga_per_kg' => $hargaPerKg,
+                'total_rupiah' => $totalRupiah,
                 'id_petugas' => $request->id_petugas,
                 'tanggal_transaksi' => $request->tanggal_transaksi ?? now(),
             ]);
 
-            // 4. Update saldo & total_setoran user
-            if ($request->id_masyarakat) {
+            // ✅ 3. Update saldo & total_setoran user DENGAN LOCK + LOGGING DETAIL
+            if ($request->id_masyarakat && is_numeric($request->id_masyarakat)) {
+                \Log::info('=== INCREMENT MASYARAKAT START ===');
+                \Log::info('User ID: ' . $request->id_masyarakat . ' | Amount: ' . $totalRupiah . ' | Berat: ' . $berat);
+
+                // ✅ SEBELUM increment - catat saldo saat ini (dengan lock)
+                $saldoSebelum = Masyarakat::lockForUpdate()
+                    ->where('id_masyarakat', $request->id_masyarakat)
+                    ->value('saldo');
+                \Log::info('💰 Saldo SEBELUM increment: ' . $saldoSebelum);
+
+                // ✅ Lakukan increment saldo
                 Masyarakat::where('id_masyarakat', $request->id_masyarakat)
                     ->increment('saldo', $totalRupiah);
+
+                // ✅ Lakukan increment total_setoran
                 Masyarakat::where('id_masyarakat', $request->id_masyarakat)
                     ->increment('total_setoran', $berat);
-            } elseif ($request->id_pns) {
+
+                // ✅ SESUDAH increment - catat saldo baru
+                $saldoSesudah = Masyarakat::where('id_masyarakat', $request->id_masyarakat)->value('saldo');
+                $selisih = $saldoSesudah - $saldoSebelum;
+
+                \Log::info('💰 Saldo SESUDAH increment: ' . $saldoSesudah);
+                \Log::info('💰 Selisih aktual: ' . $selisih . ' (harusnya: ' . $totalRupiah . ')');
+
+                if ($selisih != $totalRupiah) {
+                    \Log::error('⚠️ WARNING: Selisih tidak sesuai! Mungkin ada double increment!');
+                }
+
+                \Log::info('=== INCREMENT MASYARAKAT END ===');
+            } elseif ($request->id_pns && is_numeric($request->id_pns)) {
+                \Log::info('=== INCREMENT PNS START ===');
+                \Log::info('User ID: ' . $request->id_pns . ' | Amount: ' . $totalRupiah . ' | Berat: ' . $berat);
+
+                // ✅ SEBELUM increment - catat saldo saat ini (dengan lock)
+                $saldoSebelum = Pns::lockForUpdate()
+                    ->where('id_pns', $request->id_pns)
+                    ->value('saldo');
+                \Log::info('💰 Saldo SEBELUM increment: ' . $saldoSebelum);
+
+                // ✅ Lakukan increment saldo
                 Pns::where('id_pns', $request->id_pns)
                     ->increment('saldo', $totalRupiah);
+
+                // ✅ Lakukan increment total_setoran
                 Pns::where('id_pns', $request->id_pns)
                     ->increment('total_setoran', $berat);
+
+                // ✅ SESUDAH increment - catat saldo baru
+                $saldoSesudah = Pns::where('id_pns', $request->id_pns)->value('saldo');
+                $selisih = $saldoSesudah - $saldoSebelum;
+
+                \Log::info('💰 Saldo SESUDAH increment: ' . $saldoSesudah);
+                \Log::info('💰 Selisih aktual: ' . $selisih . ' (harusnya: ' . $totalRupiah . ')');
+
+                if ($selisih != $totalRupiah) {
+                    \Log::error('⚠️ WARNING: Selisih tidak sesuai! Mungkin ada double increment!');
+                }
+
+                \Log::info('=== INCREMENT PNS END ===');
+            } else {
+                \Log::warning('Tidak ada id_masyarakat atau id_pns yang valid');
             }
 
             DB::commit();
+
+            // ✅ SIMPAN HASH KE CACHE SELAMA 30 DETIK (mencegah duplicate request)
+            Cache::put($cacheKey, true, 30);
 
             return response()->json([
                 'status' => 'success',
@@ -147,6 +231,7 @@ class SetorController extends Controller
                     'berat' => $berat,
                     'harga_per_kg' => $hargaPerKg,
                     'total_rupiah' => $totalRupiah,
+                    'request_hash' => $requestHash, // ✅ Tambah untuk debug
                 ]
             ], 201);
         } catch (\Exception $e) {
@@ -160,6 +245,10 @@ class SetorController extends Controller
         }
     }
 
+    /**
+     * GET /api/riwayat-setor
+     * Ambil riwayat setor user
+     */
     /**
      * GET /api/riwayat-setor
      * Ambil riwayat setor user
@@ -178,8 +267,8 @@ class SetorController extends Controller
         }
 
         try {
+            // ✅ QUERY TANPA where('status') - karena kolom tidak ada di tabel
             $query = TransaksiSetor::with(['jenisSampah', 'petugas'])
-                ->where('status', 'selesai')
                 ->orderBy('tanggal_transaksi', 'desc');
 
             if ($tipeUser === 'masyarakat' && $idMasyarakat) {
@@ -198,11 +287,14 @@ class SetorController extends Controller
                     'id_transaksi' => $trx->id_transaksi,
                     'tanggal_transaksi' => $trx->tanggal_transaksi,
                     'jenis_sampah' => $trx->jenisSampah?->jenis ?? 'Umum',
-                    'berat' => $trx->berat,
-                    'harga_per_kg' => $trx->harga_per_kg ?? $trx->jenisSampah?->harga ?? 0,
-                    'total_rupiah' => $trx->total_rupiah ?? (($trx->jenisSampah?->harga ?? 0) * $trx->berat),
-                    'nama_petugas' => $trx->petugas?->nama_lengkap ?? '-',
-                    'status' => $trx->status,
+
+                    // ✅ CAST ke float agar return number, bukan string
+                    'berat' => (float) ($trx->berat ?? 0),
+                    'harga_per_kg' => (float) ($trx->harga_per_kg ?? 0),
+                    'total_rupiah' => (float) ($trx->total_rupiah ?? 0),
+
+                    'nama_petugas' => $trx->petugas?->nama_lengkap ?? $trx->petugas?->nama ?? '-',
+                    'status' => 'selesai',
                 ];
             });
 
