@@ -48,13 +48,13 @@
                             <!-- ✅ Edit: Link ke halaman edit -->
                             <a href="{{ route('admin.bank-sampah.jenis-sampah.edit', $item->id_jenis_sampah) }}"
                                class="btn-icon btn-edit" title="Edit">
-                                <i class="fas fa-edit"></i>
+                                <img src="{{ asset('assets/icons/edit.png') }}" alt="Edit" style="width: 1.2em; height: 1.2em; object-fit: contain; vertical-align: middle;">
                             </a>
                             <!-- ✅ Hapus: Tetap pakai modal konfirmasi -->
                             <button class="btn-icon btn-delete"
                                     onclick="confirmDelete({{ $item->id_jenis_sampah }}, '{{ addslashes($item->jenis) }}')"
                                     title="Hapus">
-                                <i class="fas fa-trash"></i>
+                                    <img src="{{ asset('assets/icons/delete.png') }}" alt="Hapus" style="width: 1.2em; height: 1.2em; object-fit: contain; vertical-align: middle;">
                             </button>
                         </div>
                     </td>
