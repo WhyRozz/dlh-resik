@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\TpsController;
 use App\Http\Controllers\Api\JenisSampahController;
 use App\Http\Controllers\Api\SetorController;
+use App\Http\Controllers\Api\PenjemputanController;
 
 // ==================== 🔓 PUBLIC ROUTES (Tanpa Login) ====================
 
@@ -38,6 +39,9 @@ Route::post('/cari-pengguna', [SetorController::class, 'cariPengguna']);
 Route::post('/cari-pengguna', [SetorController::class, 'cariPengguna']);
 Route::post('/transaksi-setor', [SetorController::class, 'store']);
 Route::get('/riwayat-setor', [SetorController::class, 'riwayatSetor']);
+// Penjemputan
+Route::post('/penjemputan', [PenjemputanController::class, 'store']);
+Route::get('/riwayat-penjemputan/{admin_id}', [PenjemputanController::class, 'index']);
 
 // List jenis sampah
 Route::get('/jenis-sampah', [JenisSampahController::class, 'index']);
