@@ -92,7 +92,7 @@
                     <span class="text-muted">-</span>
                     @endif
                 </td>
-                <td>{{ $user->no_telp ?? '-' }}</td>
+                <td>{{ $user->no_telepon ?? '-' }}</td>
                 <td>
                     @if($user->jenis_pengguna === 'PNS')
                     <span class="badge badge-asn">
@@ -168,6 +168,10 @@
                 <div class="info-item">
                     <label>Kode Anggota</label>
                     <span id="modalKodeAnggota">-</span>
+                </div>
+                <div class="info-item">
+                <label>Barcode ID</label>
+                <span id="modalBarcodeId">-</span>
                 </div>
                 <div class="info-item">
                     <label>Saldo Bank Sampah</label>

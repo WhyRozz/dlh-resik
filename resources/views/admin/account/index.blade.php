@@ -78,10 +78,6 @@
                     onclick="requestOTPForAction('edit_admin', {{ $tambahan[0]->id_admin }}, '{{ addslashes($tambahan[0]->email) }}')">
                     Edit
                 </button>
-                <button class="btn btn-danger" 
-                    onclick="requestOTPForAction('delete_admin', {{ $tambahan[0]->id_admin }}, '{{ addslashes($tambahan[0]->email) }}')">
-                    Hapus
-                </button>
             @else
                 <button class="btn btn-primary" onclick="showAdminForm()">Tambah Akun</button>
             @endif
@@ -110,16 +106,16 @@
     <div class="petugas-table-container">
         @if($petugas->count() > 0)
             <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
+                <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                     <thead style="background: #e6f2e6;">
                         <tr>
-                            <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">No</th>
-                            <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Nama Petugas</th>
-                            <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Email</th>
-                            <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">No Telpon</th>
-                            <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Wilayah Kerja</th>
-                            <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Kata Sandi</th>
-                            <th style="padding: 12px 15px; text-align: center; border-bottom: 2px solid #ddd; font-weight: 600; color: #333;">Aksi</th>
+                            <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 5%;">No</th>
+                            <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 15%;">Nama Petugas</th>
+                            <th style="padding: 12px 100px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 20%;">Email</th>
+                            <th style="padding: 12px 25px 12px 5px; text-align: center; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 12%;">No Telpon</th>
+                            <th style="padding: 12px 5px 12px 60px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 25%;">Wilayah Kerja</th>
+                            <th style="padding: 12px 30px 12px 0px; text-align: center; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 10%;">Kata Sandi</th>
+                            <th style="padding: 12px 5px; text-align: center; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 13%;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -164,7 +160,7 @@
                             <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 12px 15px;">{{ $index + 1 }}</td>
                                 <td style="padding: 12px 15px;">{{ htmlspecialchars($p->nama_lengkap) }}</td>
-                                <td style="padding: 12px 15px;">{{ htmlspecialchars($p->email) }}</td>
+                                <td style="padding: 12px 8px; word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; white-space: normal;">{{ htmlspecialchars($p->email) }}</td>
                                 <td style="padding: 12px 15px;">{{ htmlspecialchars($p->no_telepon) }}</td>
                                 <td style="padding: 12px 15px;">
                                 <span style="display: inline-block; padding: 4px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; font-size: 12px; font-weight: 500;">
