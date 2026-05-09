@@ -27,18 +27,17 @@ class DataPenggunaController extends Controller
     private function getUsersQuery($filter, $search = '')
     {
         if ($filter === 'masyarakat') {
-            // ✅ Simpan ke variabel $query dulu
             $query = DB::table('masyarakat')
                 ->select(
                     'masyarakat.id_masyarakat as id',
                     'masyarakat.nama',
                     'masyarakat.email',
                     DB::raw("'Masyarakat' as jenis_pengguna"),
-                    DB::raw('NULL as no_telepon'),
-                    DB::raw('NULL as jenis_kelamin'),
-                    DB::raw('NULL as tanggal_lahir'),
-                    DB::raw('NULL as foto'),
-                    DB::raw('0 as saldo'),
+                    'masyarakat.no_telepon',            
+                    'masyarakat.jenis_kelamin',         
+                    'masyarakat.tanggal_lahir',         
+                    'masyarakat.foto',                  
+                    'masyarakat.saldo',                 
                     DB::raw('NULL as kode_anggota'),
                     DB::raw('NULL as id_dinas'),
                     DB::raw('NULL as nama_dinas'),
@@ -88,22 +87,22 @@ class DataPenggunaController extends Controller
             
             //  Query Masyarakat
             $masyarakatQuery = DB::table('masyarakat')
-                ->select(
-                    'masyarakat.id_masyarakat as id',
-                    'masyarakat.nama',
-                    'masyarakat.email',
-                    DB::raw("'Masyarakat' as jenis_pengguna"),
-                    DB::raw('NULL as no_telepon'),
-                    DB::raw('NULL as jenis_kelamin'),
-                    DB::raw('NULL as tanggal_lahir'),
-                    DB::raw('NULL as foto'),
-                    DB::raw('0 as saldo'),
-                    DB::raw('NULL as kode_anggota'),
-                    DB::raw('NULL as id_dinas'),
-                    DB::raw('NULL as nama_dinas'),
-                    'masyarakat.created_at',
-                    'masyarakat.updated_at'
-                );
+            ->select(
+                'masyarakat.id_masyarakat as id',
+                'masyarakat.nama',
+                'masyarakat.email',
+                DB::raw("'Masyarakat' as jenis_pengguna"),
+                'masyarakat.no_telepon',       
+                'masyarakat.jenis_kelamin',     
+                'masyarakat.tanggal_lahir',     
+                'masyarakat.foto',              
+                'masyarakat.saldo',             
+                DB::raw('NULL as kode_anggota'),
+                DB::raw('NULL as id_dinas'),
+                DB::raw('NULL as nama_dinas'),
+                'masyarakat.created_at',
+                'masyarakat.updated_at'
+            );
 
             // ✅ Tambah filter search untuk masyarakat
             if ($search) {
@@ -165,10 +164,13 @@ class DataPenggunaController extends Controller
                     'type' => 'masyarakat',
                     'nama' => $user->nama,
                     'email' => $user->email,
-                    'jenis_kelamin' => null,
-                    'no_telepon' => null,
-                    'saldo' => 0,
-                    'nama_dinas' => null,
+                    'jenis_kelamin' => $user->jenis_kelamin,     
+                    'no_telepon' => $user->no_telepon,           
+                    'tanggal_lahir' => $user->tanggal_lahir,     
+                    'saldo' => $user->saldo,                     
+                    'nama_dinas' => 'Masyarakat',                
+                    'kode_anggota' => $user->barcode_id,        
+                    'created_at' => $user->created_at,           
                 ]);
             } elseif ($type === 'pns') {
                 $user = \App\Models\Pns::with('dinas')->find($id);
@@ -184,8 +186,12 @@ class DataPenggunaController extends Controller
                     'email' => $user->email,
                     'jenis_kelamin' => $user->jenis_kelamin,
                     'no_telepon' => $user->no_telepon,
+                    'tanggal_lahir' => $user->tanggal_lahir,     
                     'saldo' => $user->saldo,
-                    'nama_dinas' => $user->dinas ? $user->dinas->nama_dinas : null,
+                    'nama_dinas' => $user->dinas ? $user->dinas->nama_dinas : 'ASN/PNS',
+                    'kode_anggota' => $user->kode_anggota,
+                    'barcode_id' => $user->barcode_id,        
+                    'created_at' => $user->created_at,            
                 ]);
             }
 

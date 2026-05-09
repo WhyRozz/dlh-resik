@@ -93,7 +93,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/', [AccountController::class, 'store'])->name('store');
             Route::get('/{id}', [AccountController::class, 'show'])->name('show');
             Route::put('/{id}', [AccountController::class, 'update'])->name('update');
-            Route::delete('/{id}', [AccountController::class, 'destroy'])->name('destroy');
+            Route::get('/get-admin-emails', [AccountController::class, 'getAdminEmails'])->name('get-emails');
+            Route::post('/send-otp', [AccountController::class, 'processSendOtp'])->name('send-otp');
 
             // OTP
             Route::post('/request-otp', [AccountController::class, 'requestOtp'])->name('request-otp');
@@ -153,6 +154,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/', [SetorController::class, 'index'])->name('index');
                 Route::get('/{id}', [SetorController::class, 'detail'])->name('detail');
                 Route::post('/', [SetorController::class, 'store'])->name('store');
+                Route::put('/{id}', [SetorController::class, 'update'])->name('update');
             });
             
             // ── Shortcut Sidebar (opsional) ──

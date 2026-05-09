@@ -239,22 +239,22 @@ class AuthController extends Controller
         // ✅ KIRIM EMAIL VIA LARAVEL MAIL
         try {
             Mail::raw("
-            🔐 KODE VERIFIKASI RESIK APP
+            KODE VERIFIKASI RESIK APP
 
             Halo,
 
             Kode OTP Anda adalah: {$otp}
 
-            ⏰ Berlaku selama 10 menit.
+            Berlaku selama 10 menit.
 
-            🔒 Jangan bagikan kode ini kepada siapa pun.
+            Jangan bagikan kode ini kepada siapa pun.
             Jika Anda tidak meminta reset password, abaikan email ini.
 
             Terima kasih,
             Tim RESIK App
             ", function ($message) use ($email) {
                 $message->to($email)
-                    ->subject('🔐 Kode Verifikasi - RESIK App')
+                    ->subject('Kode Verifikasi - RESIK App')
                     ->from('simpelsi2025@gmail.com', 'RESIK App');
             });
         } catch (\Exception $e) {

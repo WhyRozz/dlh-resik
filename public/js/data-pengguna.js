@@ -26,6 +26,17 @@ function initModalEvents() {
     });
 }
 
+    function formatTanggal(dateString) {
+        if (!dateString) return '-';
+        
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${day}-${month}-${year}`;
+    }
+
 /**
  * Open modal and fetch user detail via API
  * @param {string|number} userId - User ID
@@ -76,6 +87,10 @@ function openModal(userId, userType) {
         document.getElementById('modalJenisKelamin').textContent = data.jenis_kelamin || '-';
         document.getElementById('modalEmail').textContent = data.email || '-';
         document.getElementById('modalTelp').textContent = data.no_telepon || '-';
+        document.getElementById('modalTglLahir').textContent = formatTanggal(data.tanggal_lahir);
+        document.getElementById('modalKodeAnggota').textContent = data.kode_anggota || '-';
+        document.getElementById('modalBarcodeId').textContent = data.barcode_id || '-';
+        document.getElementById('modalCreated').textContent = formatTanggal(data.created_at);
         document.getElementById('modalPekerjaan').textContent = data.nama_dinas || 'Masyarakat Umum';
         document.getElementById('modalSaldo').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(data.saldo || 0);
 

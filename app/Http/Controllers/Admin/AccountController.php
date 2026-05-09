@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
-use App\Models\Petugas; // ← PENTING: Import Model Petugas
+use App\Models\Petugas;
 use App\Services\EncryptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log; // ← TAMBAHKAN INI
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -21,7 +21,7 @@ class AccountController extends Controller
      * Konstanta
      */
     const MAX_ADMIN_ACCOUNTS = 3;
-    const DEFAULT_ADMIN_EMAIL = 'simpelsi2025@gmail.com';
+    // ✅ DEFAULT_ADMIN_EMAIL DIHAPUS - sekarang ambil dari database
     const OTP_EXPIRE_MINUTES = 5;
 
     /**
@@ -29,19 +29,20 @@ class AccountController extends Controller
      */
     public function index()
     {
-        // 1. Ambil data Admin
-        $admins = Admin::orderByRaw("
-            CASE WHEN email = ? THEN 0 ELSE 1 END,
-            id_admin ASC
-        ", [self::DEFAULT_ADMIN_EMAIL])->get();
+        // ✅ Ambil admin utama berdasarkan id_admin terkecil (bukan hardcoded email)
+        $adminUtama = Admin::orderBy('id_admin', 'asc')->first();
+        
+        // ✅ Ambil semua admin
+        $admins = Admin::orderBy('id_admin', 'asc')->get();
+        
+        // ✅ Pisahkan admin utama dan tambahan
+        $akunUtama = $adminUtama;
+        $tambahan = $admins->reject(fn($a) => $a->id_admin === ($adminUtama?->id_admin))->values();
 
-        $akunUtama = $admins->firstWhere('email', self::DEFAULT_ADMIN_EMAIL);
-        $tambahan = $admins->reject(fn($a) => $a->email === self::DEFAULT_ADMIN_EMAIL)->values();
-
-        // 2. Ambil data Petugas
+        // ✅ Ambil data Petugas
         $petugas = \App\Models\Petugas::orderBy('created_at', 'desc')->get();
 
-        // 3. Kirim ke view
+        // ✅ Kirim ke view
         return view('admin.account.index', compact('admins', 'akunUtama', 'tambahan', 'petugas'));
     }
 
@@ -112,26 +113,84 @@ class AccountController extends Controller
 
         return redirect()->route('admin.akun.index')->with('success', 'Akun berhasil diperbarui.');
     }
+    
+    /**
+     * ✅ BARU: Get semua email admin dari database (untuk modal OTP)
+     */
+    public function getAdminEmails()
+    {
+        $admins = Admin::select('id_admin', 'email')->orderBy('id_admin', 'asc')->get();
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'admins' => $admins
+            ]
+        ]);
+    }
 
     /**
-     * Hapus akun (hanya untuk akun tambahan, bukan default)
+     * ✅ BARU: Proses kirim OTP ke email admin (via admin_id)
      */
-    public function destroy($id)
+    public function processSendOtp(Request $request)
     {
-        $admin = Admin::findOrFail($id);
+        $validated = $request->validate([
+            'admin_id' => 'required|integer|exists:admin,id_admin',
+        ]);
 
-        // Jangan hapus akun default
-        if ($admin->email === self::DEFAULT_ADMIN_EMAIL) {
-            return back()->with('error', 'Akun utama tidak dapat dihapus.');
+        $admin = Admin::find($validated['admin_id']);
+        
+        if (!$admin) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Admin tidak ditemukan'
+            ], 404);
         }
+        
+        // Generate OTP 6 digit
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expiresAt = now()->addMinutes(self::OTP_EXPIRE_MINUTES);
 
-        $admin->delete();
+        // Simpan di cache
+        Cache::put('admin_otp_' . $admin->email, $otp, $expiresAt);
 
-        return redirect()->route('admin.akun.index')->with('success', 'Akun berhasil dihapus.');
+        // Update DB juga
+        Admin::where('id_admin', $admin->id_admin)->update([
+            'otp' => $otp,
+            'otp_expires' => $expiresAt,
+        ]);
+
+        // Kirim email
+        try {
+            Mail::raw("
+                🔐 Kode OTP Admin SIMPELSI: {$otp}
+                
+                Berlaku selama " . self::OTP_EXPIRE_MINUTES . " menit.
+                
+                Jangan bagikan kode ini kepada siapa pun.
+                
+                Jika Anda tidak meminta kode ini, abaikan email ini.
+            ", function ($message) use ($admin) {
+                $message->to($admin->email)
+                        ->subject('Kode OTP Admin - SIMPELSI');
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'OTP berhasil dikirim ke ' . $admin->email
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Gagal kirim OTP: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengirim email'
+            ], 500);
+        }
     }
 
     /**
      * Request OTP untuk verifikasi aksi sensitif
+     * ✅ DIUPDATE: Sekarang support via email (untuk backward compatibility)
      */
     public function requestOtp(Request $request)
     {
@@ -153,15 +212,23 @@ class AccountController extends Controller
         ]);
 
         // Kirim email
-        Mail::raw("Kode OTP Admin SIMPELSI Anda: {$otp}\nBerlaku selama " . self::OTP_EXPIRE_MINUTES . " menit.", function ($message) use ($validated) {
-            $message->to($validated['email'])->subject('Kode OTP Admin - SIMPELSI');
-        });
+        try {
+            Mail::raw("Kode OTP Admin SIMPELSI Anda: {$otp}\nBerlaku selama " . self::OTP_EXPIRE_MINUTES . " menit.", function ($message) use ($validated) {
+                $message->to($validated['email'])->subject('Kode OTP Admin - SIMPELSI');
+            });
 
-        return response()->json([
-            'status' => app()->environment('local') ? 'success_dev' : 'success',
-            'message' => 'Kode OTP telah dikirim ke email Anda.',
-            'otp' => app()->environment('local') ? $otp : null,
-        ]);
+            return response()->json([
+                'status' => app()->environment('local') ? 'success_dev' : 'success',
+                'message' => 'Kode OTP telah dikirim ke email Anda.',
+                'otp' => app()->environment('local') ? $otp : null,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Gagal kirim OTP: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengirim email'
+            ], 500);
+        }
     }
 
     /**
