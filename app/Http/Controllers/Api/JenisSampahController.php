@@ -8,22 +8,34 @@ use Illuminate\Http\Request;
 
 class JenisSampahController extends Controller
 {
+    /**
+     * GET /api/jenis-sampah
+     * List semua jenis sampah
+     */
     public function index()
     {
         try {
-            // ✅ Ambil semua data sesuai kolom asli
-            $data = JenisSampah::select('id_jenis_sampah', 'jenis', 'satuan', 'harga', 'gambar')
-                ->get();
+            $jenisSampah = JenisSampah::orderBy('jenis', 'asc')->get()->map(function($item) {
+                return [
+                    'id_jenis_sampah' => $item->id_jenis_sampah,
+                    'jenis' => $item->jenis,
+                    'satuan' => $item->satuan ?? 'kg',
+                    'harga' => (float) ($item->harga ?? 0),
+                    'gambar' => $item->gambar ? asset('storage/' . $item->gambar) : null,
+                ];
+            });
 
             return response()->json([
                 'status' => 'success',
-                'data' => $data
-            ]);
+                'data' => $jenisSampah,
+                'total' => $jenisSampah->count()
+            ], 200);
+
         } catch (\Exception $e) {
-            \Log::error('JenisSampah Index Error: ' . $e->getMessage());
+            \Log::error('JenisSampah List Error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Server error: ' . $e->getMessage()
+                'message' => 'Gagal memuat data jenis sampah'
             ], 500);
         }
     }

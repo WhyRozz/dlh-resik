@@ -482,7 +482,6 @@ class AuthController extends Controller
     }
     public function getSaldo(Request $request)
     {
-        // Debug: catat request masuk
         \Log::info('=== GET SALDO DIPANGGIL ===');
         \Log::info('Query: ' . json_encode($request->query()));
 
@@ -513,12 +512,23 @@ class AuthController extends Controller
                 ], 404);
             }
 
-            // ✅ RETURN JSON MURNI
+            // ✅ HITUNG total_setoran TANPA filter status (karena kolom tidak ada)
+            $totalSetoran = \App\Models\TransaksiSetor::where(function ($query) use ($tipe, $userId) {
+                if ($tipe === 'masyarakat') {
+                    $query->where('id_masyarakat', $userId);
+                } else {
+                    $query->where('id_pns', $userId);
+                }
+            })
+                // ✅ TIDAK ADA ->where('status', 'selesai')
+                ->sum('berat');
+
+            // ✅ RETURN JSON
             $response = [
                 'status' => 'success',
                 'data' => [
-                    'saldo' => $user->saldo ?? 0,
-                    'total_setoran' => $user->total_setoran ?? 0,
+                    'saldo' => (float) ($user->saldo ?? 0),
+                    'total_setoran' => (float) ($totalSetoran ?? 0),
                 ]
             ];
 
@@ -528,7 +538,6 @@ class AuthController extends Controller
             \Log::error('ERROR getSaldo: ' . $e->getMessage());
             \Log::error($e->getTraceAsString());
 
-            // ✅ Return JSON walau error (jangan return view!)
             return response()->json([
                 'status' => 'error',
                 'message' => 'Server error: ' . $e->getMessage()

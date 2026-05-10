@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 // ✅ FIX: Tambahkan use statements untuk class yang dipanggil
 use App\Models\Masyarakat;
 use App\Models\Pns;
+use App\Models\JenisSampah;
+use App\Models\Petugas;
+use Illuminate\Http\Request;
 
 class TransaksiSetor extends Model
 {
@@ -81,23 +84,63 @@ class TransaksiSetor extends Model
         if ($this->id_pns) return 'PNS';
         return '-';
     }
-
-    // ✅ BOOT METHOD: Update saldo otomatis
-    protected static function boot()
+    /**
+     * GET /api/riwayat-setor
+     * Ambil riwayat setor user
+     */
+    public function riwayatSetor(Request $request)
     {
-        parent::boot();
+        $idMasyarakat = $request->query('id_masyarakat');
+        $idPns = $request->query('id_pns');
+        $tipeUser = $request->query('tipe_user');
 
-        static::created(function ($transaksi) {
-            // ✅ Sekarang tidak merah karena sudah di-use di atas
-            if ($transaksi->id_masyarakat) {
-                Masyarakat::where('id_masyarakat', $transaksi->id_masyarakat)
-                    ->increment('saldo', $transaksi->total_rupiah);
+        if (!$tipeUser || (!$idMasyarakat && !$idPns)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Parameter user tidak lengkap'
+            ], 422);
+        }
+
+        try {
+            // ✅ QUERY TANPA FILTER STATUS (karena kolom tidak ada di DB)
+            $query = TransaksiSetor::with(['jenisSampah', 'petugas'])
+                ->orderBy('tanggal_transaksi', 'desc');
+
+            if ($tipeUser === 'masyarakat' && $idMasyarakat) {
+                $query->where('id_masyarakat', $idMasyarakat);
+            } elseif ($tipeUser === 'pns' && $idPns) {
+                $query->where('id_pns', $idPns);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tipe user atau ID tidak valid'
+                ], 422);
             }
 
-            if ($transaksi->id_pns) {
-                Pns::where('id_pns', $transaksi->id_pns)
-                    ->increment('saldo', $transaksi->total_rupiah);
-            }
-        });
+            $riwayat = $query->get()->map(function ($trx) {
+                return [
+                    'id_transaksi' => $trx->id_transaksi,
+                    'tanggal_transaksi' => $trx->tanggal_transaksi,
+                    'jenis_sampah' => $trx->jenisSampah?->jenis ?? 'Umum',
+                    'berat' => $trx->berat,
+                    'harga_per_kg' => $trx->harga_per_kg ?? $trx->jenisSampah?->harga ?? 0,
+                    'total_rupiah' => $trx->total_rupiah ?? (($trx->jenisSampah?->harga ?? 0) * $trx->berat),
+                    'nama_petugas' => $trx->petugas?->nama_lengkap ?? $trx->petugas?->nama ?? '-',
+                    'status' => 'selesai', // ✅ Hardcode karena kolom tidak ada
+                ];
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $riwayat,
+                'total' => $riwayat->count()
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Riwayat Setor Error: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
