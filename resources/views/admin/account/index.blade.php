@@ -5,10 +5,11 @@
 @section('page-title-mobile', 'AKUN')
 
 @push('styles')
+    <!-- Fungsi: Memuat file CSS khusus untuk halaman kelola akun -->
     <link rel="stylesheet" href="{{ asset('css/account.css') }}">
 @endpush
 
-{{-- Messages --}}
+<!-- Fungsi: Menampilkan notifikasi flash message dari session Laravel -->
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
 @endif
@@ -20,19 +21,20 @@
 @endif
 
 @section('content')
+<!-- Fungsi: Header section untuk judul halaman -->
 <div class="content-header">
     <h2>Kelola Akun Admin</h2>
 </div>
 
-{{-- 🔍 Search Bar Modern (Nama & Email) --}}
+<!-- Fungsi: Search bar untuk filter akun petugas berdasarkan nama atau email (client-side) -->
 <div class="search-wrapper-akun">
     <i class="fas fa-search search-icon"></i>
     <input type="text" id="searchAkun" class="search-input-akun" placeholder="Cari akun petugas berdasarkan nama atau email">
 </div>
 
-{{-- ==================== BAGIAN 1: CARDS ADMIN ==================== --}}
+<!-- Fungsi: Section card untuk menampilkan dan mengelola 2 akun admin default (utama & kedua) -->
 <div class="accounts-grid">
-    {{-- Akun Utama --}}
+    <!-- Fungsi: Card untuk Akun Utama WEB (wajib ada, maksimal 1) -->
     <div class="account-card">
         <div class="card-header">
             <div class="card-title"><span>🔒</span> Akun Utama WEB</div>
@@ -40,6 +42,7 @@
         </div>
         <div class="account-info">
             <label>Email:</label>
+            <!-- Fungsi: Menampilkan email akun utama dengan htmlspecialchars untuk mencegah XSS -->
             <span>{{ $akunUtama ? htmlspecialchars($akunUtama->email) : 'Belum dibuat' }}</span>
         </div>
         <div class="account-info">
@@ -48,17 +51,19 @@
         </div>
         <div class="btn-group">
             @if($akunUtama)
+                <!-- Fungsi: Tombol Edit yang memicu flow OTP sebelum mengizinkan perubahan data admin -->
                 <button class="btn btn-outline" 
                     onclick="requestOTPForAction('edit_admin', {{ $akunUtama->id_admin }}, '{{ addslashes($akunUtama->email) }}')">
                     Edit
                 </button>
             @else
+                <!-- Fungsi: Tombol untuk membuat akun utama jika belum ada -->
                 <button class="btn btn-primary" onclick="showAdminForm()">Buat Akun Utama</button>
             @endif
         </div>
     </div>
 
-    {{-- Akun Kedua --}}
+    <!-- Fungsi: Card untuk Akun Kedua WEB (opsional, maksimal 1) -->
     <div class="account-card">
         <div class="card-header">
             <div class="card-title"><span>👤</span> Akun Kedua WEB</div>
@@ -66,6 +71,7 @@
         </div>
         <div class="account-info">
             <label>Email:</label>
+            <!-- Fungsi: Menampilkan email akun kedua dengan htmlspecialchars untuk mencegah XSS -->
             <span>{{ isset($tambahan[0]) ? htmlspecialchars($tambahan[0]->email) : 'Belum dibuat' }}</span>
         </div>
         <div class="account-info">
@@ -74,27 +80,31 @@
         </div>
         <div class="btn-group">
             @if(isset($tambahan[0]))
+                <!-- Fungsi: Tombol Edit yang memicu flow OTP sebelum mengizinkan perubahan data admin -->
                 <button class="btn btn-outline" 
                     onclick="requestOTPForAction('edit_admin', {{ $tambahan[0]->id_admin }}, '{{ addslashes($tambahan[0]->email) }}')">
                     Edit
                 </button>
             @else
+                <!-- Fungsi: Tombol untuk menambah akun kedua jika slot masih tersedia -->
                 <button class="btn btn-primary" onclick="showAdminForm()">Tambah Akun</button>
             @endif
         </div>
     </div>
 </div>
 
-{{-- ==================== BAGIAN 2: PETUGAS LAPANGAN ==================== --}}
+<!-- Fungsi: Pembatas visual antara section admin dan section petugas -->
 <hr style="margin: 40px 0; border: none; border-top: 2px solid #e0e0e0;">
 
+<!-- Fungsi: Section utama untuk mengelola akun petugas lapangan (CRUD) -->
 <div class="petugas-section" style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 20px;">
     
-    {{-- Header Section --}}
+    <!-- Fungsi: Header section dengan judul dan tombol tambah akun petugas -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
         <h3 style="color: #20A726; margin: 0; font-size: 20px; font-weight: 600;">
             Daftar Akun Petugas Mobile
         </h3>
+        <!-- Fungsi: Tombol untuk membuka modal form tambah akun petugas -->
         <button type="button" class="btn-tambah-akun" 
                 onclick="openPetugasModal('add')"
                 style="background: #20A726; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
@@ -102,11 +112,12 @@
         </button>
     </div>
 
-    {{-- Tabel Daftar Petugas --}}
+    <!-- Fungsi: Container tabel daftar petugas -->
     <div class="petugas-table-container">
         @if($petugas->count() > 0)
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                    <!-- Fungsi: Header tabel dengan kolom-kolom data petugas -->
                     <thead style="background: #e6f2e6;">
                         <tr>
                             <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 5%;">No</th>
@@ -120,6 +131,7 @@
                     </thead>
                     <tbody>
                         @php
+                        // Fungsi: Array mapping untuk konversi level kode ke nama yang mudah dibaca
                         $levelNames = [
                             'petugas_dlh' => 'Petugas DLH',
                             'bank_sampah_kelurahan_kauman_kauman_nganjuk' => 'BS Kel. Kauman (Kauman, Nganjuk)',
@@ -155,7 +167,8 @@
                             'bank_sampah_cengkok_cengkok_ngronggot' => 'BS Cengkok (Cengkok, Ngronggot)',
                             'bank_sampah_induk_salepok_omahe_nganjuk_kedondong_bagor' => 'BS Induk Salepok Omahe Nganjuk (Kedondong, Bagor)',
                         ];
-                    @endphp
+                        @endphp
+                        <!-- Fungsi: Looping data petugas untuk ditampilkan dalam tabel -->
                         @foreach($petugas as $index => $p)
                             <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 12px 15px;">{{ $index + 1 }}</td>
@@ -163,6 +176,7 @@
                                 <td style="padding: 12px 8px; word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; white-space: normal;">{{ htmlspecialchars($p->email) }}</td>
                                 <td style="padding: 12px 15px;">{{ htmlspecialchars($p->no_telepon) }}</td>
                                 <td style="padding: 12px 15px;">
+                                <!-- Fungsi: Badge untuk menampilkan wilayah kerja petugas -->
                                 <span style="display: inline-block; padding: 4px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; font-size: 12px; font-weight: 500;">
                                     {{ $levelNames[$p->level] ?? $p->level }}
                                 </span>
@@ -170,7 +184,8 @@
                             
                                 <td style="padding: 12px 15px;">••••••••••••</td>
                                 <td style="padding: 12px 15px; text-align: center;">
-                                    <button type="button" class="btn-edit-modal" 
+                                    <!-- Fungsi: Tombol Edit untuk membuka modal edit petugas -->
+                                    <button type="button" 
                                     onclick='openPetugasModal("edit", {{ json_encode([
                                         "id" => $p->id_petugas,
                                         "nama" => $p->nama_lengkap,
@@ -178,12 +193,12 @@
                                         "telpon" => $p->no_telepon,
                                         "level" => $p->level
                                     ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }})'
-                                    <button onclick='openPetugasModal("edit", ...)' 
                                     style="display: inline-block; margin: 0 2px; padding: 5px 10px; background: #fff3cd; color: #856404; border: none; border-radius: 4px; cursor: pointer; vertical-align: middle;" 
                                     title="Edit">
                                     <img src="{{ asset('assets/icons/edit.png') }}" alt="Edit" style="width: 18px; height: 18px; vertical-align: middle;">
                                     </button>
                                     
+                                    <!-- Fungsi: Tombol Hapus untuk memicu konfirmasi penghapusan petugas -->
                                     <button onclick="confirmDelete({{ $p->id_petugas }})" 
                                     style="display: inline-block; margin: 0 2px; padding: 5px 10px; background: #f8d7da; color: #721c24; border: none; border-radius: 4px; cursor: pointer; vertical-align: middle;"
                                     title="Hapus">
@@ -196,6 +211,7 @@
                 </table>
             </div>
         @else
+            <!-- Fungsi: Pesan kosong ketika belum ada data petugas -->
             <div style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px; color: #666;">
                 <p style="margin: 0; font-size: 16px;">📭 Belum ada akun petugas lapangan</p>
                 <p style="margin: 5px 0 0 0; font-size: 14px;">Silakan tambahkan petugas menggunakan tombol di atas</p>
@@ -204,16 +220,18 @@
     </div>
 </div>
 
-{{-- Modal Konfirmasi Hapus --}}
+<!-- Fungsi: Modal konfirmasi hapus untuk validasi sebelum penghapusan data -->
 <div id="deleteModal" class="modal" style="display: none;">
     <div style="background: white; padding: 30px; border-radius: 10px; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
         <h4 style="margin-top: 0; color: #333; font-size: 18px; margin-bottom: 15px;">Konfirmasi Hapus</h4>
         <p style="color: #666; margin-bottom: 25px;">Apakah Anda yakin ingin menghapus Akun ini?</p>
         <div style="display: flex; gap: 15px; justify-content: center;">
+            <!-- Fungsi: Tombol Batal untuk menutup modal konfirmasi -->
             <button onclick="closeDeleteModal()" 
                     style="background: #6c757d; color: white; padding: 10px 25px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
                 Batal
             </button>
+            <!-- Fungsi: Form submit untuk proses penghapusan data -->
             <form id="deleteForm" method="POST" style="display: inline;">
                 @csrf
                 @method('DELETE')
@@ -226,7 +244,7 @@
     </div>
 </div>
 
-{{-- ==================== MODALS OTP (DARI PARTIALS) ==================== --}}
+<!-- Fungsi: Include partials untuk modal-modal OTP (request dan verifikasi) -->
 @include('admin.account.partials.modals')
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -234,17 +252,18 @@
 
 @push('scripts')
 <script>
-// ==================== GLOBAL VARIABLES ====================
+// Fungsi: Deklarasi variabel global untuk menyimpan state action, ID, dan email saat ini
 let currentAction = null;
 let currentId = null;
 let currentEmail = null;
 
-// ==================== MODAL HELPERS ====================
+// Fungsi: Helper untuk membuka modal dengan menambahkan display flex
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) modal.style.display = 'flex';
 }
 
+// Fungsi: Helper untuk menutup modal dan reset form OTP jika ada
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) modal.style.display = 'none';
@@ -256,18 +275,20 @@ function closeModal(modalId) {
     }
 }
 
+// Fungsi: Event listener untuk menutup modal ketika klik di luar area modal
 window.onclick = function(event) {
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
     }
 }
 
-// ==================== ADMIN (WITH OTP) ====================
+// Fungsi: Menampilkan form admin yang tersembunyi
 function showAdminForm() {
     const section = document.getElementById('adminFormSection');
     if (section) section.style.display = 'block';
 }
 
+// Fungsi: Menyimpan action, ID, dan email ke variabel global lalu membuka modal request OTP
 function requestOTPForAction(action, id, email) {
     currentAction = action;
     currentId = id;
@@ -277,6 +298,7 @@ function requestOTPForAction(action, id, email) {
     openModal('otpRequestModal');
 }
 
+// Fungsi: Mengirim request OTP ke backend via AJAX untuk email target
 function sendOTPToTarget() {
     fetch('{{ route("admin.akun.request-otp") }}', {
         method: 'POST',
@@ -304,6 +326,7 @@ function sendOTPToTarget() {
     });
 }
 
+// Fungsi: Memverifikasi kode OTP yang dimasukkan user ke backend
 function verifyOTP() {
     const otpInput = document.getElementById('otpInput');
     const otp = otpInput ? otpInput.value : '';
@@ -342,6 +365,7 @@ function verifyOTP() {
     });
 }
 
+// Fungsi: Mengeksekusi action admin (edit atau delete) setelah OTP terverifikasi
 function executeAdminAction() {
     if (currentAction === 'edit_admin') {
         loadAdminForEdit(currentId);
@@ -350,6 +374,7 @@ function executeAdminAction() {
     }
 }
 
+// Fungsi: Memuat data admin untuk diedit dan mengisi form dengan data existing
 function loadAdminForEdit(id) {
     showAdminForm();
     const formId = document.getElementById('adminFormId');
@@ -387,6 +412,7 @@ function loadAdminForEdit(id) {
         .catch(e => console.error('Load admin error:', e));
 }
 
+// Fungsi: Menghapus akun admin dengan konfirmasi dan submit form DELETE
 function deleteAdmin(id) {
     if (!confirm('Yakin hapus akun ini?')) return;
     
@@ -398,9 +424,9 @@ function deleteAdmin(id) {
     form.submit();
 }
 
-// Fungsi untuk Konfirmasi Hapus dengan Popup (SweetAlert2)
+// Fungsi: Konfirmasi hapus petugas dengan SweetAlert2 dan AJAX DELETE request
 function confirmDelete(id) {
-    // 1. Tampilkan Popup Konfirmasi
+    // Fungsi: Tampilkan Popup Konfirmasi
     Swal.fire({
         title: 'Apakah Anda yakin?',
         text: "Data petugas akan dihapus permanen!",
@@ -412,9 +438,9 @@ function confirmDelete(id) {
         cancelButtonText: 'Batal',
         reverseButtons: true
     }).then((result) => {
-        // 2. Jika user klik "Ya, Hapus!"
+        // Fungsi: Jika user klik "Ya, Hapus!"
         if (result.isConfirmed) {
-            // Kirim permintaan hapus (AJAX)
+            // Fungsi: Kirim permintaan hapus (AJAX)
             fetch(`/admin/petugas/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -426,17 +452,17 @@ function confirmDelete(id) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Jika berhasil dihapus
+                    // Fungsi: Jika berhasil dihapus
                     Swal.fire({
                         title: 'Terhapus!',
                         text: data.message,
                         icon: 'success',
                         confirmButtonColor: '#20A726'
                     }).then(() => {
-                        location.reload(); // Refresh halaman otomatis
+                        location.reload(); // Fungsi: Refresh halaman otomatis
                     });
                 } else {
-                    // Jika gagal
+                    // Fungsi: Jika gagal
                     Swal.fire({
                         title: 'Gagal!',
                         text: data.message,
@@ -452,6 +478,7 @@ function confirmDelete(id) {
     });
 }
 
+// Fungsi: Menutup modal konfirmasi hapus
 function closeDeleteModal() {
     const modal = document.getElementById('deleteModal');
     if (modal) {
@@ -459,7 +486,7 @@ function closeDeleteModal() {
     }
 }
 
-// ==================== MODAL PETUGAS (TAMBAH/EDIT) ====================
+// Fungsi: Membuka modal petugas untuk mode tambah atau edit dengan mengisi data jika edit
 function openPetugasModal(mode, data = null) {
     const modal = document.getElementById('modalPetugas');
     const title = document.getElementById('modalPetugasTitle');
@@ -476,7 +503,7 @@ function openPetugasModal(mode, data = null) {
     document.body.style.overflow = 'hidden';
     
     if (mode === 'edit' && data) {
-        // Mode Edit
+        // Fungsi: Mode Edit
         if (title) title.textContent = 'Edit Akun Petugas';
         if (btnSimpan) btnSimpan.textContent = 'Update';
         if (passHint) passHint.textContent = '(Kosongkan jika tidak ingin mengubah)';
@@ -498,7 +525,7 @@ function openPetugasModal(mode, data = null) {
             passwordPetugas.required = false;
         }
     } else {
-        // Mode Tambah
+        // Fungsi: Mode Tambah
         if (title) title.textContent = 'Tambah Akun Petugas';
         if (btnSimpan) btnSimpan.textContent = 'Simpan';
         if (passHint) passHint.textContent = '';
@@ -514,6 +541,7 @@ function openPetugasModal(mode, data = null) {
     }
 }
 
+// Fungsi: Menutup modal petugas dan reset form
 function closeModalPetugas() {
     const modal = document.getElementById('modalPetugas');
     if (modal) {
@@ -525,9 +553,9 @@ function closeModalPetugas() {
     if (form) form.reset();
 }
 
-// ==================== EVENT LISTENERS & SUBMIT HANDLER ====================
+// Fungsi: Event listeners dan submit handler untuk modal petugas
 document.addEventListener('DOMContentLoaded', function() {
-    // --- Event Listeners untuk Modal Petugas ---
+    // Fungsi: Event Listeners untuk Modal Petugas
     const btnClose = document.getElementById('btnClosePetugasModal');
     const btnBatal = document.getElementById('btnBatalPetugas');
     const modal = document.getElementById('modalPetugas');
@@ -540,13 +568,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Fungsi: Menutup modal dengan tombol Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
             closeModalPetugas();
         }
     });
     
-    // --- Handle Submit Form Petugas (AJAX) ---
+    // Fungsi: Handle Submit Form Petugas (AJAX)
     const form = document.getElementById('formPetugas');
     if (form) {
         form.addEventListener('submit', async (e) => {
@@ -564,14 +593,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const formData = new FormData(form);
 
-        // --- PERBAIKAN MULAI DI SINI ---
+        // Fungsi: PERBAIKAN MULAI DI SINI
         const baseUrl = '{{ url("admin/petugas") }}';
         let url = baseUrl;
 
-        // Kita paksa method pengiriman selalu 'POST' agar FormData terbaca stabil
+        // Fungsi: Kita paksa method pengiriman selalu 'POST' agar FormData terbaca stabil
         if (isEdit) {
             url = baseUrl + '/' + encodeURIComponent(petugasId.value);
-            // Method Spoofing: Laravel akan menganggap ini request PUT karena field ini
+            // Fungsi: Method Spoofing: Laravel akan menganggap ini request PUT karena field ini
             formData.append('_method', 'PUT'); 
         }
         
@@ -632,11 +661,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
-// 🔍 Search Akun: Filter by Nama & Email (Client-side)
+// Fungsi: Search Akun: Filter by Nama & Email (Client-side)
 document.getElementById('searchAkun')?.addEventListener('input', function(e) {
     const keyword = e.target.value.toLowerCase().trim();
     
-    // Filter Cards (Akun Utama & Kedua)
+    // Fungsi: Filter Cards (Akun Utama & Kedua)
     const cards = document.querySelectorAll('.account-card');
     cards.forEach(card => {
         const spans = card.querySelectorAll('span');
@@ -648,7 +677,7 @@ document.getElementById('searchAkun')?.addEventListener('input', function(e) {
         card.style.display = found ? '' : 'none';
     });
     
-    // Filter Table Rows (Petugas)
+    // Fungsi: Filter Table Rows (Petugas)
     const rows = document.querySelectorAll('.petugas-table-container tbody tr');
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();

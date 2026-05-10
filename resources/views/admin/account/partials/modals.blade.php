@@ -1,4 +1,4 @@
-{{-- MODAL: Batas Akun --}}
+<!-- Fungsi: Menampilkan notifikasi ketika jumlah akun admin sudah mencapai batas maksimal 3 -->
 <div class="modal" id="limitModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -15,7 +15,7 @@
     </div>
 </div>
 
-{{-- MODAL: Kirim OTP --}}
+<!-- Fungsi: Konfirmasi sebelum sistem mengirim kode OTP ke email target -->
 <div class="modal" id="otpRequestModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -24,10 +24,12 @@
         </div>
         <div class="modal-body">
             <p>Kode OTP akan dikirim ke email berikut:</p>
+            <!-- Fungsi: Menampilkan alamat email tujuan pengiriman OTP -->
             <div style="background:#f0f9f0; padding:10px; border-radius:6px; font-weight:bold; color:#20A726;"
                  id="targetEmailDisplay">
                 email@domain.com
             </div>
+            <!-- Fungsi: Memicu pengiriman kode OTP ke backend via AJAX -->
             <button type="button" class="btn-small btn-otp" onclick="sendOTPToTarget()" style="margin-top:15px;">
                 Kirim Kode OTP Sekarang
             </button>
@@ -36,7 +38,7 @@
     </div>
 </div>
 
-{{-- MODAL: Verifikasi OTP --}}
+<!-- Fungsi: Form input untuk memverifikasi kode OTP yang telah dikirim -->
 <div class="modal" id="otpVerifyModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -46,33 +48,35 @@
         <div class="modal-body">
             <p>Masukkan kode 4 digit yang dikirim ke <span id="otpTargetEmail" style="font-weight:bold;">email@domain.com</span>.</p>
             <label for="otpInput">Kode OTP</label>
+            <!-- Fungsi: Input kode OTP dengan filter hanya angka dan maksimal 4 digit -->
             <input type="text" id="otpInput" maxlength="4" placeholder="1234"
                    oninput="this.value=this.value.replace(/[^0-9]/g,'')">
             <div id="otpVerifyStatus"></div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn-small btn-cancel" onclick="closeModal('otpVerifyModal')">Batal</button>
+            <!-- Fungsi: Memicu proses verifikasi kode OTP ke backend -->
             <button type="button" class="btn-small btn-otp" onclick="verifyOTP()">Verifikasi</button>
         </div>
     </div>
 </div>
 
 
-
-{{-- =================================================================== --}}
-{{-- MODAL: Tambah/Edit Akun Petugas (Popup Style Penjemputan)          --}}
-{{-- =================================================================== --}}
+<!-- Fungsi: Modal form untuk menambah atau mengedit data akun petugas -->
 <div class="modal-overlay" id="modalPetugas">
     <div class="modal-container">
         <!-- Header -->
         <div class="modal-header">
+            <!-- Fungsi: Menampilkan judul dinamis (Tambah/Edit) sesuai konteks operasi -->
             <h3 id="modalPetugasTitle">Tambah Akun Petugas</h3>
             <button type="button" class="modal-close" id="btnClosePetugasModal">&times;</button>
         </div>
 
         <!-- Form Body -->
         <form id="formPetugas" class="modal-body">
+            <!-- Fungsi: Penanda apakah form dalam mode tambah (kosong) atau edit (terisi ID) -->
             <input type="hidden" id="petugasId" name="id">
+            <!-- Fungsi: Token keamanan Laravel untuk mencegah serangan CSRF -->
             @csrf
             
             <div class="form-group">
@@ -92,6 +96,7 @@
 
             <div class="form-group">
                 <label for="levelPetugas">Petugas</label>
+                <!-- Fungsi: Dropdown pilihan role petugas yang dikelompokkan berdasarkan wilayah -->
                 <select id="levelPetugas" name="level" required>
                     <option value="">-- Pilih Petugas --</option>
                     <option value="petugas_dlh">Petugas DLH</option>
@@ -133,6 +138,7 @@
             </div>
 
             <div class="form-group">
+                <!-- Fungsi: Input kata sandi, wajib saat tambah baru dan opsional saat edit -->
                 <label for="passwordPetugas">Kata Sandi <span id="passHint" style="font-weight:400; color:#6c757d; font-size:12px;"></span></label>
                 <input type="password" id="passwordPetugas" name="password" placeholder="••••••••">
             </div>
@@ -141,6 +147,7 @@
         <!-- Footer -->
         <div class="modal-footer">
             <button type="button" class="btn-secondary" id="btnBatalPetugas">Batal</button>
+            <!-- Fungsi: Submit form untuk menyimpan data ke backend -->
             <button type="submit" form="formPetugas" class="btn-primary" id="btnSimpanPetugas">Simpan</button>
         </div>
     </div>
