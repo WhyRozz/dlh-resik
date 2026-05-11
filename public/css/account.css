@@ -3,17 +3,21 @@
 .modal {
     display: none;
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
     z-index: 9999;
     justify-content: center;
     align-items: center;
 }
+
 .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0, 0, 0, 0.45);
     z-index: 1000;
     justify-content: center;
     align-items: center;
@@ -281,7 +285,7 @@ hr[style*="margin: 40px"] {
     border-radius: 12px;
     width: 90%;
     max-width: 480px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
     overflow: hidden;
     transform: scale(0.95);
     transition: transform 0.2s ease;
@@ -490,8 +494,8 @@ hr[style*="margin: 40px"] {
     }
 
     .modal-container {
-    max-width: 450px;
-}
+        max-width: 450px;
+    }
 
     .modal-header h3 {
         font-size: 15px;
@@ -513,16 +517,16 @@ hr[style*="margin: 40px"] {
     .modal-container {
         width: 95%;
     }
-    
+
     .modal-footer {
         flex-direction: column;
     }
-    
+
     .btn-secondary,
     .btn-primary {
         width: 100%;
     }
-    
+
     .form-group input,
     .form-group select {
         font-size: 13px;
@@ -538,7 +542,7 @@ hr[style*="margin: 40px"] {
     background: white;
     border-radius: 10px;
     padding: 30px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     margin-top: 20px;
 }
 
@@ -640,7 +644,7 @@ hr[style*="margin: 40px"] {
     background: white;
     border-radius: 10px;
     padding: 30px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     margin-top: 30px;
 }
 
@@ -686,6 +690,7 @@ hr[style*="margin: 40px"] {
     color: #2e8b57;
     background: #f0f9f0;
 }
+
 .btn-icon.btn-edit:hover {
     background: #2e8b57;
     color: white;
@@ -695,6 +700,7 @@ hr[style*="margin: 40px"] {
     color: #dc3545;
     background: #fff0f0;
 }
+
 .btn-icon.btn-delete:hover {
     background: #dc3545;
     color: white;
@@ -705,22 +711,22 @@ hr[style*="margin: 40px"] {
     .petugas-form-section {
         padding: 20px;
     }
-    
+
     .form-actions {
         flex-direction: column;
     }
-    
+
     .btn-batal,
     .btn-tambah {
         width: 100%;
     }
-    
+
     .data-table th,
     .data-table td {
         padding: 10px 8px;
         font-size: 13px;
     }
-    
+
     .actions {
         flex-direction: column;
         gap: 4px;
@@ -728,11 +734,12 @@ hr[style*="margin: 40px"] {
 }
 
 @media (max-width: 480px) {
+
     .petugas-form-section h3,
     .petugas-list-section h3 {
         font-size: 16px;
     }
-    
+
     .form-row .form-control {
         padding: 10px 12px;
         font-size: 13px;
@@ -747,16 +754,19 @@ hr[style*="margin: 40px"] {
     width: 100%;
     justify-content: flex-end;
     max-width: 400px;
-    margin-bottom: 80px !important;  
-    margin-left: auto;    /* Push ke kanan */
+    margin-bottom: 80px !important;
+    margin-left: auto;
+    /* Push ke kanan */
     margin-right: 100px;
 }
 
 .search-input-akun {
     width: 100%;
-    padding: 12px 20px 12px 45px; /* Kiri besar untuk icon */
+    padding: 12px 20px 12px 45px;
+    /* Kiri besar untuk icon */
     border: 2px solid #eef2f5;
-    border-radius: 50px; /* Bulat penuh */
+    border-radius: 50px;
+    /* Bulat penuh */
     font-size: 14px;
     background: #f8f9fa;
     transition: all 0.3s ease;
@@ -766,7 +776,8 @@ hr[style*="margin: 40px"] {
 .search-input-akun:focus {
     border-color: #2e8b57;
     background: #fff;
-    box-shadow: 0 0 0 4px rgba(46, 139, 87, 0.15); /* Efek glow */
+    box-shadow: 0 0 0 4px rgba(46, 139, 87, 0.15);
+    /* Efek glow */
 }
 
 .search-icon {
@@ -799,13 +810,20 @@ hr[style*="margin: 40px"] {
     border-radius: 16px;
     width: 90%;
     max-width: 420px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: slideIn 0.3s ease;
 }
 
 @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-30px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 #otpRequestModal .modal-header,
@@ -826,7 +844,7 @@ hr[style*="margin: 40px"] {
 }
 
 .close-modal {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     border: none;
     color: white;
     width: 30px;
@@ -840,7 +858,7 @@ hr[style*="margin: 40px"] {
 }
 
 .close-modal:hover {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.3);
 }
 
 #otpRequestModal .modal-body,
@@ -879,7 +897,7 @@ hr[style*="margin: 40px"] {
     outline: none;
     border-color: #20A726;
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(32,167,38,0.1);
+    box-shadow: 0 0 0 3px rgba(32, 167, 38, 0.1);
 }
 
 .btn-otp {
@@ -919,4 +937,85 @@ hr[style*="margin: 40px"] {
 
 .btn-cancel:hover {
     background: #dee2e6;
+}
+
+/* =========================================
+   FIX: MODAL PETUGAS HEADER
+   (Khusus untuk #modalPetugas)
+   ========================================= */
+
+/* 1. Header Polos Putih - Judul di tengah, X di kanan */
+#modalPetugas .modal-header {
+    background: #ffffff; /* ✅ Putih polos */
+    color: #333333; /* ✅ Abu gelap untuk teks */
+    padding: 20px 25px 18px 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    border-bottom: 2px solid #e9ecef; /* ✅ Garis bawah tipis untuk separator */
+}
+
+#modalPetugas .modal-header h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2d6a4f; /* ✅ Hijau tua untuk judul */
+    text-align: center;
+    flex: 1;
+}
+
+#modalPetugas .modal-close {
+    background: #e9ecef; /* ✅ Abu terang untuk background X */
+    border: none;
+    color: #6c757d; /* ✅ Abu untuk icon X */
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    
+    transition: all 0.2s;
+}
+
+#modalPetugas .modal-close:hover {
+    background: #dee2e6; /* ✅ Abu lebih gelap saat hover */
+    color: #dc3545; /* ✅ Merah saat hover */
+    transform: translateY(-50%) rotate(90deg);
+}
+
+/* 2. Perbaiki Tombol Close (X): Pindah ke Kanan */
+#modalPetugas .modal-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* ✅ POSISI BARU: Kanan Atas */
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    transition: all 0.2s;
+}
+
+#modalPetugas .modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-50%) rotate(90deg);
 }

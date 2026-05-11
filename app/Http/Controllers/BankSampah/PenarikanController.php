@@ -19,42 +19,39 @@ class PenarikanController extends Controller
      */
 
     public function index(Request $request)  // ✅ Pastikan ada $request
-{
-    // ✅ LANGKAH 1: Ubah jadi $query dulu (JANGAN langsung paginate)
-    $query = Penarikan::with(['masyarakat', 'pns']);
-    
-    // ✅ LANGKAH 2: ➕ TAMBAH FILTER DI SINI (setelah $query, sebelum paginate)
-    if ($request->filled('bulan')) {
-        $query->whereMonth('tanggal_penarikan', $request->bulan);
-    }
-    if ($request->filled('tahun')) {
-        $query->whereYear('tanggal_penarikan', $request->tahun);
-    }
-    if ($request->filled('status')) {
-        $query->where('status', $request->status);
-    }
-    
-    // ✅ LANGKAH 3: Baru paginate setelah filter
-    $penarikans = $query->orderBy('tanggal_penarikan', 'desc')->paginate(15);
+    {
+        // ✅ LANGKAH 1: Ubah jadi $query dulu (JANGAN langsung paginate)
+        $query = Penarikan::with(['masyarakat', 'pns']);
 
-    // ✅ LANGKAH 4: ➕ Ambil tahun list (sebelum return)
-    $tahunList = Penarikan::selectRaw('YEAR(tanggal_penarikan) as tahun')
-        ->distinct()
-        ->orderBy('tahun', 'desc')
-        ->pluck('tahun');
-
-    // ✅(UNTUK NAMA USER) 
-    foreach ($penarikans as $penarikan) {
-        if ($penarikan->id_masyarakat) {
-            $penarikan->nama_user = $penarikan->masyarakat->nama ?? 'Unknown';
-        } else {
-            $penarikan->nama_user = $penarikan->pns->nama ?? 'Unknown';
+        // ✅ LANGKAH 2: ➕ TAMBAH FILTER DI SINI (setelah $query, sebelum paginate)
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal_penarikan', $request->bulan);
         }
-    }    
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal_penarikan', $request->tahun);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
 
-    // ✅ LANGKAH 5: ➕ Tambah 'tahunList' di compact
-    return view('admin.bank-sampah.penarikan.index', compact('penarikans', 'tahunList'));
-}
+        // ✅ LANGKAH 3: Baru paginate setelah filter
+        $penarikans = $query->orderBy('tanggal_penarikan', 'desc')->paginate(15);
+
+        // ✅ LANGKAH 4: ➕ Ambil tahun list (sebelum return)
+        $tahunList = collect(range(date('Y') - 5, date('Y') + 5));
+
+        // ✅(UNTUK NAMA USER) 
+        foreach ($penarikans as $penarikan) {
+            if ($penarikan->id_masyarakat) {
+                $penarikan->nama_user = $penarikan->masyarakat->nama ?? 'Unknown';
+            } else {
+                $penarikan->nama_user = $penarikan->pns->nama ?? 'Unknown';
+            }
+        }
+
+        // ✅ LANGKAH 5: ➕ Tambah 'tahunList' di compact
+        return view('admin.bank-sampah.penarikan.index', compact('penarikans', 'tahunList'));
+    }
 
     /**
      * User ajukan penarikan (Masyarakat/PNS)
@@ -116,21 +113,21 @@ class PenarikanController extends Controller
     /**
      * Detail penarikan (AJAX)
      */
-public function show($id)
-{
-    $penarikan = Penarikan::with(['masyarakat', 'pns'])->findOrFail($id);
-    
-    $userName = $penarikan->masyarakat->nama ?? $penarikan->pns->nama ?? 'Unknown';
+    public function show($id)
+    {
+        $penarikan = Penarikan::with(['masyarakat', 'pns'])->findOrFail($id);
 
-    return response()->json(
-        array_merge($penarikan->toArray(), ['nama_user' => $userName])
-    );
-}   
+        $userName = $penarikan->masyarakat->nama ?? $penarikan->pns->nama ?? 'Unknown';
+
+        return response()->json(
+            array_merge($penarikan->toArray(), ['nama_user' => $userName])
+        );
+    }
 
     /**
      * Admin update status
      */
-     public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, $id)
     {
         $request->validate([
             'alasan_penolakan' => 'nullable|string|max:255',
@@ -201,7 +198,7 @@ public function show($id)
     public function export(Request $request)
     {
         $filter = [];
-        
+
         if ($request->filled('bulan')) {
             $filter['bulan'] = $request->bulan;
         }
@@ -213,7 +210,7 @@ public function show($id)
         }
 
         $filename = 'Data_Penarikan_' . date('Y-m-d_His') . '.xlsx';
-        
+
         return Excel::download(new PenarikanExport($filter), $filename);
     } // ← ✅ export() DITUTUP DI SINI
 

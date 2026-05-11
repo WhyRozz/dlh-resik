@@ -61,15 +61,17 @@ class SetorController extends Controller
 
         $jenisSampah = JenisSampah::all();
 
+        $tahunList = collect(range(date('Y') - 5, date('Y') + 5));
+
         // AJAX Response
         if ($request->ajax()) {
             return response()->json([
-                'table' => view('admin.bank-sampah.setor-sampah.index', compact('setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah'))->render()
+                'table' => view('admin.bank-sampah.setor-sampah.index', compact('setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah', 'tahunList'))->render()
             ]);
         }
 
         return view('admin.bank-sampah.setor-sampah.index', compact(
-            'setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah'
+            'setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah', 'tahunList'
         ));
     }
 

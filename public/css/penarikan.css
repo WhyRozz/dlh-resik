@@ -22,7 +22,7 @@
     --yellow: #fbbf24;
     --yellow-light: #fef3c7;
     --radius: 8px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
 }
 
@@ -32,10 +32,13 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     /* --- PERUBAHAN DISINI --- */
-    margin-top: -50px;      /* Tarik ke atas agar sejajar logo */
-    padding-top: 5px;       /* Jarak sangat tipis agar tidak nempel batas */
+    margin-top: -50px;
+    /* Tarik ke atas agar sejajar logo */
+    padding-top: 5px;
+    /* Jarak sangat tipis agar tidak nempel batas */
     padding-bottom: 2rem;
-    margin-bottom: 0;       /* Hapus jarak bawah */
+    margin-bottom: 0;
+    /* Hapus jarak bawah */
 }
 
 /* 🔹 HEADER WRAPPER - Judul + Filter + Search dalam 1 baris */
@@ -117,8 +120,20 @@
     background: var(--dark-green);
 }
 
-.btn-reset {
-    display: none;
+/* ✅ Reset Button - Samakan ukuran dengan Filter */
+.btn-filter.reset {
+    background: #6c757d;
+    height: 40px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+.btn-filter.reset:hover {
+    background: #5a6268;
 }
 
 /* Search Box - Compact Inline */
@@ -174,11 +189,12 @@
 }
 
 .btn-cetak {
-    background: #1b5e20;;
+    background: #1b5e20;
+    ;
     color: white;
     border: none;
     padding: 0.6rem 1.2rem;
-    border-radius: 25px;   
+    border-radius: 25px;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -201,7 +217,7 @@
     background: var(--primary-green);
     border-radius: 99px;
     margin-bottom: 1rem;
-    margin-top: 0.5rem; 
+    margin-top: 0.5rem;
 }
 
 /* Table Styles */
@@ -218,7 +234,7 @@
 }
 
 .data-table thead {
-    background: var(--gray-100);
+    background: #e6f2e6;
 }
 
 .data-table thead th {
@@ -531,16 +547,21 @@
 }
 
 .icon-excel {
-    width: 25px;           /* Sesuaikan ukuran yang kamu mau */
+    width: 25px;
+    /* Sesuaikan ukuran yang kamu mau */
     height: 25px;
-    object-fit: contain;   /* Agar gambar tidak gepeng */
+    object-fit: contain;
+    /* Agar gambar tidak gepeng */
     display: block;
 }
 
 .btn-export img {
-    width: 25px;        /* Lebar icon */
-    height: 25px;       /* Tinggi icon */
-    object-fit: contain; /* Agar tidak gepeng */
+    width: 25px;
+    /* Lebar icon */
+    height: 25px;
+    /* Tinggi icon */
+    object-fit: contain;
+    /* Agar tidak gepeng */
 }
 
 .btn-secondary {
@@ -563,13 +584,25 @@
 
 /* Animations */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* Responsive */
@@ -584,33 +617,33 @@
         flex-wrap: wrap;
         gap: 1rem;
     }
-    
+
     .filter-section {
         order: 3;
         width: 100%;
         margin-top: 0.5rem;
     }
-    
+
     .filter-group {
         flex-wrap: wrap;
         justify-content: center;
     }
-    
+
     .search-wrapper {
         width: 220px;
     }
 }
 
 @media (max-width: 768px) {
-    .page-container { 
-        padding: 1rem; 
+    .page-container {
+        padding: 1rem;
     }
-    
+
     .header-wrapper {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .page-title-wrapper,
     .filter-section,
     .top-search,
@@ -618,53 +651,54 @@
         width: 100%;
         justify-content: center;
     }
-    
+
     .search-wrapper {
         width: 100%;
         max-width: none;
     }
-    
+
     .filter-group {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .filter-select,
     .btn-filter,
     .btn-cetak {
         width: 100%;
         justify-content: center;
     }
-    
-    .data-table { 
-        font-size: 0.8rem; 
+
+    .data-table {
+        font-size: 0.8rem;
     }
-    
+
     .data-table thead th,
-    .data-table tbody td { 
-        padding: 0.75rem 0.5rem; 
+    .data-table tbody td {
+        padding: 0.75rem 0.5rem;
     }
-    
-    .action-buttons { 
-        flex-direction: column; 
+
+    .action-buttons {
+        flex-direction: column;
     }
 }
 
 /* Print Styles */
 @media print {
+
     .top-search,
     .btn-cetak,
     .btn-action,
     .filter-section {
         display: none !important;
     }
-    
+
     .page-container {
         box-shadow: none;
         padding: 0;
     }
-    
-    .data-table { 
-        font-size: 0.8rem; 
+
+    .data-table {
+        font-size: 0.8rem;
     }
 }
