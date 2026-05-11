@@ -42,7 +42,7 @@ Route::post('/profile', [ProfileController::class, 'update']);
 Route::post('/cari-pengguna', [SetorController::class, 'cariPengguna']);
 
 Route::post('/cari-pengguna', [SetorController::class, 'cariPengguna']);
-Route::post('/transaksi-setor', [SetorController::class, 'store']);
+Route::post('/transaksi-setor', [app\Http\Controllers\Api\SetorController::class, 'store']);
 Route::get('/riwayat-setor', [SetorController::class, 'riwayatSetor']);
 // Penjemputan
 Route::post('/penjemputan/store', [PenjemputanController::class, 'store']);
@@ -84,7 +84,6 @@ Route::get('/get-saldo', [AuthController::class, 'getSaldo']);
 Route::post('/penarikan', [PenarikanController::class, 'store']);
 Route::get('/penarikan', [PenarikanController::class, 'index']);
 
-// Route::get('/riwayat-setor', [SetorController::class, 'index']);
 
 Route::get('/tps', [TpsController::class, 'index']);           // List semua TPS
 Route::get('/tps/{id}', [TpsController::class, 'show']);       // Detail TPS by ID

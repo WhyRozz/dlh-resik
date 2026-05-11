@@ -44,7 +44,7 @@
                     };
 
                     $isEditable = ($status === 'Diproses');
-                    $fotoUrl = $foto ? asset('storage/uploads/' . $foto) : 'https://via.placeholder.com/300x200?text=Tidak+Ada+Foto';
+                    $fotoUrl = $foto ? asset('storage/' . $foto) : 'https://via.placeholder.com/300x200?text=Tidak+Ada+Foto';
                 @endphp
 
                 {{-- Row Utama --}}

@@ -32,9 +32,9 @@ class PenjemputanController extends Controller
         $affected = DB::table($this->table)
             ->where('id', $id)
             ->where('status', 'diproses') // Cegah approve ulang
-            ->update(['status' => 'berhasil']);
+            ->update(['status' => 'disetujui']);
 
-        if (!$affected) {
+        if (!$affected) {   
             return redirect()->back()->with('error', 'Data sudah diproses atau tidak ditemukan.');
         }
         return redirect()->back()->with('success', 'Penjemputan berhasil disetujui.');
