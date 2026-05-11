@@ -42,7 +42,7 @@ Route::post('/profile', [ProfileController::class, 'update']);
 Route::post('/cari-pengguna', [SetorController::class, 'cariPengguna']);
 
 Route::post('/cari-pengguna', [SetorController::class, 'cariPengguna']);
-Route::post('/transaksi-setor', [app\Http\Controllers\Api\SetorController::class, 'store']);
+Route::post('/transaksi-setor', [App\Http\Controllers\Api\SetorController::class, 'store']);
 Route::get('/riwayat-setor', [SetorController::class, 'riwayatSetor']);
 // Penjemputan
 Route::post('/penjemputan/store', [PenjemputanController::class, 'store']);

@@ -512,7 +512,7 @@ class AuthController extends Controller
                 ], 404);
             }
 
-            // ✅ HITUNG total_setoran TANPA filter status (karena kolom tidak ada)
+            // ✅ FIX: Hitung total_setoran HANYA yang sudah dikonfirmasi
             $totalSetoran = \App\Models\TransaksiSetor::where(function ($query) use ($tipe, $userId) {
                 if ($tipe === 'masyarakat') {
                     $query->where('id_masyarakat', $userId);
@@ -520,7 +520,8 @@ class AuthController extends Controller
                     $query->where('id_pns', $userId);
                 }
             })
-                // ✅ TIDAK ADA ->where('status', 'selesai')
+                ->whereNotNull('tanggal_koreksi')      // ✅ Hanya yang sudah dikonfirmasi
+                ->where('status_transaksi', '!=', 'dibatalkan')  // ✅ Kecuali yang dibatalkan
                 ->sum('berat');
 
             // ✅ RETURN JSON
