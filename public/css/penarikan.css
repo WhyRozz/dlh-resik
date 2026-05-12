@@ -702,3 +702,75 @@
         font-size: 0.8rem;
     }
 }
+
+
+/* Hapus bullet points pada pagination */
+.pagination-container ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pagination-container li {
+    display: inline-block;
+}
+
+/* Style untuk link pagination */
+.pagination-container a,
+.pagination-container span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--gray-600);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+/* Hover effect */
+.pagination-container a:hover {
+    background: var(--light-green);
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+}
+
+/* Active/current page */
+.pagination-container .active span {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+    color: white;
+}
+
+/* Disabled state */
+.pagination-container .disabled span {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Sembunyikan teks "Showing..." yang ganda */
+.pagination-container ~ div {
+    display: none;
+}
+
+
+/* Hide Laravel pagination info text */
+.pagination-container small,
+.pagination+small,
+.pagination~small,
+.pagination-info,
+.text-muted {
+    display: none !important;
+}
+
+
+.pagination-container p,
+.pagination-container .text-sm.text-gray-700 {
+    display: none !important;
+}

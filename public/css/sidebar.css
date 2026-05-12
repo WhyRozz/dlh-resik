@@ -5,13 +5,17 @@
     --sidebar-width: 260px;
     --sidebar-bg: #ffffff;
     --sidebar-border: #e5e7eb;
-    --primary-color: #1f2937; /* Warna teks utama (Dark Gray) */
-    --primary-hover: #4EA674; /* Warna Hijau RESIK saat hover */
+    --primary-color: #1f2937;
+    /* Warna teks utama (Dark Gray) */
+    --primary-hover: #4EA674;
+    /* Warna Hijau RESIK saat hover */
     --text-color: #1f2937;
     --text-muted: #6b7280;
     --transition-speed: 0.3s;
-    --active-bg: #ecfdf5; /* Background hijau muda saat aktif */
-    --active-text: #059669; /* Teks hijau tua saat aktif */
+    --active-bg: #ecfdf5;
+    /* Background hijau muda saat aktif */
+    --active-text: #059669;
+    /* Teks hijau tua saat aktif */
 }
 
 /* ========================
@@ -40,11 +44,13 @@
     gap: 12px;
     padding: 20px 15px;
     border-bottom: 1px solid var(--sidebar-border);
-    flex-shrink: 0; /* Agar header tidak mengecil */
+    flex-shrink: 0;
+    /* Agar header tidak mengecil */
 }
 
 .sidebar-header .logo {
-    width: 50px; /* Ukuran logo disesuaikan agar rapi */
+    width: 50px;
+    /* Ukuran logo disesuaikan agar rapi */
     height: 50px;
     object-fit: contain;
     margin: 0;
@@ -64,7 +70,8 @@
     font-size: 24px;
     color: var(--text-muted);
     cursor: pointer;
-    display: none; /* Muncul hanya di mobile */
+    display: none;
+    /* Muncul hanya di mobile */
     padding: 4px;
 }
 
@@ -72,10 +79,12 @@
    NAVIGASI (MENU)
    ======================== */
 .sidebar-nav {
-    flex: 1; /* Mengisi ruang kosong */
+    flex: 1;
+    /* Mengisi ruang kosong */
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Agar scroll di-handle oleh .nav-list */
+    overflow: hidden;
+    /* Agar scroll di-handle oleh .nav-list */
     padding: 10px 0;
 }
 
@@ -85,7 +94,8 @@
     padding: 0 12px;
     margin: 0;
     list-style: none;
-    scrollbar-width: thin; /* Firefox */
+    scrollbar-width: thin;
+    /* Firefox */
     scrollbar-color: #cbd5e1 transparent;
 }
 
@@ -93,9 +103,11 @@
 .nav-list::-webkit-scrollbar {
     width: 6px;
 }
+
 .nav-list::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .nav-list::-webkit-scrollbar-thumb {
     background-color: #cbd5e1;
     border-radius: 20px;
@@ -122,7 +134,8 @@
 
 /* Hover Effect */
 .nav-item a:hover {
-    background: #f0fdf4; /* Hijau sangat muda */
+    background: #f0fdf4;
+    /* Hijau sangat muda */
     color: var(--primary-hover);
 }
 
@@ -135,7 +148,7 @@
 }
 
 /* Active State */
-.nav-item.active > a,
+.nav-item.active>a,
 .nav-item.active .dropdown-toggle {
     background: var(--primary-hover);
     color: white;
@@ -145,7 +158,8 @@
 
 .nav-item.active i,
 .nav-item:hover i {
-    color: inherit; /* Mengikuti warna teks */
+    color: inherit;
+    /* Mengikuti warna teks */
 }
 
 /* Icon Default */
@@ -160,6 +174,7 @@
 /* Dropdown Styles */
 .has-dropdown .dropdown-toggle {
     justify-content: space-between;
+
 }
 
 .has-dropdown .arrow {
@@ -182,11 +197,12 @@
 }
 
 .has-dropdown.open .sub-menu {
-    max-height: 500px; /* Cukup besar untuk menampung submenu */
+    max-height: 500px;
+    /* Cukup besar untuk menampung submenu */
 }
 
 .sub-menu a {
-    padding: 10px 16px 10px 20px;
+    padding: 10px 16px 10px 40px;
     font-size: 13px;
     color: var(--text-muted);
     background: transparent;
@@ -199,16 +215,6 @@
     background: #f0fdf4;
 }
 
-/* ========================
-   SIDEBAR FOOTER (LOGOUT)
-   ======================== */
-.sidebar-footer {
-    flex-shrink: 0; /* Agar footer selalu di bawah */
-    padding: 16px;
-    border-top: 1px solid var(--sidebar-border);
-    background: #f9fafb;
-}
-
 .logout-btn {
     width: 100%;
     display: flex;
@@ -216,9 +222,9 @@
     justify-content: center;
     gap: 10px;
     padding: 12px;
-    background: #ffffff;
+    background: transparent;
+    border: none;
     color: #ef4444;
-    border: 1px solid #fee2e2;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
@@ -253,7 +259,8 @@
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
-        box-shadow: none; /* Hilangkan bayangan saat tersembunyi */
+        box-shadow: none;
+        /* Hilangkan bayangan saat tersembunyi */
     }
 
     .sidebar.active {
@@ -262,16 +269,21 @@
     }
 
     .sidebar-close {
-        display: block; /* Tampilkan tombol tutup */
+        display: block;
+        /* Tampilkan tombol tutup */
     }
-    
+
     /* Opsional: Ubah ukuran logo di mobile jika perlu */
     .sidebar-header {
         padding: 15px;
     }
-    
+
     .sidebar-header .logo {
         width: 40px;
         height: 40px;
     }
+}
+
+.has-dropdown .nav-link-text span {
+    margin-left: 10px;
 }

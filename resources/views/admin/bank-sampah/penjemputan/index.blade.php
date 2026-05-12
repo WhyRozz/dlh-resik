@@ -295,7 +295,9 @@
         <table id="penjemputanTable" class="data-table" style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="background: #f8f9fa; border-bottom: 1px solid #e0e0e0;">
-       <th style="padding: 14px 20px 14px 35px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">No</th>
+                    <th
+                        style="padding: 14px 20px 14px 35px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">
+                        No</th>
                     <th style="padding: 14px 20px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">
                         Gambar</th>
                     <th style="padding: 14px 20px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">
@@ -314,7 +316,10 @@
                 @forelse($penjemputans as $index => $item)
                     <tr onclick="showDetail({{ $item->id }})"
                         style="cursor: pointer; border-bottom: 1px solid #f2f2f2;">
-                        <td style="padding: 14px 20px; color: #333;">{{ $index + 1 }}</td>
+                
+                        <td style="padding: 14px 20px; color: #333;">
+                            {{ $penjemputans->firstItem() + $index }}
+                        </td>
                         <td style="padding: 14px 20px;">
                             @if ($item->foto)
                                 <img src="{{ asset('storage/' . $item->foto) }}" alt="Foto Penjemputan"

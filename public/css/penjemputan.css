@@ -866,4 +866,96 @@ table td:nth-child(7) {
         transform: scale(1);
     }
 }
+/* ============================================
+   ✅ PAGINATION (Ambil dari Data Setor)
+   ============================================ */
+.pagination-container {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 15px 20px 0 20px;
+    border-top: 1px solid #e0e0e0;
+}
 
+/* Text info pagination */
+.pagination-container > div:first-child {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+/* Wrapper tombol */
+.pagination {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Tombol Prev/Next/Page */
+.pagination li a,
+.pagination li span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    font-size: 0.875rem;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.pagination li a:hover,
+.pagination li span:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    text-decoration: none;
+}
+
+/* Active page (hijau) */
+.pagination li.active span,
+.pagination li.active a {
+    background: #2e8b57;
+    color: white;
+    border-color: #2e8b57;
+    font-weight: 600;
+}
+
+/* Disabled state */
+.pagination li.disabled span {
+    color: #d1d5db;
+    cursor: not-allowed;
+    background: #f9fafb;
+}
+
+/* Hide Laravel default text */
+.pagination-container small,
+.pagination-container .text-sm,
+.pagination-container p,
+.pagination-container .text-gray-700 {
+    display: none !important;
+}
+
+
+/* Hide Laravel pagination info text */
+.pagination-container small,
+.pagination+small,
+.pagination~small,
+.pagination-info,
+.text-muted {
+    display: none !important;
+}
+
+.pagination-container p,
+.pagination-container .text-sm.text-gray-700 {
+    display: none !important;
+}
