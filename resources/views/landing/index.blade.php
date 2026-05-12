@@ -311,7 +311,6 @@
             z-index: 1000;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             width: 100%;
-            /* ← Tambahkan ini */
         }
 
         .navbar-container {
@@ -500,15 +499,6 @@
         .hero-text {
             /* Background transparan (tidak ada kotak putih) */
             background: transparent;
-            backdrop-filter: blur(0px);
-
-
-            /* Hapus efek card */
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            border: 1px solid (0, 0, 0, 0.3);
-
             /* Posisi & Ukuran */
             max-width: 600px;
             text-align: left;
