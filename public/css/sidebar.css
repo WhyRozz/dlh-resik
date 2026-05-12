@@ -3,11 +3,11 @@
    ========================================= */
 :root {
     --sidebar-width: 260px;
-    --sidebar-bg: #ffffff;
+    --sidebar-bg: url("/assets/background-sidebar.png");
     --sidebar-border: #e5e7eb;
     --primary-color: #1f2937;
     /* Warna teks utama (Dark Gray) */
-    --primary-hover: #4EA674;
+    --primary-hover: #4ea674;
     /* Warna Hijau RESIK saat hover */
     --text-color: #1f2937;
     --text-muted: #6b7280;
@@ -27,13 +27,17 @@
     left: 0;
     width: var(--sidebar-width);
     height: 100vh;
-    background: var(--sidebar-bg);
     border-right: 1px solid var(--sidebar-border);
     display: flex;
     flex-direction: column;
     z-index: 1000;
     transition: transform var(--transition-speed) ease;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    background-image: var(--sidebar-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #f0f7f0;
 }
 
 /* Header Sidebar (Logo) */
@@ -99,6 +103,39 @@
     scrollbar-color: #cbd5e1 transparent;
 }
 
+/* Wrapper agar badge rapi di samping menu */
+.notif-badge-wrapper {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Desain Badge */
+.notif-badge {
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 12px;
+    min-width: 20px;
+    text-align: center;
+    display: inline-block;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+    transition: transform 0.2s;
+}
+.notif-badge:hover {
+    transform: scale(1.1);
+}
+
+/* Agar menu item punya position relative */
+.nav-item {
+    position: relative;
+}
+
 /* Custom Scrollbar untuk Webkit (Chrome/Safari) */
 .nav-list::-webkit-scrollbar {
     width: 6px;
@@ -148,7 +185,7 @@
 }
 
 /* Active State */
-.nav-item.active>a,
+.nav-item.active > a,
 .nav-item.active .dropdown-toggle {
     background: var(--primary-hover);
     color: white;
@@ -174,7 +211,6 @@
 /* Dropdown Styles */
 .has-dropdown .dropdown-toggle {
     justify-content: space-between;
-
 }
 
 .has-dropdown .arrow {
@@ -248,7 +284,9 @@
     z-index: 999;
     opacity: 0;
     visibility: hidden;
-    transition: opacity var(--transition-speed), visibility var(--transition-speed);
+    transition:
+        opacity var(--transition-speed),
+        visibility var(--transition-speed);
 }
 
 .sidebar-overlay.active {
@@ -286,4 +324,166 @@
 
 .has-dropdown .nav-link-text span {
     margin-left: 10px;
+}
+
+/* =========================================
+   NOTIFICATION BADGE & MODAL
+   ========================================= */
+
+/* Badge di menu sidebar */
+.notif-badge-wrapper {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 10;
+}
+
+.notif-badge {
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 12px;
+    min-width: 20px;
+    text-align: center;
+    display: inline-block;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+    transition: transform 0.2s;
+}
+
+.notif-badge:hover {
+    transform: scale(1.1);
+}
+
+.nav-item {
+    position: relative;
+}
+
+/* Modal Overlay & Card */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.notif-modal-card {
+    background: #fff;
+    width: 92%;
+    max-width: 420px;
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: modalSlide 0.3s ease;
+}
+
+@keyframes modalSlide {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.notif-modal-header {
+    background: linear-gradient(135deg, #2e8b57, #3cb371);
+    padding: 16px 20px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notif-modal-header h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.notif-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.notif-modal-body {
+    padding: 15px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.notif-item {
+    padding: 12px;
+    border-radius: 10px;
+    background: #f8faf9;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #2e8b57;
+}
+
+.notif-item:last-child {
+    margin-bottom: 0;
+}
+
+.notif-info strong {
+    color: #333;
+    font-size: 14px;
+    display: block;
+}
+
+.notif-info small {
+    color: #666;
+    font-size: 12px;
+}
+
+.notif-time {
+    font-size: 11px;
+    color: #888;
+    background: #e8f5e9;
+    padding: 3px 8px;
+    border-radius: 8px;
+}
+
+.notif-modal-footer {
+    padding: 12px;
+    text-align: center;
+    border-top: 1px solid #eee;
+}
+
+.btn-see-all {
+    color: #2e8b57;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-size: 13px;
 }

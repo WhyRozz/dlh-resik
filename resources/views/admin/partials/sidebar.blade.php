@@ -25,6 +25,10 @@
                     <!-- Fungsi: Icon menu Laporan -->
                     <img src="{{ asset('assets/icons/laporan_sampah.png') }}" alt="Laporan" class="custom-icon">
                     <span>Laporan Sampah Ilegal</span>
+                    <!-- ✅ Badge Notifikasi -->
+                    <span class="notif-badge-wrapper" onclick="openNotifModal('laporan')" title="Lihat notifikasi">
+                        <span id="badge-laporan" class="notif-badge" style="display:none;">0</span>
+                    </span>
                 </a>
             </li>
 
@@ -44,19 +48,24 @@
                 <ul class="sub-menu">
                     <!-- Fungsi: Sub-menu Data Setor dengan active state -->
                     <li>
-                    <a href="{{ route('admin.bank-sampah.setor.index') }}" 
-                    class="{{ request()->routeIs('admin.bank-sampah.setor.index') ? 'active' : '' }}">
-                        Data Setor
-                    </a>
+                        <a href="{{ route('admin.bank-sampah.setor.index') }}"
+                            class="{{ request()->routeIs('admin.bank-sampah.setor.index') ? 'active' : '' }}">
+                            Data Setor
+                        </a>
                     </li>
                     <!-- Fungsi: Sub-menu Data Penarikan -->
-                    <li><a href="{{ route('admin.bank-sampah.penarikan.index') }}" class="{{ request()->routeIs('admin.bank-sampah.penarikan.index') ? 'active' : '' }}">Data Penarikan</a></li>
+                    <li><a href="{{ route('admin.bank-sampah.penarikan.index') }}" class="{{ request()->routeIs('admin.bank-sampah.penarikan.index') ? 'active' : '' }}">Data Penarikan</a>
+                        <!-- ✅ Badge Notifikasi -->
+                        <span class="notif-badge-wrapper" onclick="openNotifModal('penarikan')" title="Lihat notifikasi">
+                            <span id="badge-penarikan" class="notif-badge" style="display:none;">0</span>
+                        </span>
+                    </li>
                     <!-- Fungsi: Sub-menu Jenis & Harga Sampah -->
                     <li><a href="{{ route('admin.bank-sampah.jenis-sampah.index') }}" class="{{ request()->routeIs('admin.bank-sampah.jenis-sampah.index') ? 'active' : '' }}">Jenis & Harga Sampah</a></li>
                     <!-- Fungsi: Sub-menu Penjemputan dengan wildcard route matching -->
                     <li>
-                        <a href="{{ route('admin.bank-sampah.penjemputan.index') }}" 
-                        class="{{ request()->routeIs('admin.bank-sampah.penjemputan*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.bank-sampah.penjemputan.index') }}"
+                            class="{{ request()->routeIs('admin.bank-sampah.penjemputan*') ? 'active' : '' }}">
                             Penjemputan
                         </a>
                     </li>
@@ -118,16 +127,3 @@
 
 <!-- Fungsi: Overlay transparan untuk mobile yang menutup sidebar saat diklik -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-
-<!-- Fungsi: Styling background sidebar dengan gambar custom -->
-<style>
-    /* Fungsi: Menetapkan background image pada container sidebar utama */
-    .sidebar {
-        background-image: url('{{ asset('assets/background-sidebar.png') }}'); /* Fungsi: Path gambar background sidebar */
-        background-size: cover;      /* Fungsi: Gambar menyesuaikan ukuran sidebar secara proporsional */
-        background-position: center; /* Fungsi: Posisi gambar di tengah container */
-        background-repeat: no-repeat;/* Fungsi: Mencegah gambar background berulang */
-        background-color: #f0f7f0;   /* Fungsi: Warna fallback jika gambar belum termuat */
-    }
-</style>

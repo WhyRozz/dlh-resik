@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PenarikanExport;
+use App\Events\NewWithdrawalRequest;
+use Illuminate\Support\Facades\Log;
 
 class PenarikanController extends Controller
 {
@@ -40,7 +42,7 @@ class PenarikanController extends Controller
         // ✅ LANGKAH 4: ➕ Ambil tahun list (sebelum return)
         $tahunList = collect(range(date('Y') - 5, date('Y') + 5));
 
-        // ✅(UNTUK NAMA USER) 
+        // ✅(UNTUK NAMA USER)
         foreach ($penarikans as $penarikan) {
             if ($penarikan->id_masyarakat) {
                 $penarikan->nama_user = $penarikan->masyarakat->nama ?? 'Unknown';
@@ -90,8 +92,8 @@ class PenarikanController extends Controller
                 $idPns = $user->id_pns;
             }
 
-            // 2. Buat penarikan
-            Penarikan::create([
+            // 2. ✅ BUAT PENARIKAN & SIMPAN KE VARIABLE $penarikan
+            $penarikan = Penarikan::create([
                 'id_masyarakat'     => $idMasyarakat,
                 'id_pns'            => $idPns,
                 'jumlah_uang'       => $jumlah,
@@ -101,7 +103,16 @@ class PenarikanController extends Controller
                 'tanggal_penarikan' => now(),
             ]);
 
+            Log::info('Penarikan created:', ['id' => $penarikan->id_penarikan]);
+
             DB::commit();
+
+            Log::info('About to broadcast event...');
+
+            // 3. ✅ BROADCAST EVENT (setelah commit agar data pasti tersimpan)
+            event(new NewWithdrawalRequest($penarikan));
+
+            Log::info('Event broadcasted!');
 
             return redirect()->back()->with('success', '✅ Penarikan berhasil diajukan! Saldo terpotong Rp ' . number_format($jumlah, 0, ',', '.'));
         } catch (\Exception $e) {

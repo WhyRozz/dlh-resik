@@ -11,6 +11,10 @@ class Penarikan extends Model
 
     public $timestamps = false;    // TERUS IKI SEHARUSE FALSE/TRUE?
 
+    // ✅ Gunakan tanggal_penarikan sebagai created_at
+    const CREATED_AT = 'tanggal_penarikan';
+    const UPDATED_AT = 'tanggal_disetujui';
+    
     protected $fillable = [
         'id_masyarakat',
         'id_pns',

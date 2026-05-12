@@ -7,6 +7,7 @@ use App\Models\Penarikan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Events\NewWithdrawalRequest;
 
 class PenarikanController extends Controller
 {
@@ -76,6 +77,8 @@ class PenarikanController extends Controller
                 'updated_by' => null,
                 'tanggal_disetujui' => null,
             ]);
+
+            event(new NewWithdrawalRequest($penarikan));
 
             DB::commit();
 
