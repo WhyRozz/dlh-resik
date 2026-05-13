@@ -165,6 +165,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/notifications/counts', [NotificationController::class, 'getCounts']);
         Route::get('/notifications/recent/penarikan', [NotificationController::class, 'recentPenarikan']);
         Route::get('/notifications/recent/laporan', [NotificationController::class, 'recentLaporan']);
+        Route::get('/notifications/recent/penjemputan', [NotificationController::class, 'recentPenjemputan']);
     }); // ← Tutup middleware auth:admin
 
 }); // ← Tutup prefix admin

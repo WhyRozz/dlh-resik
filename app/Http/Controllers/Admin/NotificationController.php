@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Penarikan;
 use App\Models\Laporan; // Sesuaikan dengan model laporan kamu
+use App\Models\Penjemputan;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
@@ -13,7 +14,8 @@ class NotificationController extends Controller
     {
         return response()->json([
             'penarikan' => Penarikan::where('status', 'diproses')->count(),
-            'laporan'   => Laporan::where('status', 'pending')->count(), // Sesuaikan status
+            'laporan'   => Laporan::where('status', 'diproses')->count(), // Sesuaikan status
+            'penjemputan' => Penjemputan::where('status', 'diproses')->count(),
         ]);
     }
 
@@ -45,6 +47,21 @@ class NotificationController extends Controller
                     'jenis' => $l->keterangan ? substr($l->keterangan, 0, 50) . '...' : '-',
                     'waktu' => $l->created_at->diffForHumans(),
                     'nama' => $l->nama ?? 'Unknown',
+                ];
+            });
+    }
+    public function recentPenjemputan()
+    {
+        return Penjemputan::where('status', 'diproses')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'nama_admin' => $p->nama_admin ?? 'Unknown',
+                    'berat'      => $p->berat . ' Kg',
+                    'waktu'      => $p->created_at->diffForHumans(),
+                    'lokasi'     => $p->lokasi ?? '-',
                 ];
             });
     }

@@ -26,10 +26,10 @@
                     <img src="{{ asset('assets/icons/laporan_sampah.png') }}" alt="Laporan" class="custom-icon">
                     <span>Laporan Sampah Ilegal</span>
                     <!-- ✅ Badge Notifikasi -->
-                    <span class="notif-badge-wrapper" onclick="openNotifModal('laporan')" title="Lihat notifikasi">
-                        <span id="badge-laporan" class="notif-badge" style="display:none;">0</span>
-                    </span>
                 </a>
+                <span class="notif-badge-wrapper" onclick="openNotifModal('laporan')" title="Lihat notifikasi">
+                    <span id="badge-laporan" class="notif-badge" style="display:none;">0</span>
+                </span>
             </li>
 
             <!-- Fungsi: Menu dropdown Bank Sampah dengan toggle expand/collapse -->
@@ -63,11 +63,21 @@
                     <!-- Fungsi: Sub-menu Jenis & Harga Sampah -->
                     <li><a href="{{ route('admin.bank-sampah.jenis-sampah.index') }}" class="{{ request()->routeIs('admin.bank-sampah.jenis-sampah.index') ? 'active' : '' }}">Jenis & Harga Sampah</a></li>
                     <!-- Fungsi: Sub-menu Penjemputan dengan wildcard route matching -->
-                    <li>
+                    <li style="position: relative;">
                         <a href="{{ route('admin.bank-sampah.penjemputan.index') }}"
-                            class="{{ request()->routeIs('admin.bank-sampah.penjemputan*') ? 'active' : '' }}">
+                            class="{{ request()->routeIs('admin.bank-sampah.penjemputan*') ? 'active' : '' }}"
+                            style="position: relative; z-index: 5; padding-right: 40px;">
                             Penjemputan
                         </a>
+
+                        <span class="notif-badge-wrapper" title="Lihat notifikasi">
+                            <span id="badge-penjemputan"
+                                class="notif-badge"
+                                style="display: none;"
+                                onclick="openNotifModal('penjemputan'); event.stopPropagation();">
+                                0
+                            </span>
+                        </span>
                     </li>
                 </ul>
             </li>

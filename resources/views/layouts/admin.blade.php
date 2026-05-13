@@ -9,26 +9,16 @@
     <meta name="pusher-cluster" content="{{ config('broadcasting.connections.pusher.options.cluster', 'ap1') }}">
 
     <title>@yield('title', 'Admin RESIK')</title>
-    <!-- Favicon standar -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-
-    <!-- Favicon untuk berbagai ukuran -->
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-
-    <!-- Untuk Apple devices -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-
-    <!-- Web manifest untuk PWA -->
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Sidebar CSS -->
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
     @stack('styles')
 </head>
-
 
 <body>
     <!-- Modal Notifikasi -->
@@ -49,7 +39,6 @@
     @include('admin.partials.sidebar')
 
     <div class="admin-wrapper" style="margin-left: 260px; padding: 20px;">
-        {{-- Navbar bisa ditaruh di sini --}}
         @include('admin.partials.navbar')
         <main>
             @yield('content')
@@ -59,7 +48,38 @@
     <!-- Sidebar JS -->
     <script src="{{ asset('js/sidebar.js') }}"></script>
 
-    <script src="{{ asset('js/notifications.js') }}"></script>
+    <!-- Script untuk disable notifikasi di Penjemputan -->
+    @if(request()->routeIs('admin.bank-sampah.penjemputan*'))
+    <script>
+        // Disable notifikasi untuk halaman Penjemputan
+        window.disableNotifPenjemputan = true;
+        
+        // Override fungsi openNotifModal
+        window.openNotifModal = function(type) {
+            if (type === 'penjemputan') {
+                console.log('Notifikasi Penjemputan disabled');
+                return;
+            }
+            // Untuk tipe lain, biarkan normal
+        };
+        
+        // Override fungsi updateNotifBadges
+        const originalUpdateBadges = window.updateNotifBadges;
+        window.updateNotifBadges = function() {
+            if (originalUpdateBadges) {
+                // Panggil fungsi asli tapi skip badge penjemputan
+                const originalGetElementById = document.getElementById.bind(document);
+                document.getElementById = function(id) {
+                    if (id === 'badge-penjemputan') {
+                        return null; // Pura-pura badge tidak ada
+                    }
+                    return originalGetElementById(id);
+                };
+                originalUpdateBadges();
+            }
+        };
+    </script>
+    @endif
 
     <!-- Load notifications.js (compiled via Vite) -->
     @vite(['resources/js/notifications.js', 'resources/js/echo.js'])
