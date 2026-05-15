@@ -199,32 +199,31 @@ class AuthController extends Controller
 
         $email = trim($request->email);
 
-        // ✅ Set timezone ke WIB (seperti kode lama)
+        // Set timezone
         date_default_timezone_set('Asia/Jakarta');
         DB::statement("SET time_zone = '+07:00'");
 
-        // ✅ Cek email di tabel masyarakat
+        // Cek email di tabel masyarakat
         $user = Masyarakat::where('email', $email)->first();
 
-        // ✅ Kalau tidak ada, cek di tabel pns
+        // Kalau tidak ada di masyarakat, cek di pns
         if (!$user) {
             $user = Pns::where('email', $email)->first();
         }
 
+        // ✅ VALIDASI EMAIL TIDAK TERDAFTAR
         if (!$user) {
-            // Untuk keamanan, tetap return success agar tidak bisa enumerate email
             return response()->json([
-                'status' => 'success',
-                'timestamp' => now()->format('Y-m-d H:i:s'),
-                'message' => 'Jika email terdaftar, kode verifikasi telah dikirim'
-            ]);
+                'status' => 'error',
+                'message' => 'Email belum terdaftar'  // ← Ini yang dideteksi frontend
+            ], 404);
         }
 
-        // ✅ Generate OTP 4 digit (sama seperti kode lama)
+        // Generate OTP 4 digit
         $otp = str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT);
         $otp_expires = date('Y-m-d H:i:s', strtotime('+10 minutes'));
 
-        // ✅ Simpan OTP ke database
+        // Simpan OTP ke database
         if ($user instanceof Masyarakat) {
             Masyarakat::where('email', $email)->update([
                 'otp' => $otp,
@@ -237,38 +236,38 @@ class AuthController extends Controller
             ]);
         }
 
-        // ✅ KIRIM EMAIL VIA LARAVEL MAIL
+        // Kirim email via Laravel Mail
         try {
             Mail::raw("
-            KODE VERIFIKASI RESIK APP
+        KODE VERIFIKASI RESIK APP
 
-            Halo,
+        Halo,
 
-            Kode OTP Anda adalah: {$otp}
+        Kode OTP Anda adalah: {$otp}
 
-            Berlaku selama 10 menit.
+        Berlaku selama 10 menit.
 
-            Jangan bagikan kode ini kepada siapa pun.
-            Jika Anda tidak meminta reset password, abaikan email ini.
+        Jangan bagikan kode ini kepada siapa pun.
+        Jika Anda tidak meminta reset password, abaikan email ini.
 
-            Terima kasih,
-            Tim RESIK App
-            ", function ($message) use ($email) {
+        Terima kasih,
+        Tim RESIK App
+        ", function ($message) use ($email) {
                 $message->to($email)
                     ->subject('Kode Verifikasi - RESIK App')
                     ->from('simpelsi2025@gmail.com', 'RESIK App');
             });
         } catch (\Exception $e) {
-            // Log error tapi tetap return success (agar tidak crash di production)
             \Log::error('Gagal kirim email: ' . $e->getMessage());
         }
 
         return response()->json([
             'status' => 'success',
             'timestamp' => now()->format('Y-m-d H:i:s'),
-            'message' => 'OTP berhasil dikirim ke email Anda.'
+            'message' => 'Kode verifikasi telah dikirim ke email Anda.'
         ]);
     }
+
     // ✅ VERIFY OTP
     public function verifyOtp(Request $request)
     {
