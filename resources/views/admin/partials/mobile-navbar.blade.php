@@ -8,9 +8,10 @@
     $user = auth()->user();
     $userInitial = $user ? strtoupper(substr($user->name ?? 'A', 0, 1)) : 'A';
 
-    // Get notification counts
-    $laporanCount = \App\Models\Laporan::where('status', 'Pending')->count() ?? 0;
+    // Get notification counts (hanya 3 menu yang butuh badge)
+    $laporanCount = \App\Models\Laporan::where('status', 'diproses')->count() ?? 0;
     $penarikanCount = \App\Models\Penarikan::where('status', 'diproses')->count() ?? 0;
+    $penjemputanCount = \App\Models\Penjemputan::where('status', 'diproses')->count() ?? 0;
 @endphp
 
 <nav class="mobile-navbar">
@@ -48,13 +49,13 @@
                 </a>
             </li>
 
-            {{-- Laporan Sampah Ilegal --}}
-            <li class="mobile-menu-item">
+            {{-- ✅ Laporan Sampah Ilegal (dengan badge) --}}
+            <li class="mobile-menu-item" data-menu="laporan">
                 <a href="{{ route('admin.laporan.index') }}"
                     class="mobile-menu-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
                     <i class="fas fa-exclamation-triangle"></i>
                     <span>Laporan Sampah Ilegal</span>
-                    @if ($laporanCount > 0)
+                    @if (isset($laporanCount) && $laporanCount > 0)
                         <span class="mobile-menu-badge">{{ $laporanCount }}</span>
                     @endif
                 </a>
@@ -68,21 +69,43 @@
                     <i class="fas fa-chevron-right mobile-submenu-toggle"></i>
                 </a>
                 <ul class="mobile-submenu">
-                    <li><a href="{{ route('admin.bank-sampah.setor.index') }}" class="mobile-menu-link">
-                            <i class="fas fa-upload"></i> Data Setor
-                        </a></li>
-                    <li><a href="{{ route('admin.bank-sampah.penarikan.index') }}" class="mobile-menu-link">
-                            <i class="fas fa-money-bill-wave"></i> Data Penarikan
-                            @if ($penarikanCount > 0)
+                    {{-- Data Setor (tanpa badge) --}}
+                    <li class="mobile-menu-item">
+                        <a href="{{ route('admin.bank-sampah.setor.index') }}" class="mobile-menu-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Data Setor</span>
+                        </a>
+                    </li>
+                    
+                    {{-- ✅ Data Penarikan (dengan badge) --}}
+                    <li class="mobile-menu-item" data-menu="penarikan">
+                        <a href="{{ route('admin.bank-sampah.penarikan.index') }}" class="mobile-menu-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Data Penarikan</span>
+                            @if (isset($penarikanCount) && $penarikanCount > 0)
                                 <span class="mobile-menu-badge">{{ $penarikanCount }}</span>
                             @endif
-                        </a></li>
-                    <li><a href="{{ route('admin.bank-sampah.jenis-sampah.index') }}" class="mobile-menu-link">
-                            <i class="fas fa-tags"></i> Jenis & Harga Sampah
-                        </a></li>
-                    <li><a href="{{ route('admin.bank-sampah.penjemputan.index') }}" class="mobile-menu-link">
-                            <i class="fas fa-truck"></i> Penjemputan
-                        </a></li>
+                        </a>
+                    </li>
+                    
+                    {{-- Jenis & Harga Sampah (tanpa badge) --}}
+                    <li class="mobile-menu-item">
+                        <a href="{{ route('admin.bank-sampah.jenis-sampah.index') }}" class="mobile-menu-link">
+                            <i class="fas fa-tags"></i>
+                            <span>Jenis & Harga Sampah</span>
+                        </a>
+                    </li>
+                    
+                    {{-- ✅ Penjemputan (dengan badge) --}}
+                    <li class="mobile-menu-item" data-menu="penjemputan">
+                        <a href="{{ route('admin.bank-sampah.penjemputan.index') }}" class="mobile-menu-link">
+                            <i class="fas fa-truck"></i>
+                            <span>Penjemputan</span>
+                            @if (isset($penjemputanCount) && $penjemputanCount > 0)
+                                <span class="mobile-menu-badge">{{ $penjemputanCount }}</span>
+                            @endif
+                        </a>
+                    </li>
                 </ul>
             </li>
 

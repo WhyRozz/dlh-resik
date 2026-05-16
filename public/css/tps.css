@@ -1,124 +1,134 @@
+/* ========================================
+   HALAMAN DAFTAR TPS (RESPONSIVE FIXED)
+   ======================================== */
+
 .tps-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-.btn-tambah-tps {
-    background: #2e8b57;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 14px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: background 0.2s;
-}
-
-.btn-tambah-tps:hover {
-    background: #226b42;
-}
-
-/* --- Gaya Khusus Halaman Kelola TPS --- */
-.content-header h2 {
-    color: #2e8b57;
-    font-size: 24px;
-    margin-bottom: 20px;
-}
-
-th:nth-child(5) {
-    text-align: center !important;
-}
-
-/* --- SEARCH BAR (FINAL - FORCE STYLE) --- */
+/* Container Search Bar */
 .search-bar {
-    margin-top: -50px !important;
-    display: flex !important;
-    justify-content: flex-end !important;
-    padding-right: 40px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-bottom: 15px;
+    box-sizing: border-box;
 }
 
 .search-input {
-    width: 100% !important;
-    max-width: 400px !important;
-    padding: 10px 18px !important;
-    border: 2px solid #e0e0e0 !important;
-    border-radius: 25px !important;
-    font-size: 14px !important;
-    background: #f8f9fa !important;
-    box-sizing: border-box !important; /* 🔥 Kunci: agar padding tidak melebarkan elemen */
-    transition: all 0.3s ease !important;
-}
-
-.search-input::placeholder {
-    color: #aaa !important;
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    font-size: 14px;
+    background: #f8f9fa;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    min-height: 44px; /* Target sentuh aman */
 }
 
 .search-input:focus {
-    background: #fff !important;
-    border-color: #2e8b57 !important;
-    outline: none !important;
-    box-shadow: 0 2px 8px rgba(46, 139, 87, 0.15) !important;
+    background: #fff;
+    border-color: #2e8b57;
+    outline: none;
+    box-shadow: 0 2px 8px rgba(46, 139, 87, 0.15);
 }
 
+/* Container Tabel */
 .table-container {
     background: white;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    overflow-x: auto;
+    overflow-x: auto; /* Scroll horizontal untuk HP */
+    -webkit-overflow-scrolling: touch;
 }
 
+/* Header Judul & Tombol (PERBAIKAN DISINI) */
 .header-artikel {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Judul Kiri, Tombol Kanan */
     align-items: center;
     margin-bottom: 15px;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Agar tidak pecah jika layar sangat kecil */
     gap: 10px;
 }
 
 .table-title {
     color: #2e8b57;
     font-size: 20px;
-    border-bottom: 2px solid #2e8b57;
-    padding-bottom: 8px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+    border-bottom: none; /* Dihapus underline tebal */
 }
 
+/* Tombol Tambah (Ukuran Normal) */
+.btn-tambah-tps {
+    background: #2e8b57;
+    color: white;
+    padding: 10px 20px; /* Padding standar */
+    border-radius: 8px; /* Sudut membulat */
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap; /* Mencegah teks turun baris */
+}
+
+.btn-tambah-tps:hover {
+    background: #226b42;
+    transform: translateY(-1px);
+}
+
+/* Tabel Styling */
 table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    min-width: 600px; /* Memaksa tabel bisa di-scroll */
 }
 
 th, td {
     padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid #eee; /* Garis lebih tipis */
-    vertical-align: top;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    white-space: nowrap;
 }
 
 th {
-    background: #e6f2e6; /* Hijau muda seperti laporan */
+    background: #e6f2e6;
     font-weight: 600;
-    color: #333; /* Teks header gelap */
+    color: #333;
     text-transform: uppercase;
     font-size: 13px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 tr:hover {
     background: #f8f9fa;
 }
 
+/* Action Buttons */
 .action-btns {
     display: flex;
     gap: 8px;
+    align-items: center;
 }
 
 .btn-action {
@@ -127,266 +137,100 @@ tr:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 14px;
-    text-decoration: none;
-}
-
-.btn-edit {
-    background: #ffc107;
-    color: #333;
-}
-
-.btn-edit:hover {
-    background: #e0a800;
-}
-
-.btn-delete {
-    background: #dc3545;
-    color: white;
-}
-
-.btn-delete:hover {
-    background: #c82333;
-}
-
-.btn-add {
-    background: #2e8b57;
-    color: white;
-    padding: 10px 20px;
-    border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: background 0.2s;
+    transition: all 0.2s;
     text-decoration: none;
+    border: none;
 }
 
-.btn-add:hover {
-    background: #226b42;
-}
+.btn-edit { background: #ffc107; color: #333; }
+.btn-edit:hover { background: #e0a800; }
 
-.btn-add span {
-    font-size: 16px;
-}
+.btn-delete { background: #dc3545; color: white; }
+.btn-delete:hover { background: #c82333; }
 
-/* Link Maps */
 .maps-link {
     color: #2e8b57;
     text-decoration: none;
     font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
 }
-
-.maps-link:hover {
-    text-decoration: underline;
-}
+.maps-link:hover { text-decoration: underline; }
 
 /* Popup Styles */
 .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    pointer-events: none;
+    display: none; justify-content: center; align-items: center;
+    z-index: 9999; pointer-events: none; padding: 15px;
 }
-
-.popup-overlay.active {
-    display: flex;
-    pointer-events: auto;
-}
+.popup-overlay.active { display: flex; pointer-events: auto; }
 
 .popup-content {
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    width: 400px;
-    max-width: 90%;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    transform: scale(0.8);
-    opacity: 0;
+    background: white; padding: 25px; border-radius: 10px;
+    width: 400px; max-width: 90%; max-height: 85vh; overflow-y: auto;
+    text-align: center; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9); opacity: 0;
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
+.popup-content.show { transform: scale(1); opacity: 1; }
+.popup-content h3 { margin: 0 0 15px; font-size: 20px; color: #333; }
+.popup-content p { margin: 0 0 20px; color: #555; font-size: 15px; }
 
-.popup-content.show {
-    transform: scale(1);
-    opacity: 1;
-}
+.popup-btns { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.popup-btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+.popup-btn.cancel { background: #6c757d; color: white; }
+.popup-btn.confirm { background: #dc3545; color: white; }
 
-.popup-content.success {
-    border-left: 5px solid #28a745;
-}
-
-.popup-content.error {
-    border-left: 5px solid #dc3545;
-}
-
-.popup-content h3 {
-    margin: 0 0 15px 0;
-    font-size: 20px;
-    color: #333;
-}
-
-.popup-content p {
-    margin: 0 0 20px 0;
-    color: #555;
-    font-size: 15px;
-}
-
-.popup-btns {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-.popup-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-    transition: background 0.2s;
-}
-
-.popup-btn.cancel {
-    background: #6c757d;
-    color: white;
-}
-
-.popup-btn.cancel:hover {
-    background: #5a6268;
-}
-
-.popup-btn.confirm {
-    background: #dc3545;
-    color: white;
-}
-
-.popup-btn.confirm:hover {
-    background: #c82333;
-}
-
-/* Responsive Design */
+/* ========================================
+   PERBAIKAN RESPONSIVE (PENTING)
+   ======================================== */
 @media (max-width: 768px) {
     .header-artikel {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .btn-add {
-        width: 100%;
-        justify-content: center;
-    }
-
-    th,
-    td {
-        padding: 10px 8px;
-        font-size: 13px;
-    }
-
-    .btn-action {
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
-    }
-
-    .table-container {
-        padding: 15px;
+        /* Tetap Row agar tombol tidak turun ke bawah */
+        flex-direction: row; 
+        align-items: center;
+        justify-content: space-between;
     }
 
     .table-title {
-        font-size: 18px;
+        font-size: 18px; /* Sedikit mengecilkan judul */
+    }
+
+    /* MENGHAPUS LEBAR 100% PADA TOMBOL */
+    .btn-tambah-tps {
+        width: auto;        /* Ukuran otomatis sesuai teks */
+        padding: 8px 16px;  /* Padding sedikit lebih kecil di HP */
+        font-size: 13px;
+    }
+    
+    .table-container {
+        padding: 15px 10px;
+        border-radius: 8px;
+    }
+
+    th, td {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .search-input {
+        max-width: 100%; /* Search bar full width di HP */
     }
 }
 
 @media (max-width: 480px) {
-    .popup-content {
-        width: 95%;
-        padding: 20px;
-    }
-
-    .popup-btns {
+    .popup-content { width: 95%; padding: 20px; }
+    .popup-btns { flex-direction: column; }
+    .popup-btn { width: 100%; }
+    
+    /* Jika layar SANGAT sempit (<480px), baru turunkan tombolnya ke bawah judul */
+    .header-artikel {
         flex-direction: column;
+        align-items: flex-start; /* Tombol rata kiri */
     }
-
-    .popup-btn {
-        width: 100%;
+    .btn-tambah-tps {
+        margin-top: 10px;
+        width: auto; /* Tetap ukuran normal */
     }
-}
-
-/* --- TAMBAHKAN DI BAWAH tps.css --- */
-
-/* Style untuk Alert Banner (Pesan Sukses di atas tabel) */
-.alert {
-    padding: 12px 20px;
-    margin-bottom: 20px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-}
-
-.alert-success {
-    background: #d4edda;
-    color: #155724;
-    border-left: 5px solid #28a745;
-}
-
-.alert-error {
-    background: #f8d7da;
-    color: #721c24;
-    border-left: 5px solid #dc3545;
-}
-
-/* Pastikan tombol popup di tps.css punya warna cancel & confirm yang beda */
-.popup-btn.cancel {
-    background: #6c757d;
-    color: white;
-}
-
-.popup-btn.cancel:hover {
-    background: #5a6268;
-}
-
-.popup-btn.confirm {
-    background: #dc3545;
-    color: white;
-}
-
-.popup-btn.confirm:hover {
-    background: #c82333;
-}
-
-/* Perbesar dan hijaukan judul Daftar Informasi TPS */
-.table-title, 
-h2, 
-h3 {
-    color: #2e8b57 !important;
-    font-size: 24px !important;
-    font-weight: 600 !important;
-}
-
-/* Jika judul ada di dalam .tps-header */
-.tps-header h2,
-.tps-header h3 {
-    color: #2e8b57 !important;
-    font-size: 24px !important;
-    margin: 0 !important;
 }

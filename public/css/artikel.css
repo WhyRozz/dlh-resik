@@ -15,15 +15,15 @@
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     overflow: hidden;
-    margin-top: -25px;
-    padding-top: 20px;
+    margin-top: 15px; /* Dihapus margin negatif biar aman di mobile */
+    padding: 20px;
+    overflow-x: auto; /* WAJIB: Agar tabel bisa di-scroll horizontal di HP */
+    -webkit-overflow-scrolling: touch;
 }
 
 /* ========================================
-   SEARCH BOX MODERN (SAMA SEPERTI AKUN)
+   SEARCH BOX MODERN
    ======================================== */
-
-/* Container search - posisi kanan */
 .search-wrapper-akun {
     width: 100%;
     max-width: 400px;
@@ -33,7 +33,6 @@
     position: relative;
 }
 
-/* Input box dengan desain pill/rounded */
 .search-input-akun {
     width: 100%;
     padding: 12px 20px 12px 45px;
@@ -46,14 +45,12 @@
     box-sizing: border-box;
 }
 
-/* Efek saat diklik/focus */
 .search-input-akun:focus {
     border-color: #20A726;
     background: #ffffff;
     box-shadow: 0 0 0 4px rgba(32, 167, 38, 0.15);
 }
 
-/* Icon search di kiri */
 .search-icon {
     position: absolute;
     left: 18px;
@@ -67,13 +64,13 @@
 /* ========================================
    HEADER & TOMBOL TAMBAH
    ======================================== */
-
-/* Header dengan judul dan tombol */
 .table-header-custom {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 5px;
+    flex-wrap: wrap; /* Agar tidak terpotong di layar sempit */
+    gap: 10px;
 }
 
 .table-header-title {
@@ -83,22 +80,23 @@
     margin: 0;
 }
 
-/* Tombol tambah artikel (Hijau solid seperti Akun) */
 .btn-tambah-artikel {
-    background: #2e8b57; /* Hijau solid */
+    background: #2e8b57;
     color: white;
     padding: 10px 24px;
-    border-radius: 50px; /* Pill shape */
+    border-radius: 50px;
     text-decoration: none;
     font-weight: 600;
     font-size: 14px;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     transition: all 0.2s;
     border: none;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(46, 139, 87, 0.2);
+    min-height: 44px; /* Touch target aman */
 }
 
 .btn-tambah-artikel:hover {
@@ -112,7 +110,6 @@
     font-weight: bold;
 }
 
-/* Garis hijau di bawah judul */
 .header-divider {
     border: none;
     border-top: 2px solid #2e8b57;
@@ -126,6 +123,7 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    min-width: 600px; /* Mencegah tabel hancur, memaksa scroll horizontal */
 }
 
 .table-design th,
@@ -133,9 +131,9 @@
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #e0e0e0;
+    white-space: nowrap; /* Baris tetap rapi saat di-scroll */
 }
 
-/* Header tabel abu-abu */
 .table-design thead th {
     background: #e6f2e6;
     color: #333;
@@ -143,6 +141,9 @@
     text-transform: capitalize;
     font-size: 14px;
     border-bottom: 2px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .table-design tbody tr:hover {
@@ -154,7 +155,7 @@
     border-bottom: none;
 }
 
-/* Aksi Buttons - Style Rounded Pastel */
+/* Aksi Buttons */
 .action-btns {
     display: flex;
     gap: 8px;
@@ -166,14 +167,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px; /* Kotak rounded */
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
     border: none;
     padding: 0;
+    min-width: 44px;
+    min-height: 44px;
 }
 
-/* Edit: Kuning Cream */
 .btn-edit {
     background-color: #FEF3C7;
     color: #D97706;
@@ -184,7 +186,6 @@
     box-shadow: 0 2px 8px rgba(217, 119, 6, 0.2);
 }
 
-/* Hapus: Merah Muda */
 .btn-delete {
     background-color: #FEE2E2;
     color: #DC2626;
@@ -196,15 +197,11 @@
 }
 
 /* ========================================
-   MODAL STYLES (SAMA SEPERTI AKUN)
+   MODAL STYLES
    ======================================== */
-
 .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     display: none;
     align-items: center;
@@ -212,6 +209,7 @@
     z-index: 9999;
     opacity: 0;
     transition: opacity 0.3s ease;
+    padding: 15px;
 }
 
 .modal-overlay.show {
@@ -222,8 +220,10 @@
 .modal-content {
     background: white;
     border-radius: 12px;
-    width: 90%;
+    width: 100%;
     max-width: 450px;
+    max-height: 90vh; /* Agar tidak terpotong di HP pendek */
+    overflow-y: auto;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     transform: scale(0.9);
     transition: transform 0.3s ease;
@@ -236,7 +236,6 @@
     transform: scale(1);
 }
 
-/* Warning Icon */
 .modal-warning-icon {
     width: 80px;
     height: 80px;
@@ -255,38 +254,26 @@
     color: #ffc107;
 }
 
-.modal-header {
-    padding: 0;
-    border-bottom: none;
-    margin-bottom: 15px;
-}
-
 .modal-header h3 {
-    margin: 0;
+    margin: 0 0 10px 0;
     font-size: 24px;
     color: #333;
     font-weight: 600;
     font-family: 'Georgia', serif;
 }
 
-.modal-body {
-    padding: 0;
-    margin-bottom: 30px;
-}
-
 .modal-body p {
-    margin: 0;
+    margin: 0 0 20px 0;
     color: #666;
     font-size: 15px;
     line-height: 1.6;
 }
 
 .modal-footer {
-    padding: 0;
-    border-top: none;
     display: flex;
     gap: 12px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .btn-modal {
@@ -298,53 +285,39 @@
     cursor: pointer;
     transition: all 0.2s;
     min-width: 100px;
+    min-height: 44px;
 }
 
 .btn-batal {
     background: #6c757d;
     color: white;
 }
-
-.btn-batal:hover {
-    background: #5a6268;
-    transform: translateY(-2px);
-}
+.btn-batal:hover { background: #5a6268; transform: translateY(-2px); }
 
 .btn-hapus {
     background: #dc3545;
     color: white;
 }
-
-.btn-hapus:hover {
-    background: #c82333;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-}
+.btn-hapus:hover { background: #c82333; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3); }
 
 /* ========================================
    EMPTY STATE
    ======================================== */
-
 .empty-state {
     text-align: center;
     padding: 40px 20px;
     color: #999;
 }
-
 .empty-state a {
     color: #2e8b57;
     text-decoration: none;
     font-weight: 600;
 }
-
-.empty-state a:hover {
-    text-decoration: underline;
-}
+.empty-state a:hover { text-decoration: underline; }
 
 /* ========================================
-   SUCCESS MODAL (ELEGAN)
+   SUCCESS MODAL
    ======================================== */
-
 .success-modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -355,12 +328,9 @@
     z-index: 10000;
     opacity: 0;
     transition: opacity 0.3s ease;
+    padding: 15px;
 }
-
-.success-modal-overlay.show {
-    display: flex;
-    opacity: 1;
-}
+.success-modal-overlay.show { display: flex; opacity: 1; }
 
 .success-modal-content {
     background: white;
@@ -368,152 +338,87 @@
     padding: 40px 30px;
     text-align: center;
     max-width: 400px;
-    width: 90%;
+    width: 100%;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     transform: scale(0.8);
     transition: transform 0.3s ease;
 }
+.success-modal-overlay.show .success-modal-content { transform: scale(1); }
 
-.success-modal-overlay.show .success-modal-content {
-    transform: scale(1);
-}
-
-.success-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 20px;
-}
-
+.success-icon { width: 80px; height: 80px; margin: 0 auto 20px; }
 .success-icon-circle {
-    width: 80px;
-    height: 80px;
+    width: 80px; height: 80px;
     border: 3px solid #d4edda;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     animation: scaleIn 0.3s ease;
 }
-
 .success-icon-check {
-    width: 40px;
-    height: 40px;
-    stroke: #28a745;
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    fill: none;
-    stroke-dasharray: 100;
-    stroke-dashoffset: 100;
+    width: 40px; height: 40px;
+    stroke: #28a745; stroke-width: 3;
+    stroke-linecap: round; stroke-linejoin: round; fill: none;
+    stroke-dasharray: 100; stroke-dashoffset: 100;
     animation: drawCheck 0.5s ease 0.3s forwards;
 }
-
-
-
-@keyframes drawCheck {
-    to { stroke-dashoffset: 0; }
-}
-
-@keyframes scaleIn {
-    from { transform: scale(0); }
-    to { transform: scale(1); }
-}
+@keyframes drawCheck { to { stroke-dashoffset: 0; } }
+@keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
 
 .success-modal-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: #2e8b57;
-    margin: 0 0 10px 0;
-    font-family: 'Georgia', serif;
+    font-size: 28px; font-weight: 700; color: #2e8b57;
+    margin: 0 0 10px 0; font-family: 'Georgia', serif;
 }
-
-.success-modal-message {
-    font-size: 16px;
-    color: #666;
-    margin: 0 0 30px 0;
-    line-height: 1.6;
-}
+.success-modal-message { font-size: 16px; color: #666; margin: 0 0 30px 0; line-height: 1.6; }
 
 .success-modal-btn {
-    background: #2e8b57;
-    color: white;
-    border: none;
-    padding: 12px 40px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+    background: #2e8b57; color: white; border: none;
+    padding: 12px 40px; border-radius: 8px; font-size: 16px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    min-height: 48px;
 }
-
-.success-modal-btn:hover {
-    background: #226b42;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
-}
+.success-modal-btn:hover { background: #226b42; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3); }
 
 /* ========================================
-   RESPONSIVE DESIGN
+   RESPONSIVE MOBILE
    ======================================== */
-
 @media (max-width: 768px) {
+    .content-header h2 { font-size: 26px; }
+    
     .search-wrapper-akun {
         max-width: 100%;
         margin-bottom: 15px;
     }
     
-    .search-input-akun {
-        width: 100%;
-    }
-
     .table-header-custom {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
+        align-items: stretch;
+        gap: 12px;
     }
+
+    .table-header-title { font-size: 22px; text-align: center; }
 
     .btn-tambah-artikel {
         width: 100%;
         justify-content: center;
     }
 
-    .table-design th,
-    .table-design td {
-        padding: 12px 15px;
-        font-size: 13px;
-    }
-
-    .action-btns {
-        gap: 6px;
-    }
-
-    .btn-action {
-        width: 32px;
-        height: 32px;
-    }
-}
-
-@media (max-width: 480px) {
     .table-container {
-        padding: 15px;
+        padding: 15px 10px;
+        margin-top: 0;
         border-radius: 8px;
     }
 
-    .table-design th,
-    .table-design td {
+    .table-design th, .table-design td {
         padding: 10px 12px;
-        font-size: 12px;
+        font-size: 13px;
     }
 
-    .modal-content,
-    .success-modal-content {
-        width: 95%;
-    }
+    .action-btns { gap: 6px; }
+    .btn-action { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
 }
 
-/* Posisi search bar di kanan atas */
-.search-wrapper-akun {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
+@media (max-width: 480px) {
+    .modal-content, .success-modal-content { padding: 30px 20px; }
+    .modal-header h3 { font-size: 20px; }
+    .btn-modal, .success-modal-btn { width: 100%; margin-bottom: 8px; }
+    .modal-footer { flex-direction: column; gap: 10px; }
 }
