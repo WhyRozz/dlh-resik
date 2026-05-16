@@ -12,11 +12,11 @@ class LaporanController extends Controller
     /**
      * Tampilkan halaman kelola laporan
      */
-    public function index()
+    public function index(Request $request)
     {
         $laporanList = Laporan::with('masyarakat')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         return view('admin.laporan.index', compact('laporanList'));
     }

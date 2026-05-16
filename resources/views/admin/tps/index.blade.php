@@ -9,12 +9,6 @@
 @endpush
 
 @section('content')
-{{-- Notifikasi sukses --}}
-@if(session('success'))
-    <div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 12px 20px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #28a745;">
-        {{ session('success') }}
-    </div>
-@endif
 
 <div class="search-bar">
     <input type="text" class="search-input" id="searchInput" placeholder="Cari TPS berdasarkan nama atau lokasi...">
@@ -62,30 +56,28 @@
                         {{ Str::limit($tps->keterangan ?? '-', 40) }}
                     </td>
                     <td>
+                        <div class="aksi-buttons" style="display: flex; gap: 4px;">
+                            {{-- ✅ Tombol Edit dengan icon gambar --}}
+                            <button type="button"
+                                    onclick="window.location.href='{{ route('admin.tps.edit', $tps->id_tps) }}'"
+                                    style="display: inline-flex; align-items: center; justify-content: center; margin: 0 2px; padding: 6px 10px; background: #fff3cd; color: #856404; border: 1px solid #ffc107; border-radius: 4px; cursor: pointer; vertical-align: middle; transition: all 0.2s;"
+                                    title="Edit"
+                                    onmouseover="this.style.background='#ffeaa7'"
+                                    onmouseout="this.style.background='#fff3cd'">
+                                <img src="{{ asset('assets/icons/edit.png') }}" alt="Edit" style="width: 18px; height: 18px; vertical-align: middle;">
+                            </button>
 
-                    
-                    <div class="aksi-buttons" style="display: flex; gap: 4px;">
-                        {{-- ✅ Tombol Edit dengan icon gambar --}}
-                        <button type="button"
-                                onclick="window.location.href='{{ route('admin.tps.edit', $tps->id_tps) }}'"
-                                style="display: inline-flex; align-items: center; justify-content: center; margin: 0 2px; padding: 6px 10px; background: #fff3cd; color: #856404; border: 1px solid #ffc107; border-radius: 4px; cursor: pointer; vertical-align: middle; transition: all 0.2s;"
-                                title="Edit"
-                                onmouseover="this.style.background='#ffeaa7'"
-                                onmouseout="this.style.background='#fff3cd'">
-                            <img src="{{ asset('assets/icons/edit.png') }}" alt="Edit" style="width: 18px; height: 18px; vertical-align: middle;">
-                        </button>
-
-                        {{-- ✅ Tombol Hapus dengan icon gambar --}}
-                        <button type="button"
-                                onclick="konfirmasiHapus({{ $tps->id_tps }})"
-                                style="display: inline-flex; align-items: center; justify-content: center; margin: 0 2px; padding: 6px 10px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px; cursor: pointer; vertical-align: middle; transition: all 0.2s;"
-                                title="Hapus"
-                                onmouseover="this.style.background='#f5c6cb'"
-                                onmouseout="this.style.background='#f8d7da'">
-                            <img src="{{ asset('assets/icons/delete.png') }}" alt="Hapus" style="width: 18px; height: 18px; vertical-align: middle;">
-                        </button>
-                    </div>
-                </td>
+                            {{-- ✅ Tombol Hapus dengan icon gambar --}}
+                            <button type="button"
+                                    onclick="konfirmasiHapus({{ $tps->id_tps }})"
+                                    style="display: inline-flex; align-items: center; justify-content: center; margin: 0 2px; padding: 6px 10px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px; cursor: pointer; vertical-align: middle; transition: all 0.2s;"
+                                    title="Hapus"
+                                    onmouseover="this.style.background='#f5c6cb'"
+                                    onmouseout="this.style.background='#f8d7da'">
+                                <img src="{{ asset('assets/icons/delete.png') }}" alt="Hapus" style="width: 18px; height: 18px; vertical-align: middle;">
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             @empty
                 <tr>
@@ -114,34 +106,17 @@
     </div>
 </div>
 
-{{-- Script Close Popup --}}
-<script>
-function closeErrorPopup() {
-    const popup = document.getElementById('errorPopup');
-    popup.querySelector('.popup-content').classList.remove('show');
-    setTimeout(() => {
-        popup.classList.remove('active');
-    }, 300);
-}
-</script>
-
-{{-- Script Error Handling --}}
+{{-- 🔗 BRIDGE: Pass error message ke file JS eksternal --}}
 @if($errors->any())
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const errorMsg = "{{ $errors->first() }}";
-    document.getElementById('errorMessage').textContent = errorMsg;
-    const popup = document.getElementById('errorPopup');
-    popup.classList.add('active');
-    setTimeout(() => {
-        popup.querySelector('.popup-content').classList.add('show');
-    }, 10);
-});
+    window.TpsConfig = {
+        errorMessage: "{{ $errors->first() }}"
+    };
 </script>
 @endif
 
-@endsection
-
 @push('scripts')
+    {{-- FUNGSI: Memuat file JS eksternal yang berisi semua fungsi interaksi halaman --}}
     <script src="{{ asset('js/tps.js') }}"></script>
 @endpush
+@endsection

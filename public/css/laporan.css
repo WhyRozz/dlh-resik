@@ -230,3 +230,175 @@ th {
     .status-options { flex-direction: column; gap: 10px; }
     .search-input { padding: 8px 15px; font-size: 13px; }
 }
+
+
+/* Pagination Styles */
+.pagination-container {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 15px 20px 0 20px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.pagination {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pagination li a,
+.pagination li span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    font-size: 0.875rem;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.pagination li a:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.pagination li.active span {
+    background: #2e8b57;
+    color: white;
+    border-color: #2e8b57;
+    font-weight: 600;
+}
+
+.pagination li.disabled span {
+    color: #d1d5db;
+    cursor: not-allowed;
+    background: #f9fafb;
+}
+
+/* Hide Laravel pagination info text */
+.pagination-container small,
+.pagination+small,
+.pagination~small,
+.pagination-info,
+.text-muted {
+    display: none !important;
+}
+
+
+.pagination-container p,
+.pagination-container .text-sm.text-gray-700 {
+    display: none !important;
+}
+
+
+/* =========================================
+   TAMBAHAN RESPONSIVE MOBILE (MINIMAL)
+   ========================================= */
+
+@media (max-width: 768px) {
+    /* Fix search bar di mobile */
+    .page-search-bar {
+        margin-top: 10px !important;
+        padding-right: 15px !important;
+        padding-left: 15px;
+        justify-content: center !important;
+    }
+    
+    .page-search-bar .search-input {
+        max-width: 100% !important;
+    }
+    
+    /* Fix content card padding di mobile */
+    .content-card {
+        padding: 15px 20px !important;
+    }
+    
+    /* Enable scroll horizontal untuk tabel */
+    .table-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Paksa tabel bisa di-scroll */
+    table {
+        min-width: 650px;
+        font-size: 13px;
+    }
+    
+    /* Perkecil padding cell di mobile */
+    th, td {
+        padding: 10px 8px !important;
+    }
+    
+    /* Perkecil status badge */
+    .status-badge {
+        font-size: 10px !important;
+        padding: 3px 6px !important;
+    }
+    
+    /* Detail form di mobile */
+    .detail-content {
+        flex-direction: column !important;
+    }
+    
+    .detail-image {
+        flex: 0 0 100% !important;
+    }
+    
+    .detail-form {
+        min-width: 100% !important;
+    }
+    
+    /* Tombol full width di mobile */
+    .btn-group {
+        flex-direction: column !important;
+    }
+    
+    .btn-group button {
+        width: 100% !important;
+    }
+    
+    /* Pagination di mobile */
+    .pagination-container {
+        flex-direction: column !important;
+        gap: 10px;
+        padding: 15px 10px 0 10px !important;
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* Untuk layar sangat kecil */
+@media (max-width: 480px) {
+    .content-card {
+        padding: 10px 15px !important;
+    }
+    
+    table {
+        font-size: 12px;
+        min-width: 600px;
+    }
+    
+    .detail-image img {
+        max-height: 200px;
+    }
+}
+
+

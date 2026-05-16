@@ -35,7 +35,7 @@ function resetFilter() {
     let timer = null;
 
     if (input && table) {
-        input.addEventListener('input', function() {
+        input.addEventListener('input', function () {
             const val = this.value.trim();
             clearTimeout(timer);
             timer = setTimeout(() => filterTable(val), 300);
@@ -46,7 +46,7 @@ function resetFilter() {
         if (!table) return;
         const filter = query.toLowerCase();
         const rows = table.getElementsByTagName('tr');
-        
+
         for (let i = 1; i < rows.length; i++) {
             const text = rows[i].textContent.toLowerCase();
             rows[i].style.display = text.includes(filter) ? '' : 'none';
@@ -112,7 +112,7 @@ function showDetail(id) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Gagal mengambil data detail');
+            showConfirmModal('Error', 'Gagal mengambil data detail', () => { }, 'danger');
         });
 }
 
@@ -141,15 +141,15 @@ function toggleStatusInfo() {
 
     const messages = {
         'diproses': {
-            text: '🔄 Status masih dalam proses verifikasi',
+            text: 'Status masih dalam proses verifikasi',
             class: 'info'
         },
         'berhasil': {
-            text: '✅ Penarikan disetujui. Saldo sudah dipotong dan admin akan melakukan transfer manual.',
+            text: 'Penarikan disetujui. Saldo sudah dipotong dan admin akan melakukan transfer manual.',
             class: 'success'
         },
         'ditolak': {
-            text: '❌ Penarikan ditolak. Saldo akan dikembalikan otomatis ke anggota.',
+            text: 'Penarikan ditolak. Saldo akan dikembalikan otomatis ke pengguna.',
             class: 'danger'
         }
     };
@@ -160,42 +160,123 @@ function toggleStatusInfo() {
     }
 }
 
-// ================= UPDATE STATUS =================
+// ================= CONFIRMATION MODAL =================
+
+let confirmCallback = null;
+
+function showConfirmModal(title, message, callback, type = 'warning') {
+    const modal = document.getElementById('confirmModal');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmIcon = modal?.querySelector('.confirm-icon i');
+    const btnOk = document.getElementById('btnConfirmOk');
+
+    if (!modal) {
+        if (confirm(message)) callback();
+        return;
+    }
+
+    confirmTitle.textContent = title;
+    confirmMessage.textContent = message;
+
+    if (confirmIcon) {
+        if (type === 'success') {
+            confirmIcon.className = 'fas fa-check-circle';
+            confirmIcon.parentElement.className = 'confirm-icon success';
+            btnOk.className = 'btn-confirm btn-ok';
+            btnOk.textContent = 'Ya, Setujui';
+        } else if (type === 'danger') {
+            confirmIcon.className = 'fas fa-times-circle';
+            confirmIcon.parentElement.className = 'confirm-icon danger';
+            btnOk.className = 'btn-confirm btn-ok danger';
+            btnOk.textContent = 'Ya, Tolak';
+        } else {
+            confirmIcon.className = 'fas fa-question-circle';
+            confirmIcon.parentElement.className = 'confirm-icon';
+            btnOk.className = 'btn-confirm btn-ok';
+            btnOk.textContent = 'Ya, Lanjutkan';
+        }
+    }
+
+    confirmCallback = callback;
+    modal.classList.add('active');
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+    confirmCallback = null;
+}
+
+function executeConfirm() {
+    if (confirmCallback) {
+        confirmCallback();
+    }
+    closeConfirmModal();
+}
+
+// ================= UPDATE STATUS (BARU) =================
 
 function updateStatus() {
     if (!currentId) {
-        alert('ID penarikan tidak ditemukan');
+        showConfirmModal('Error', 'ID penarikan tidak ditemukan', () => { }, 'danger');
         return;
     }
 
     const statusSelect = document.getElementById('detail-status');
     const alasanInput = document.getElementById('detail-alasan');
-    
+
     if (!statusSelect) return;
 
     const status = statusSelect.value;
 
     // Validate alasan for rejection
     if (status === 'ditolak' && (!alasanInput || !alasanInput.value.trim())) {
-        alert('❌ Alasan penolakan wajib diisi!');
-        if (alasanInput) alasanInput.focus();
+        showConfirmModal('Validasi', '❌ Alasan penolakan wajib diisi!', () => {
+            if (alasanInput) alasanInput.focus();
+        }, 'danger');
         return;
     }
 
-    if (!confirm('Yakin ingin mengubah status menjadi ' + status.toUpperCase() + '?')) {
-        return;
-    }
+    // Prepare messages
+    const messages = {
+        'berhasil': {
+            title: 'Konfirmasi Persetujuan',
+            message: 'Yakin ingin mengubah status menjadi BERHASIL?\n\nSaldo sudah terpotong dan admin akan melakukan transfer manual.',
+            type: 'success'
+        },
+        'ditolak': {
+            title: 'Konfirmasi Penolakan',
+            message: 'Yakin ingin mengubah status menjadi DITOLAK?\n\nSaldo akan dikembalikan otomatis ke pengguna.',
+            type: 'danger'
+        },
+        'diproses': {
+            title: 'Konfirmasi Update',
+            message: 'Yakin ingin mengubah status menjadi DIPROSES?',
+            type: 'warning'
+        }
+    };
 
-    // Get CSRF token
+    const config = messages[status] || messages['diproses'];
+
+    showConfirmModal(
+        config.title,
+        config.message,
+        () => submitStatusUpdate(status, alasanInput),
+        config.type
+    );
+}
+
+function submitStatusUpdate(status, alasanInput) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
     if (!csrfToken) {
-        alert('CSRF token tidak ditemukan. Silakan refresh halaman.');
-        location.reload();
+        showConfirmModal('Error', 'CSRF token tidak ditemukan. Silakan refresh halaman.', () => location.reload(), 'danger');
         return;
     }
 
-    // Prepare request body
     const requestBody = {
         status: status,
         _method: 'PUT'
@@ -215,21 +296,23 @@ function updateStatus() {
         },
         body: JSON.stringify(requestBody)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSuccessPopup(data.message);
-            setTimeout(() => {
-                location.reload();
-            }, 2500);
-        } else {
-            alert('❌ ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('❌ Gagal: ' + error.message);
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeConfirmModal();
+                closeModal();
+                showSuccessPopup(data.message);
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                showConfirmModal('Error', '❌ ' + data.message, () => { }, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showConfirmModal('Error', '❌ Gagal: ' + error.message, () => { }, 'danger');
+        });
 }
 
 // ================= SUCCESS POPUP =================
@@ -237,11 +320,11 @@ function updateStatus() {
 function showSuccessPopup(message) {
     const popup = document.getElementById('successPopup');
     const msg = document.getElementById('successMessage');
-    
+
     if (popup && msg) {
         msg.textContent = message || 'Data berhasil diperbarui!';
         popup.style.display = 'flex';
-        
+
         setTimeout(() => {
             popup.style.display = 'none';
         }, 2500);
@@ -251,12 +334,12 @@ function showSuccessPopup(message) {
 // ================= EVENT LISTENERS =================
 
 // Close modal on outside click
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const detailModal = document.getElementById('detailModal');
     const successPopup = document.getElementById('successPopup');
 
     if (detailModal) {
-        detailModal.addEventListener('click', function(e) {
+        detailModal.addEventListener('click', function (e) {
             if (e.target === this) {
                 closeModal();
             }
@@ -264,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (successPopup) {
-        successPopup.addEventListener('click', function(e) {
+        successPopup.addEventListener('click', function (e) {
             if (e.target === this) {
                 this.style.display = 'none';
             }
@@ -272,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ESC key to close
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeModal();
             if (successPopup) successPopup.style.display = 'none';
@@ -283,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ================= LARAVEL SESSION HANDLER =================
 
 // Handle success/error messages from Laravel session
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // This would be populated by Blade if needed
     // For now, handled via showSuccessPopup()
 });

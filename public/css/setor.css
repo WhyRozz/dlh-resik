@@ -667,3 +667,50 @@
 .pagination-container .text-sm.text-gray-700 {
     display: none !important;
 }
+
+
+
+/* =========================================
+   FIX KHUSUS MOBILE (TANPA MERUSAK DESKTOP)
+   ========================================= */
+@media (max-width: 480px) {
+    /* 1. Perbaiki scroll tabel agar stabil & sinkron */
+    .table-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch; /* Smooth scroll iOS */
+    }
+    .data-table {
+        display: table !important;
+        min-width: 650px; /* Paksa scroll horizontal rapi */
+    }
+
+    /* 2. Perbesar area sentuh (standar mobile 44px) */
+    .filter-select,
+    .btn-filter,
+    .search-wrapper,
+    .data-table .btn-action {
+        min-height: 44px !important;
+    }
+
+    /* 3. Pagination rapi & tidak tumpuk */
+    .pagination-container {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 10px !important;
+        padding: 15px 10px !important;
+    }
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* 4. Modal aman di layar kecil */
+    .modal-box {
+        width: 95% !important;
+        margin: 10px;
+        max-height: 85vh;
+    }
+    .modal-body {
+        padding: 15px;
+    }
+}

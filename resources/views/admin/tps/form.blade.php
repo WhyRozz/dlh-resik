@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', isset($tps) ? 'Edit Informasi TPS - SIMPELSI' : 'Tambah Informasi TPS - SIMPELSI')
+@section('title', isset($tps) ? 'Edit Informasi TPS - RESIK' : 'Tambah Informasi TPS - RESIK')
 @section('page-title', isset($tps) ? 'Edit TPS' : 'Tambah TPS')
 @section('page-title-mobile', isset($tps) ? 'EDIT' : 'TAMBAH')
 
@@ -9,9 +9,6 @@
 @endpush
 
 @section('content')
-<div class="content-header">
-    <h2>{{ isset($tps) ? 'Edit' : 'Tambah' }} Informasi TPS</h2>
-</div>
 
 <div class="form-container">
     <div class="form-title">{{ isset($tps) ? 'Edit TPS' : 'Form Tambah TPS' }}</div>

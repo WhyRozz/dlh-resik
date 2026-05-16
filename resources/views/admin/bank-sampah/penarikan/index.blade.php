@@ -18,7 +18,7 @@
                     <div class="filter-group">
                         <select name="bulan" class="filter-select">
                             <option value="">Semua Bulan</option>
-                            @for($i = 1; $i <= 12; $i++)
+                            @for ($i = 1; $i <= 12; $i++)
                                 <option value="{{ $i }}" {{ request('bulan') == $i ? 'selected' : '' }}>
                                     {{ date('F', mktime(0, 0, 0, $i, 1)) }}
                                 </option>
@@ -36,8 +36,10 @@
 
                         <select name="status" class="filter-select">
                             <option value="">Semua Status</option>
-                            <option value="diproses" {{ request('status') == 'diproses' ? 'selected' : '' }}>Diproses</option>
-                            <option value="berhasil" {{ request('status') == 'berhasil' ? 'selected' : '' }}>Berhasil</option>
+                            <option value="diproses" {{ request('status') == 'diproses' ? 'selected' : '' }}>Diproses
+                            </option>
+                            <option value="berhasil" {{ request('status') == 'berhasil' ? 'selected' : '' }}>Berhasil
+                            </option>
                             <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                         </select>
 
@@ -58,7 +60,8 @@
             <div class="top-search">
                 <div class="search-wrapper">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="Cari nama, status, atau tanggal...">
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="Cari nama, status, atau tanggal...">
                 </div>
             </div>
         </div>
@@ -84,7 +87,7 @@
                 <thead>
                     <tr>
                         <th width="5%">No</th>
-                        <th width="20%">Nama Anggota</th>
+                        <th width="20%">Nama Pengguna</th>
                         <th width="18%">Tanggal Penarikan</th>
                         <th width="15%">Jumlah Uang</th>
                         <th width="17%">E-Wallet</th>
@@ -95,20 +98,46 @@
                 <tbody>
                     @forelse($penarikans as $index => $penarikan)
                         <tr>
+                            {{-- 1. Nomor Urut --}}
                             <td>{{ $penarikans->firstItem() + $index }}</td>
+
+                            {{-- 2. Nama Anggota --}}
                             <td><span class="member-name">{{ $penarikan->nama_user ?? 'Unknown' }}</span></td>
+
+                            {{-- 3. Tanggal --}}
                             <td>
                                 <span class="date-main">{{ $penarikan->tanggal_penarikan->format('d M Y') }}</span>
                                 <span class="date-time">{{ $penarikan->tanggal_penarikan->format('H:i') }}</span>
                             </td>
-                            <td><span class="amount">Rp {{ number_format($penarikan->jumlah_uang, 0, ',', '.') }}</span></td>
+
+                            {{-- 4. Jumlah Uang --}}
+                            <td><span class="amount">Rp {{ number_format($penarikan->jumlah_uang, 0, ',', '.') }}</span>
+                            </td>
+
+                            {{-- 5. E-Wallet --}}
                             <td>
                                 <span class="wallet-type">{{ $penarikan->jenis_ewallet ?? '-' }}</span>
                                 <span class="wallet-number">{{ $penarikan->nomor_ewallet ?? '' }}</span>
                             </td>
+
+                            {{-- 6. ✅ STATUS (Badge: Diproses/Disetujui/Ditolak) --}}
+                            <td>
+                                @php
+                                    $statusClass = match ($penarikan->status) {
+                                        'berhasil' => 'status-berhasil',
+                                        'ditolak' => 'status-ditolak',
+                                        default => 'status-diproses',
+                                    };
+                                    $statusText = ucfirst($penarikan->status);
+                                @endphp
+                                <span class="status-badge {{ $statusClass }}">{{ $statusText }}</span>
+                            </td>
+
+                            {{-- 7. ✅ AKSI (Icon Mata 👁️) --}}
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn-action btn-view" onclick="showDetail({{ $penarikan->id_penarikan }})" title="Lihat Detail">
+                                    <button class="btn-action btn-view"
+                                        onclick="showDetail({{ $penarikan->id_penarikan }})" title="Lihat Detail">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
@@ -117,7 +146,8 @@
                     @empty
                         <tr class="empty-row">
                             <td colspan="7">
-                                <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.3; display: block; margin-bottom: 8px;"></i>
+                                <i class="fas fa-inbox"
+                                    style="font-size: 48px; opacity: 0.3; display: block; margin-bottom: 8px;"></i>
                                 Belum ada data penarikan
                             </td>
                         </tr>
@@ -129,7 +159,8 @@
         {{-- Pagination --}}
         @if ($penarikans->hasPages())
             <div class="pagination-container">
-                <div>Menampilkan {{ $penarikans->firstItem() }} - {{ $penarikans->lastItem() }} dari {{ $penarikans->total() }} data</div>
+                <div>Menampilkan {{ $penarikans->firstItem() }} - {{ $penarikans->lastItem() }} dari
+                    {{ $penarikans->total() }} data</div>
                 {{ $penarikans->links() }}
             </div>
         @endif
@@ -142,7 +173,7 @@
                 <h3 class="modal-title">Detail Penarikan</h3>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
-            
+
             <div class="modal-body">
                 <div class="form-grid">
                     <div class="form-group">
@@ -167,8 +198,10 @@
 
                     <div class="form-group">
                         <label class="form-label">E-Wallet</label>
-                        <input type="text" id="detail-jenis" class="form-input" readonly placeholder="Jenis E-Wallet">
-                        <input type="text" id="detail-ewallet" class="form-input" readonly placeholder="Nomor E-Wallet" style="margin-top: 8px;">
+                        <input type="text" id="detail-jenis" class="form-input" readonly
+                            placeholder="Jenis E-Wallet">
+                        <input type="text" id="detail-ewallet" class="form-input" readonly
+                            placeholder="Nomor E-Wallet" style="margin-top: 8px;">
                     </div>
 
                     <div class="form-group">
@@ -201,7 +234,8 @@
 
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
-                <button id="btnSimpan" class="btn btn-primary" onclick="updateStatus()" style="display: none;">Simpan Perubahan</button>
+                <button id="btnSimpan" class="btn btn-primary" onclick="updateStatus()" style="display: none;">Simpan
+                    Perubahan</button>
             </div>
         </div>
     </div>
@@ -214,6 +248,21 @@
             </div>
             <h3 class="success-title">Berhasil!</h3>
             <p class="success-message" id="successMessage">Data berhasil diperbarui.</p>
+        </div>
+    </div>
+
+    {{-- Confirmation Modal --}}
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-content">
+            <div class="confirm-icon">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <h3 class="confirm-title" id="confirmTitle">Konfirmasi</h3>
+            <p class="confirm-message" id="confirmMessage">Apakah Anda yakin?</p>
+            <div class="confirm-buttons">
+                <button class="btn-confirm btn-cancel" onclick="closeConfirmModal()">Batal</button>
+                <button class="btn-confirm btn-ok" id="btnConfirmOk" onclick="executeConfirm()">Ya, Lanjutkan</button>
+            </div>
         </div>
     </div>
 @endsection

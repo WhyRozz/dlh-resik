@@ -3,6 +3,7 @@
 @section('title', 'Data Setor - Bank Sampah')
 
 @push('styles')
+    {{-- FUNGSI: Memuat file CSS khusus untuk halaman data setor --}}
     <link rel="stylesheet" href="{{ asset('css/setor.css') }}">
 @endpush
 
@@ -76,7 +77,7 @@
                 <thead>
                     <tr>
                         <th width="5%">No</th>
-                        <th width="22%">Nama</th>
+                        <th width="22%">Nama Pengguna</th>
                         <th width="15%">Waktu Setor</th>
                         <th width="13%">Pekerjaan</th>
                         <th width="15%">Jenis</th>
@@ -147,127 +148,17 @@
     {{-- ✅ MODAL DETAIL (Tetap sama, tidak diubah) --}}
     @include('admin.bank-sampah.setor-sampah._detail-modal')
 
-    {{-- ✅ LIVE SEARCH JAVASCRIPT (Tetap sama, tidak diubah) --}}
+    {{-- 🔗 BRIDGE: Pass dynamic routes ke file JS eksternal --}}
     <script>
-        (function() {
-            const input = document.getElementById('liveSearchInput');
-            const clearBtn = document.getElementById('clearSearch');
-            const tableContainer = document.querySelector('.table-container'); // ✅ Update selector
-            const filterForm = document.getElementById('filterForm');
-            let timer = null;
-
-            // Live Search Input
-            if (input && clearBtn) {
-                if (input.value.trim() !== '') clearBtn.style.display = 'inline-block';
-
-                input.addEventListener('input', function() {
-                    const val = this.value.trim();
-                    clearBtn.style.display = val ? 'inline-block' : 'none';
-
-                    toggleResetButton();
-
-                    clearTimeout(timer);
-                    timer = setTimeout(() => {
-                        if (val.length >= 2 || val === '') fetchSearch(val);
-                    }, 350);
-                });
-
-                clearBtn.addEventListener('click', () => {
-                    input.value = '';
-                    clearBtn.style.display = 'none';
-                    toggleResetButton();
-                    fetchSearch('');
-                    input.focus();
-                });
+        window.SetorConfig = {
+            routes: {
+                index: "{{ route('admin.bank-sampah.setor.index') }}"
             }
-
-            // Filter Form Submit (AJAX)
-            if (filterForm) {
-                filterForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const formData = new FormData(this);
-                    const searchQuery = input?.value.trim() || '';
-                    if (searchQuery) formData.set('search', searchQuery);
-
-                    const queryString = new URLSearchParams(formData).toString();
-                    fetchSearchAjax(queryString);
-                });
-            }
-
-            function fetchSearch(query) {
-                if (!tableContainer) return;
-                tableContainer.innerHTML =
-                    `<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top:15px;color:#666;">Mencari...</p></div>`;
-
-                fetch(`{{ route('admin.bank-sampah.setor.index') }}?search=${encodeURIComponent(query)}`, {
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => updateTable(data.table))
-                    .catch(err => {
-                        console.error('Search error:', err);
-                        window.location.href =
-                            `{{ route('admin.bank-sampah.setor.index') }}?search=${encodeURIComponent(query)}`;
-                    });
-            }
-
-            function fetchSearchAjax(queryString) {
-                if (!tableContainer) return;
-                tableContainer.innerHTML =
-                    `<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top:15px;color:#666;">Memfilter...</p></div>`;
-
-                fetch(`{{ route('admin.bank-sampah.setor.index') }}?${queryString}`, {
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => updateTable(data.table))
-                    .catch(err => {
-                        console.error('Filter error:', err);
-                        window.location.href = `{{ route('admin.bank-sampah.setor.index') }}?${queryString}`;
-                    });
-            }
-
-            function updateTable(html) {
-                if (html) {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newContainer = doc.querySelector('.table-container'); // ✅ Update selector
-                    if (newContainer && tableContainer) {
-                        tableContainer.outerHTML = newContainer.outerHTML;
-                    }
-                    toggleResetButton();
-                }
-            }
-        })();
-
-
-        // ✅ Fungsi untuk tampilkan/sembunyikan tombol Reset berdasarkan filter aktif
-        function toggleResetButton() {
-            const resetBtn = document.getElementById('resetButton');
-            if (!resetBtn) return;
-
-            // Cek nilai filter
-            const bulan = document.querySelector('select[name="bulan"]').value;
-            const tahun = document.querySelector('select[name="tahun"]').value;
-            const search = document.getElementById('liveSearchInput')?.value || '';
-
-            // Tampilkan Reset jika ada filter aktif
-            if (bulan || tahun || search.trim()) {
-                resetBtn.style.display = 'inline-flex';
-            } else {
-                resetBtn.style.display = 'none';
-            }
-        }
-
-        // ✅ Jalankan saat halaman pertama kali load
-        document.addEventListener('DOMContentLoaded', toggleResetButton);
+        };
     </script>
+
+@push('scripts')
+    {{-- FUNGSI: Memuat file JS eksternal yang berisi semua fungsi interaksi halaman --}}
+    <script src="{{ asset('js/setor.js') }}"></script>
+@endpush
 @endsection

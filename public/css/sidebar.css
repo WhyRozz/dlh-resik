@@ -250,3 +250,23 @@
 .has-dropdown .nav-link-text span {
     margin-left: 10px;
 }
+
+
+/* Tambahkan di bagian paling bawah sidebar.css */
+
+/* Hide sidebar on mobile */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none !important;
+    }
+}
+
+/* Show sidebar on desktop */
+@media (min-width: 769px) {
+    .sidebar {
+        display: flex !important;
+    }
+}
+
+
+

@@ -208,79 +208,18 @@
         </div>
     </div>
 </div>
-@endsection
+
+{{-- 🔗 BRIDGE: Pass dynamic route ke file JS eksternal --}}
+<script>
+    window.DataPenggunaConfig = {
+        routes: {
+            index: "{{ route('admin.data-pengguna.index') }}"
+        }
+    };
+</script>
 
 @push('scripts')
 <!-- Fungsi: Memuat file JavaScript eksternal untuk handle modal dan interaksi data pengguna -->
 <script src="{{ asset('js/data-pengguna.js') }}"></script>
-@push('scripts')
-<script src="{{ asset('js/data-pengguna.js') }}"></script>
-
-<!-- Fungsi: Live search dengan AJAX dan debounce 500ms untuk pencarian real-time -->
-<script>
-(function() {
-    const searchInput = document.querySelector('.search-input');
-    const tableContainer = document.querySelector('.table-container');
-    let timeout = null;
-
-    if (!searchInput) return;
-
-    <!-- Fungsi: Event listener untuk input search dengan debounce -->
-    searchInput.addEventListener('input', function(e) {
-        const searchValue = e.target.value.trim();
-        const currentFilter = document.querySelector('input[name="filter"]')?.value || 'all';
-        
-        <!-- Fungsi: Clear timeout sebelumnya untuk mencegah multiple request -->
-        clearTimeout(timeout);
-        
-        <!-- Fungsi: Tunggu 500ms setelah user berhenti mengetik sebelum fetch -->
-        timeout = setTimeout(function() {
-            performSearch(searchValue, currentFilter);
-        }, 500);
-    });
-
-    <!-- Fungsi: Fungsi utama untuk melakukan pencarian via AJAX -->
-    function performSearch(search, filter) {
-        <!-- Fungsi: Simpan konten asli untuk fallback jika error -->
-        const originalContent = tableContainer.innerHTML;
-        <!-- Fungsi: Tampilkan loading spinner saat fetch berjalan -->
-        tableContainer.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #2e8b57;"></i>
-                <p style="margin-top: 15px; color: #666;">Mencari...</p>
-            </div>
-        `;
-
-        // Fungsi: Build URL dengan parameter search dan filter
-        const url = `{{ route('admin.data-pengguna.index') }}?search=${encodeURIComponent(search)}&filter=${filter}`;
-        
-        fetch(url, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            <!-- Fungsi: Parse HTML response dari server -->
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newTableContainer = doc.querySelector('.table-container');
-            
-            if (newTableContainer) {
-                <!-- Fungsi: Replace konten tabel dengan hasil search -->
-                tableContainer.innerHTML = newTableContainer.innerHTML;
-            } else {
-                <!-- Fungsi: Restore konten asli jika parsing gagal -->
-                tableContainer.innerHTML = originalContent;
-            }
-        })
-        .catch(error => {
-            console.error('Search error:', error);
-            <!-- Fungsi: Restore konten asli jika terjadi error network -->
-            tableContainer.innerHTML = originalContent;
-        });
-    }
-})();
-</script>
 @endpush
+@endsection
