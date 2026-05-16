@@ -1019,3 +1019,254 @@ hr[style*="margin: 40px"] {
     background: rgba(255, 255, 255, 0.3);
     transform: translateY(-50%) rotate(90deg);
 }
+
+
+/* =========================================
+   FIX RESPONSIVE MOBILE - SEARCH BAR
+   ========================================= */
+@media (max-width: 768px) {
+    .search-wrapper-akun {
+        margin-top: 0 !important;
+        margin-right: 15px !important;
+        margin-left: 15px !important;
+        max-width: 100%;
+        margin-bottom: 20px !important;
+    }
+    
+    .search-input-akun {
+        padding: 10px 15px 10px 40px;
+        font-size: 13px;
+    }
+    
+    .search-icon {
+        left: 15px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-wrapper-akun {
+        margin: 0 10px 15px 10px !important;
+    }
+    
+    .search-input-akun {
+        padding: 9px 12px 9px 38px;
+        font-size: 12px;
+        border-radius: 40px;
+    }
+}
+
+
+/* =========================================
+   FIX RESPONSIVE MOBILE - TABEL PETUGAS
+   ========================================= */
+@media (max-width: 768px) {
+    .th-email,
+    .petugas-table-container td:nth-child(3) {
+        padding: 10px 8px !important;
+        font-size: 12px;
+    }
+    
+    .th-telepon,
+    .petugas-table-container td:nth-child(4) {
+        padding: 10px 5px !important;
+        font-size: 11px;
+    }
+    
+    .th-wilayah,
+    .petugas-table-container td:nth-child(5) {
+        padding: 10px 8px !important;
+        font-size: 11px;
+    }
+    
+    .th-aksi,
+    .petugas-table-container td:nth-child(7) {
+        padding: 10px 4px !important;
+    }
+    
+    /* Perkecil tombol aksi di mobile */
+    .petugas-table-container td:nth-child(7) button {
+        padding: 4px 8px !important;
+        margin: 0 1px !important;
+    }
+    
+    .petugas-table-container td:nth-child(7) img {
+        width: 16px !important;
+        height: 16px !important;
+    }
+    
+    /* Badge wilayah lebih compact */
+    .petugas-table-container td:nth-child(5) span {
+        padding: 3px 8px !important;
+        font-size: 10px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Stack header tabel agar tidak horizontal scroll */
+    .petugas-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .petugas-table-container table {
+        min-width: 600px; /* Paksa scroll horizontal yang smooth */
+    }
+}
+
+
+/* =========================================
+   MOBILE CARD VIEW - PETUGAS (TAMBAHAN BARU)
+   ========================================= */
+.mobile-cards {
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.petugas-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.card-header-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.card-number {
+    font-size: 14px;
+    font-weight: 700;
+    color: #20A726;
+    background: #e8f5e9;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action-edit,
+.btn-action-delete {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-action-edit {
+    background: #fff3cd;
+}
+
+.btn-action-edit:hover {
+    background: #ffe69c;
+    transform: scale(1.05);
+}
+
+.btn-action-delete {
+    background: #f8d7da;
+}
+
+.btn-action-delete:hover {
+    background: #f1aeb5;
+    transform: scale(1.05);
+}
+
+.card-body-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.card-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+
+.card-value {
+    font-size: 14px;
+    color: #333;
+    word-break: break-word;
+}
+
+.badge-wilayah-mobile {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    align-self: flex-start;
+}
+
+/* =========================================
+   RESPONSIVE SWITCH - KUNCI UTAMA!
+   ========================================= */
+
+/* Desktop: Tampilkan tabel, sembunyikan card */
+@media (min-width: 769px) {
+    .desktop-table { display: block !important; }
+    .mobile-cards { display: none !important; }
+}
+
+/* Mobile: Sembunyikan tabel, tampilkan card */
+@media (max-width: 768px) {
+    .desktop-table { display: none !important; }
+    .mobile-cards { display: flex !important; }
+    
+    /* Search bar fix - tanpa ubah desain desktop */
+    .search-wrapper-akun {
+        margin-top: 0 !important;
+        margin-right: 15px !important;
+        margin-left: 15px !important;
+        max-width: 100%;
+        margin-bottom: 20px !important;
+    }
+    .search-input-akun {
+        padding: 10px 15px 10px 40px;
+        font-size: 13px;
+    }
+    .search-icon {
+        left: 15px;
+        font-size: 14px;
+    }
+}
+
+/* Small mobile tweaks */
+@media (max-width: 480px) {
+    .search-wrapper-akun { margin: 0 10px 15px 10px !important; }
+    .search-input-akun {
+        padding: 9px 12px 9px 38px;
+        font-size: 12px;
+        border-radius: 40px;
+    }
+    .petugas-card { padding: 12px; }
+    .card-number { font-size: 12px; padding: 3px 10px; }
+    .card-label { font-size: 11px; }
+    .card-value { font-size: 13px; }
+    .badge-wilayah-mobile { padding: 5px 10px; font-size: 11px; }
+}
+
+
