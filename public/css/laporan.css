@@ -230,3 +230,76 @@ th {
     .status-options { flex-direction: column; gap: 10px; }
     .search-input { padding: 8px 15px; font-size: 13px; }
 }
+
+
+/* Pagination Styles */
+.pagination-container {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 15px 20px 0 20px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.pagination {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pagination li a,
+.pagination li span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    font-size: 0.875rem;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.pagination li a:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.pagination li.active span {
+    background: #2e8b57;
+    color: white;
+    border-color: #2e8b57;
+    font-weight: 600;
+}
+
+.pagination li.disabled span {
+    color: #d1d5db;
+    cursor: not-allowed;
+    background: #f9fafb;
+}
+
+/* Hide Laravel pagination info text */
+.pagination-container small,
+.pagination+small,
+.pagination~small,
+.pagination-info,
+.text-muted {
+    display: none !important;
+}
+
+
+.pagination-container p,
+.pagination-container .text-sm.text-gray-700 {
+    display: none !important;
+}

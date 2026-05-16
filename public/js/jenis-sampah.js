@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     initModals();
     initAlerts();
+    initImageUpload();
 });
 
 function initModals() {
@@ -77,6 +78,37 @@ function openModal(type, id = null, jenis = '', satuan = '', harga = 0, gambar =
     modal.classList.add('active');
 }
 
+
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    const uploadText = input.parentElement.querySelector('p');
+    
+    if (input.files && input.files[0] && preview) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.innerHTML = '';
+            
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.alt = 'Preview';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'contain';
+            
+            preview.style.display = 'block';
+            preview.appendChild(img);
+            
+            if (uploadText) {
+                uploadText.textContent = 'Klik untuk ganti foto';
+            }
+        };
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+
 /**
  * Close add/edit modal
  */
@@ -84,19 +116,31 @@ function closeModal() {
     document.getElementById('formModal').classList.remove('active');
 }
 
-/**
- * Preview image before upload
- */
-function previewImage(input) {
-    const preview = document.getElementById('imagePreview');
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-        };
-        reader.readAsDataURL(input.files[0]);
+function initImageUpload() {
+    const imageUpload = document.querySelector('.image-upload');
+    const fileInput = document.getElementById('gambar');
+    
+    if (imageUpload && fileInput) {
+        imageUpload.addEventListener('click', function(e) {
+            if (e.target.closest('.image-preview img')) {
+                return;
+            }
+            e.stopPropagation();
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', function(e) {
+            e.stopPropagation();
+            previewImage(this);
+        });
+        
+        fileInput.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
     }
 }
+
+
 
 /**
  * Open delete confirmation modal
@@ -113,3 +157,5 @@ function confirmDelete(id, name) {
 function closeDeleteModal() {
     document.getElementById('deleteModal').classList.remove('active');
 }
+
+

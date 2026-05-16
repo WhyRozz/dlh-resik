@@ -49,7 +49,8 @@
 
                 {{-- Row Utama --}}
                 <tr onclick="toggleDetail({{ $id }})" style="cursor: pointer;">
-                    <td>{{ $id }}</td>
+                    {{-- <td>{{ $id }}</td> --}}
+                    <td>{{ $laporanList->firstItem() + $loop->index }}</td>
                     <td>{{ $nama }}</td>
                     <td>{{ $lokasi }}</td>
                     <td><span class="status-badge status-{{ $statusClass }}">{{ $status }}</span></td>
@@ -147,6 +148,27 @@
         </tbody>
     </table>
 </div>
+
+{{-- ✅ PAGINATION (Copy dari Penarikan) --}}
+@if($laporanList->hasPages())
+    <div class="pagination-container" style="
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 15px 20px 0 20px;
+        border-top: 1px solid #e0e0e0;
+        font-size: 0.9rem;
+        color: #666;
+    ">
+        <div>
+            Menampilkan {{ $laporanList->firstItem() }} - {{ $laporanList->lastItem() }} dari {{ $laporanList->total() }} data
+        </div>
+        {{ $laporanList->links() }}
+    </div>
+@endif
 </div>
 {{-- Popup Modals --}}
 @include('admin.laporan.partials.modals')

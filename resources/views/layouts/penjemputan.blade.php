@@ -20,29 +20,6 @@
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/penjemputan.css') }}">
     
-    {{-- ✅ INI RAHASIANYA: Paksa Font & Smoothing di Level Layout --}}
-    <style>
-        html, body {
-            /* Menggunakan System Font Stack biar sama persis kayak layout.admin */
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-            /* Bikin font tajam dan halus */
-            -webkit-font-smoothing: antialiased !important;
-            -moz-osx-font-smoothing: grayscale !important;
-            text-rendering: optimizeLegibility !important;
-        }
-        
-        /* Pastikan semua elemen turunannya ikut */
-        *, *::before, *::after {
-            font-family: inherit !important;
-        }
-
-        /* Fix Sidebar Font Weight biar nggak tebal aneh */
-        .sidebar .nav-item a, 
-        .sidebar .sub-menu a {
-            font-weight: 500 !important;
-        }
-    </style>
-
     @stack('styles')
 </head>
 <body>

@@ -1,39 +1,39 @@
 @extends('layouts.admin')
 
-<!-- Fungsi: Menetapkan judul halaman dinamis berdasarkan mode (Edit/Tambah) -->
+{{-- FUNGSI: Menetapkan judul halaman dinamis berdasarkan mode (Edit/Tambah) --}}
 @section('title', isset($artikel) ? 'Edit Artikel' : 'Tambah Artikel')
 @section('page-title', isset($artikel) ? 'Edit Artikel' : 'Tambah Artikel')
 @section('page-title-mobile', isset($artikel) ? 'EDIT' : 'TAMBAH')
 
 @push('styles')
-<!-- Fungsi: Memuat file CSS khusus untuk halaman form artikel -->
-<link rel="stylesheet" href="{{ asset('css/artikel-form.css') }}">
+    {{-- FUNGSI: Memuat file CSS khusus untuk halaman form artikel --}}
+    <link rel="stylesheet" href="{{ asset('css/artikel-form.css') }}">
 @endpush
 
 @section('content')
-<!-- Fungsi: Container utama form artikel -->
+{{-- FUNGSI: Container utama form artikel --}}
 <div class="form-container">
-    <!-- Fungsi: Judul form yang berubah dinamis: "Edit Artikel" atau "Tambah Artikel" -->
+    {{-- FUNGSI: Judul form yang berubah dinamis: "Edit Artikel" atau "Tambah Artikel" --}}
     <div class="form-title">{{ isset($artikel) ? 'Edit' : 'Tambah' }} Artikel</div>
 
-    <!-- Fungsi: Form utama dengan action dinamis berdasarkan mode dan enctype untuk upload file -->
+    {{-- FUNGSI: Form utama dengan action dinamis berdasarkan mode dan enctype untuk upload file --}}
     <form id="artikelForm"
           method="POST"
           action="{{ isset($artikel) ? route('admin.artikel.update', $artikel->id_artikel) : route('admin.artikel.store') }}"
           enctype="multipart/form-data">
         @csrf
         @if(isset($artikel))
-            <!-- Fungsi: Method spoofing PUT untuk update data di Laravel -->
+            {{-- FUNGSI: Method spoofing PUT untuk update data di Laravel --}}
             @method('PUT')
         @endif
 
         <div class="form-row-main">
-            <!-- Fungsi: Section upload foto artikel -->
+            {{-- FUNGSI: Section upload foto artikel --}}
             <div class="upload-section">
                 <label class="upload-label">Upload Foto</label>
-                <!-- Fungsi: Area klik untuk trigger input file -->
+                {{-- FUNGSI: Area klik untuk trigger input file --}}
                 <div class="upload-area" id="uploadArea">
-                    <!-- Fungsi: Placeholder yang tampil ketika belum ada gambar dipilih -->
+                    {{-- FUNGSI: Placeholder yang tampil ketika belum ada gambar dipilih --}}
                     <div class="upload-placeholder" id="uploadPlaceholder">
                         <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -43,15 +43,15 @@
                         <div class="upload-text">Klik untuk upload foto artikel</div>
                         <div class="upload-hint">Format: JPG, JPEG, PNG. Maksimal 2MB.</div>
                     </div>
-                    <!-- Fungsi: Preview gambar yang tampil setelah file dipilih atau saat mode edit -->
+                    {{-- FUNGSI: Preview gambar yang tampil setelah file dipilih atau saat mode edit --}}
                     <div class="upload-preview {{ isset($artikel) && $artikel->foto ? 'show' : '' }}" id="uploadPreview">
                         <img id="previewImage" 
                              src="{{ isset($artikel) && $artikel->foto ? asset('storage/' . $artikel->foto) : '' }}" 
                              alt="Preview foto artikel">
-                        <!-- Fungsi: Tombol untuk menghapus gambar yang sudah dipilih -->
+                        {{-- FUNGSI: Tombol untuk menghapus gambar yang sudah dipilih --}}
                         <button type="button" class="remove-image" onclick="removeImage()" title="Hapus gambar">×</button>
                     </div>
-                    <!-- Fungsi: Input file tersembunyi yang di-trigger via klik area upload -->
+                    {{-- FUNGSI: Input file tersembunyi yang di-trigger via klik area upload --}}
                     <input type="file" 
                            id="fotoInput" 
                            name="foto" 
@@ -60,11 +60,11 @@
                 </div>
             </div>
 
-            <!-- Fungsi: Section input form data artikel -->
+            {{-- FUNGSI: Section input form data artikel --}}
             <div class="form-section">
                 <div class="form-group">
                     <label class="form-label" for="judul">Judul Artikel *</label>
-                    <!-- Fungsi: Input judul dengan validasi required, maxlength, dan old() untuk retain value -->
+                    {{-- FUNGSI: Input judul dengan validasi required, maxlength, dan old() untuk retain value --}}
                     <input type="text"
                            class="form-input"
                            id="judul"
@@ -74,14 +74,14 @@
                            maxlength="255"
                            required>
                     @error('judul')
-                    <!-- Fungsi: Menampilkan error validation untuk field judul -->
-                    <span class="error-text">{{ $message }}</span>
+                        {{-- FUNGSI: Menampilkan error validation untuk field judul --}}
+                        <span class="error-text">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="tanggal">Tanggal Publikasi *</label>
-                    <!-- Fungsi: Input datetime-local dengan format value yang disesuaikan untuk HTML5 -->
+                    {{-- FUNGSI: Input datetime-local dengan format value yang disesuaikan untuk HTML5 --}}
                     <input type="datetime-local"
                            class="form-input"
                            id="tanggal"
@@ -89,31 +89,31 @@
                            value="{{ old('tanggal', isset($artikel) && $artikel->tanggal ? $artikel->tanggal->format('Y-m-d\TH:i') : date('Y-m-d\TH:i')) }}"
                            required>
                     @error('tanggal')
-                    <!-- Fungsi: Menampilkan error validation untuk field tanggal -->
-                    <span class="error-text">{{ $message }}</span>
+                        {{-- FUNGSI: Menampilkan error validation untuk field tanggal --}}
+                        <span class="error-text">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="deskripsi">Deskripsi Artikel *</label>
-                    <!-- Fungsi: Textarea untuk konten artikel dengan validasi required -->
+                    {{-- FUNGSI: Textarea untuk konten artikel dengan validasi required --}}
                     <textarea class="form-textarea"
                               id="deskripsi"
                               name="deskripsi"
                               placeholder="Tulis konten artikel di sini..."
                               required>{{ old('deskripsi', $artikel->deskripsi ?? '') }}</textarea>
                     @error('deskripsi')
-                    <!-- Fungsi: Menampilkan error validation untuk field deskripsi -->
-                    <span class="error-text">{{ $message }}</span>
+                        {{-- FUNGSI: Menampilkan error validation untuk field deskripsi --}}
+                        <span class="error-text">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
         </div>
 
-        <!-- Fungsi: Section tombol aksi form (Batal & Submit) -->
+        {{-- FUNGSI: Section tombol aksi form (Batal & Submit) --}}
         <div class="form-actions">
             <a href="{{ route('admin.artikel.index') }}" class="btn btn-batal">Batal</a>
-            <!-- Fungsi: Tombol submit dengan teks dinamis berdasarkan mode -->
+            {{-- FUNGSI: Tombol submit dengan teks dinamis berdasarkan mode --}}
             <button type="submit" class="btn btn-primary" id="submitBtn">
                 {{ isset($artikel) ? 'Perbarui Artikel' : 'Tambah Artikel' }}
             </button>
@@ -121,7 +121,7 @@
     </form>
 </div>
 
-<!-- Fungsi: Modal overlay untuk menampilkan error validation dari server -->
+{{-- FUNGSI: Modal overlay untuk menampilkan error validation dari server --}}
 <div id="errorModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header error">
@@ -135,113 +135,52 @@
         </div>
     </div>
 </div>
-@endsection
+
+{{-- 🔗 BRIDGE: Pass CSRF token & dynamic data ke file JS eksternal --}}
+<script>
+    window.ArtikelFormConfig = {
+        csrfToken: "{{ csrf_token() }}",
+        @if($errors->any())
+        hasErrors: true,
+        errors: @json($errors->all()),
+        @endif
+        @if(isset($artikel) && $artikel->foto)
+        existingFoto: "{{ asset('storage/' . $artikel->foto) }}",
+        @endif
+    };
+</script>
 
 @push('scripts')
-<script>
-<!-- Fungsi: Deklarasi variabel untuk elemen-elemen upload handling -->
-const uploadArea = document.getElementById('uploadArea');
-const fotoInput = document.getElementById('fotoInput');
-const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-const uploadPreview = document.getElementById('uploadPreview');
-const previewImage = document.getElementById('previewImage');
-
-<!-- Fungsi: Event listener untuk trigger file input ketika area upload diklik -->
-uploadArea.addEventListener('click', function(e) {
-    if (e.target !== uploadPreview && !uploadPreview.contains(e.target) && 
-        !e.target.classList.contains('remove-image')) {
-        fotoInput.click();
-    }
-});
-
-<!-- Fungsi: Event listener untuk handle file selection dan validasi -->
-fotoInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        <!-- Fungsi: Validasi ukuran file maksimal 2MB -->
-        if (file.size > 2 * 1024 * 1024) {
-            showError('Ukuran gambar maksimal 2MB');
-            fotoInput.value = '';
-            return;
-        }
-        
-        <!-- Fungsi: Validasi tipe file hanya JPG, PNG, GIF -->
-        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        if (!validTypes.includes(file.type)) {
-            showError('Format gambar harus JPG, JPEG, atau PNG');
-            fotoInput.value = '';
-            return;
-        }
-        
-        <!-- Fungsi: Preview gambar menggunakan FileReader -->
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            showPreview(e.target.result);
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-<!-- Fungsi: Menampilkan preview gambar dan menyembunyikan placeholder -->
-function showPreview(src) {
-    uploadPlaceholder.style.display = 'none';
-    uploadPreview.classList.add('show');
-    previewImage.src = src;
-}
-
-<!-- Fungsi: Menghapus gambar yang dipilih dan reset ke state placeholder -->
-function removeImage() {
-    fotoInput.value = '';
-    uploadPlaceholder.style.display = 'flex';
-    uploadPreview.classList.remove('show');
-    previewImage.src = '';
-}
-
-<!-- Fungsi: Menampilkan modal error dengan pesan yang diberikan -->
-function showError(message) {
-    document.getElementById('errorMessage').textContent = message;
-    document.getElementById('errorModal').classList.add('show');
-}
-
-<!-- Fungsi: Menyembunyikan modal error -->
-function hideErrorModal() {
-    document.getElementById('errorModal').classList.remove('show');
-}
-
-<!-- Fungsi: Disable tombol submit dan ubah teks saat form sedang disubmit -->
-const form = document.getElementById('artikelForm');
-const submitBtn = document.getElementById('submitBtn');
-
-form.addEventListener('submit', function(e) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Menyimpan...';
-});
-
-<!-- Fungsi: Close modal ketika user klik di luar area modal content -->
-document.getElementById('errorModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        hideErrorModal();
-    }
-});
-
-<!-- Fungsi: Show validation errors dari server di modal ketika ada error -->
-@if($errors->any())
-document.addEventListener('DOMContentLoaded', function() {
-    const errors = @json($errors->all());
-    showError(errors[0]);
-});
-@endif
-
-<!-- Fungsi: Tampilkan preview gambar existing ketika mode edit dan ada foto -->
-@if(isset($artikel) && $artikel->foto)
-document.addEventListener('DOMContentLoaded', function() {
-    showPreview('{{ asset('storage/' . $artikel->foto) }}');
-});
-@endif
-
-<!-- Fungsi: Redirect ke index dengan pesan success setelah submit berhasil -->
-@if(session('success'))
-window.location.href = "{{ route('admin.artikel.index') }}";
-@endif
-</script>
+    {{-- FUNGSI: Memuat file JS eksternal yang berisi semua fungsi form handling --}}
+    <script src="{{ asset('js/artikel-form.js') }}"></script>
+    
+    {{-- FUNGSI: Auto-show error modal jika ada validation errors dari Laravel --}}
+    @if($errors->any())
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof showError === 'function' && window.ArtikelFormConfig?.errors?.[0]) {
+                showError(window.ArtikelFormConfig.errors[0]);
+            }
+        });
+    </script>
+    @endif
+    
+    {{-- FUNGSI: Auto-show preview jika mode edit dan ada foto existing --}}
+    @if(isset($artikel) && $artikel->foto)
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof showPreview === 'function' && window.ArtikelFormConfig?.existingFoto) {
+                showPreview(window.ArtikelFormConfig.existingFoto);
+            }
+        });
+    </script>
+    @endif
+    
+    {{-- FUNGSI: Redirect ke index dengan pesan success setelah submit berhasil --}}
+    @if(session('success'))
+    <script>
+        window.location.href = "{{ route('admin.artikel.index') }}";
+    </script>
+    @endif
 @endpush
+@endsection

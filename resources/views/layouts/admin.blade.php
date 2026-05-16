@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mobile-hamburger.css') }}">
     @stack('styles')
 </head>
 
@@ -36,10 +37,12 @@
             </div>
         </div>
     </div>
-    @include('admin.partials.sidebar')
+    @include('admin.partials.sidebar') 
 
-    <div class="admin-wrapper" style="margin-left: 260px; padding: 20px;">
+    @include('admin.partials.mobile-navbar')
+
         @include('admin.partials.navbar')
+        <div class="admin-wrapper">
         <main>
             @yield('content')
         </main>
@@ -47,6 +50,7 @@
     
     <!-- Sidebar JS -->
     <script src="{{ asset('js/sidebar.js') }}"></script>
+    <script src="{{ asset('js/mobile-hamburger.js') }}"></script>
 
     <!-- Script untuk disable notifikasi di Penjemputan -->
     @if(request()->routeIs('admin.bank-sampah.penjemputan*'))
