@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Kelola Informasi TPS - SIMPELSI')
+@section('title', 'Kelola Informasi TPS - RESIK')
 @section('page-title', 'Kelola TPS')
 @section('page-title-mobile', 'TPS')
 

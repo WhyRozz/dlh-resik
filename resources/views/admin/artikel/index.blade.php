@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 {{-- FUNGSI: Menetapkan judul halaman dan header untuk halaman daftar artikel --}}
-@section('title', 'Daftar Artikel - SIMPELSI')
+@section('title', 'Daftar Artikel - RESIK')
 @section('page-title', 'Kelola Artikel')
 @section('page-title-mobile', 'ARTIKEL')
 

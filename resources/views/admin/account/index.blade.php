@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Kelola Akun - SIMPELSI')
+@section('title', 'Kelola Akun - RESIK')
 @section('page-title', 'Kelola Akun')
 @section('page-title-mobile', 'AKUN')
 
