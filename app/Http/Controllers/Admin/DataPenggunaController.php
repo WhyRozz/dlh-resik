@@ -141,12 +141,12 @@ class DataPenggunaController extends Controller
     }
 
     public function export(Request $request)
-    {
-        $filter = $request->query('filter', 'all');
-        $filename = 'data_pengguna_' . ($filter === 'all' ? 'semua' : $filter) . '_' . now()->format('Ymd') . '.xlsx';
+{
+    $filter = $request->query('filter', 'all');
+    $filename = 'data_pengguna_' . ($filter === 'all' ? 'semua' : $filter) . '_' . now()->format('Ymd') . '.xlsx';
 
-        return Excel::download(new DataPenggunaExport($filter), $filename);
-    }
+    return Excel::download(new DataPenggunaExport($filter), $filename);
+}
 
     // API untuk detail user
     public function show($type, $id)

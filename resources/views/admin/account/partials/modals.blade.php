@@ -46,20 +46,81 @@
             <span class="close-modal" onclick="closeModal('otpVerifyModal')">&times;</span>
         </div>
         <div class="modal-body">
-            <p>Masukkan kode 4 digit yang dikirim ke <span id="otpTargetEmail" style="font-weight:bold;">email@domain.com</span>.</p>
-            <label for="otpInput">Kode OTP</label>
+            <p style="margin-bottom: 15px; line-height: 1.6;">
+                Masukkan kode 4 digit yang dikirim ke<br>
+                <span id="otpTargetEmail" style="display: inline-block; background: #e8f5e9; color: #2e7d32; padding: 6px 16px; border-radius: 20px; font-weight: 600; margin: 8px 0; word-break: break-all;">email@domain.com</span>
+            </p>
+            <label for="otpInput" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Kode OTP</label>
             <!-- Fungsi: Input kode OTP dengan filter hanya angka dan maksimal 4 digit -->
-            <input type="text" id="otpInput" maxlength="4" placeholder="1234"
-                   oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-            <div id="otpVerifyStatus"></div>
+            <input type="text" id="otpInput" maxlength="4" placeholder="----"
+                   oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                   style="width: 100%; padding: 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 28px; font-weight: 700; text-align: center; letter-spacing: 12px; color: #2d6a4f; background: #fafafa; font-family: 'Courier New', monospace; box-sizing: border-box;">
+            <div id="otpVerifyStatus" style="margin-top: 10px;"></div>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-small btn-cancel" onclick="closeModal('otpVerifyModal')">Batal</button>
-            <!-- Fungsi: Memicu proses verifikasi kode OTP ke backend -->
-            <button type="button" class="btn-small btn-otp" onclick="verifyOTP()">Verifikasi</button>
+        <div class="modal-footer" style="display: flex; gap: 10px; padding: 15px 20px; background: #f8f9fa; border-top: 1px solid #e9ecef;">
+            <button type="button" class="btn-cancel" onclick="closeModal('otpVerifyModal')" 
+                    style="flex: 1; padding: 12px; background: #e9ecef; color: #495057; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                Batal
+            </button>
+            <button type="button" class="btn-otp" onclick="verifyOTP()"
+                    style="flex: 1; padding: 12px; background: #20A726; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                Verifikasi
+            </button>
         </div>
     </div>
 </div>
+
+<!-- ✅ BARU DITAMBAHKAN: Form Edit Akun Admin (Wajib untuk OTP flow) -->
+<div id="formSection" style="display: none; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin: 20px 0;">
+    <h3 id="formTitle" style="color: #20A726; margin-bottom: 15px; font-size: 18px; font-weight: 600;">Edit Akun Admin</h3>
+    
+    <form id="accountForm" method="POST" action="">
+        @csrf
+        @method('PUT')
+        
+        <!-- Hidden ID Admin -->
+        <input type="hidden" id="formIdAdmin" name="id_admin">
+        
+        <!-- Email Field -->
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label for="email" style="display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 14px;">Email</label>
+            <input type="email" id="email" name="email" 
+                   class="form-control" 
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;"
+                   placeholder="contoh@email.com" required>
+        </div>
+        
+        <!-- Password Field -->
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label for="password" style="display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 14px;">
+                Kata Sandi <span id="passHintAdmin" style="font-weight:400; color:#6c757d; font-size:12px;">(Kosongkan jika tidak ingin mengubah)</span>
+            </label>
+            <div style="position: relative;">
+                <input type="password" id="password" name="password" 
+                       class="form-control" 
+                       style="width: 100%; padding: 10px 40px 10px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;"
+                       placeholder="••••••••">
+                <button type="button" id="togglePasswordAdmin" 
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                    <img id="eyeIconAdmin" src="{{ asset('assets/icons/hide.png') }}" alt="Toggle" style="width: 18px; height: 18px;">
+                </button>
+            </div>
+        </div>
+        
+        <!-- Form Actions -->
+        <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+            <button type="button" id="btnBatalAdmin" 
+                    style="flex: 0 0 150px; max-width: 200px; padding: 10px; background: #e9ecef; color: #495057; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                Batal
+            </button>
+            <button type="submit" id="btnSimpanAdmin" 
+                    style="flex: 0 0 150px; max-width: 200px; padding: 10px; background: #20A726; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                Simpan Perubahan
+            </button>
+        </div>
+    </form>
+</div>
+<!-- ✅ END Form Edit Akun Admin -->
 
 
 <!-- Fungsi: Modal form untuk menambah atau mengedit data akun petugas -->

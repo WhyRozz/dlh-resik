@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 {{-- FUNGSI: Menetapkan judul halaman dan header untuk halaman daftar artikel --}}
-@section('title', 'Daftar Artikel - RESIK')
+@section('title', 'Daftar Artikel - SIMPELSI')
 @section('page-title', 'Kelola Artikel')
 @section('page-title-mobile', 'ARTIKEL')
 
@@ -56,12 +56,17 @@
                 <td>
                     {{-- FUNGSI: Menampilkan thumbnail gambar artikel atau placeholder jika tidak ada --}}
                     @if($artikel->foto)
-                        <img src="{{ asset('storage/' . $artikel->foto) }}" 
-                            alt="{{ $artikel->judul }}" 
-                            style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">
+                    @php
+                        // ✅ Bersihkan prefix lama (storage/ atau uploads/) agar tidak dobel
+                        $fotoPath = str_replace(['storage/', 'uploads/'], '', $artikel->foto);
+                    @endphp
+                        <img src="{{ asset('uploads/' . $fotoPath) }}" 
+                        alt="{{ $artikel->judul }}" 
+                        style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;"
+                        onerror="this.src='{{ asset('images/default-artikel.jpg') }}'">
                     @else
                         <span style="color: #999;">-</span>
-                    @endif
+                     @endif
                 </td>
                 {{-- FUNGSI: Menampilkan judul artikel dengan limit 80 karakter --}}
                 <td>{{ Str::limit($artikel->judul, 80) }}</td>

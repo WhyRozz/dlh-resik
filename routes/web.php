@@ -33,6 +33,10 @@ use App\Http\Controllers\BankSampah\SetorController;
 // Landing Page (Public)
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 
+// Route::get('/admin/dashboard', function () {
+//     return auth()->guard('admin')->user();
+// });
+
 // Admin Routes - Group Utama
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -43,7 +47,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     // ── Protected routes (sudah login) ──
-    Route::middleware('auth:admin')->group(function () {
+    Route::middleware('auth:admin', 'nocache')->group(function () {
 
         // Logout
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
@@ -195,3 +199,20 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         ]);
     })->name('admin.api.users.show');
 });
+
+
+// ── Download APK Route (Public) ──
+Route::get('/download-apk', function () {
+    $filePath = public_path('downloads/resik.apk');
+    
+    // Cek apakah file ada
+    if (!file_exists($filePath)) {
+        abort(404, 'File APK tidak ditemukan. Silakan hubungi administrator.');
+    }
+    
+    // Download dengan header yang tepat untuk APK
+    return response()->download($filePath, 'RESIK.apk', [
+        'Content-Type' => 'application/vnd.android.package-archive',
+        'Content-Disposition' => 'attachment; filename="RESIK.apk"',
+    ]);
+})->name('download.apk');

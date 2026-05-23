@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     initLaporanChart();
+    initResponsiveChart();
 });
 
 /**
@@ -141,8 +142,4 @@ window.addEventListener('resize', function() {
     }, 250);
 });
 
-// Init on DOM ready
-document.addEventListener('DOMContentLoaded', function() {
-    initResponsiveChart();
-});
 

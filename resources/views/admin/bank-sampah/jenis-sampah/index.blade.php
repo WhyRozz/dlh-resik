@@ -35,9 +35,16 @@
                     <td>{{ $jenisSampah->firstItem() + $key }}</td>
                     <td>
                         @if($item->gambar)
-                            <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->jenis }}" class="table-img">
+                        @php
+                            // ✅ Bersihkan prefix lama agar tidak dobel path
+                            $gambarPath = str_replace(['storage/', 'uploads/'], '', $item->gambar);
+                        @endphp
+                        <img src="{{ asset('uploads/' . $gambarPath) }}" 
+                            alt="{{ $item->jenis }}" 
+                            class="table-img"
+                            onerror="this.src='{{ asset('images/default-sampah.jpg') }}'">
                         @else
-                            <span class="text-muted">-</span>
+                        <span class="text-muted">-</span>
                         @endif
                     </td>
                     <td>{{ $item->jenis }}</td>

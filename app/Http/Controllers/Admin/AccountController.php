@@ -163,7 +163,7 @@ class AccountController extends Controller
         // Kirim email
         try {
             Mail::raw("
-                🔐 Kode OTP Admin SIMPELSI: {$otp}
+                🔐 Kode OTP Admin RESIK: {$otp}
                 
                 Berlaku selama " . self::OTP_EXPIRE_MINUTES . " menit.
                 
@@ -172,7 +172,7 @@ class AccountController extends Controller
                 Jika Anda tidak meminta kode ini, abaikan email ini.
             ", function ($message) use ($admin) {
                 $message->to($admin->email)
-                        ->subject('Kode OTP Admin - SIMPELSI');
+                        ->subject('Kode OTP Admin - RESIK');
             });
 
             return response()->json([
@@ -213,8 +213,8 @@ class AccountController extends Controller
 
         // Kirim email
         try {
-            Mail::raw("Kode OTP Admin SIMPELSI Anda: {$otp}\nBerlaku selama " . self::OTP_EXPIRE_MINUTES . " menit.", function ($message) use ($validated) {
-                $message->to($validated['email'])->subject('Kode OTP Admin - SIMPELSI');
+            Mail::raw("Kode OTP Admin RESIK Anda: {$otp}\nBerlaku selama " . self::OTP_EXPIRE_MINUTES . " menit.", function ($message) use ($validated) {
+                $message->to($validated['email'])->subject('Kode OTP Admin - RESIK');
             });
 
             return response()->json([
@@ -316,4 +316,36 @@ class AccountController extends Controller
             'email' => $admin->email
         ]);
     }
+    
+    
+/**
+ * Hapus akun admin
+ */
+public function destroy($id)
+{
+    $admin = Admin::findOrFail($id);
+    
+    // ⚠️ Opsional: Cegah hapus akun utama (admin dengan id_admin terkecil)
+    $primaryAdminId = Admin::min('id_admin');
+    if ($admin->id_admin === $primaryAdminId) {
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun utama tidak dapat dihapus.'
+            ], 403);
+        }
+        return back()->with('error', 'Akun utama tidak dapat dihapus.');
+    }
+    
+    $admin->delete();
+    
+    if (request()->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Akun berhasil dihapus.'
+        ]);
+    }
+    
+    return redirect()->route('admin.akun.index')->with('success', 'Akun berhasil dihapus.');
+}
 }

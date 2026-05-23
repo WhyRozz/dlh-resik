@@ -46,8 +46,9 @@
                     {{-- FUNGSI: Preview gambar yang tampil setelah file dipilih atau saat mode edit --}}
                     <div class="upload-preview {{ isset($artikel) && $artikel->foto ? 'show' : '' }}" id="uploadPreview">
                         <img id="previewImage" 
-                             src="{{ isset($artikel) && $artikel->foto ? asset('storage/' . $artikel->foto) : '' }}" 
-                             alt="Preview foto artikel">
+                            src="{{ isset($artikel) && $artikel->foto ? asset('uploads/' . str_replace(['storage/', 'uploads/'], '', $artikel->foto)) : '' }}" 
+                            alt="Preview foto artikel"
+                            onerror="this.src='{{ asset('images/default-artikel.jpg') }}'">
                         {{-- FUNGSI: Tombol untuk menghapus gambar yang sudah dipilih --}}
                         <button type="button" class="remove-image" onclick="removeImage()" title="Hapus gambar">×</button>
                     </div>
@@ -145,7 +146,10 @@
         errors: @json($errors->all()),
         @endif
         @if(isset($artikel) && $artikel->foto)
-        existingFoto: "{{ asset('storage/' . $artikel->foto) }}",
+            @php
+                $fotoPath = str_replace(['storage/', 'uploads/'], '', $artikel->foto);
+            @endphp
+        existingFoto: "{{ asset('uploads/' . $fotoPath) }}",
         @endif
     };
 </script>

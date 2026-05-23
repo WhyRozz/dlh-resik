@@ -31,7 +31,6 @@ class AuthController extends Controller
                 'string',
                 'min:8',
                 'max:50',
-                'regex:/^[a-zA-Z0-9\s]+$/',
             ],
         ], [
             'email.required' => 'Email wajib diisi.',
@@ -61,19 +60,19 @@ class AuthController extends Controller
         // Login berhasil
         Auth::guard('admin')->login($admin);
 
-        return redirect()->intended(route('admin.dashboard'));
+        return redirect()->route('admin.dashboard');
     }
 
     /**
      * Logout
      */
     public function logout(Request $request)
-    {
-        Auth::guard('admin')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+{
+    Auth::guard('admin')->logout();
 
-        // ✅ PERBAIKAN: Ganti 'landing' dengan 'admin.login'
-        return redirect()->route('admin.login');
-    }
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('admin.login');
+}
 }

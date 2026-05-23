@@ -37,7 +37,12 @@
                 <small>Format: JPG, PNG. Max: 2MB</small>
                 <div class="image-preview" id="imagePreview">
                     @if($jenisSampah->gambar)
-                        <img src="{{ asset('storage/' . $jenisSampah->gambar) }}" alt="{{ $jenisSampah->jenis }}">
+                    @php
+                        $gambarPath = str_replace(['storage/', 'uploads/'], '', $jenisSampah->gambar);
+                    @endphp
+                        <img src="{{ asset('uploads/' . $gambarPath) }}" 
+                        alt="{{ $jenisSampah->jenis }}"
+                        onerror="this.src='{{ asset('images/default-sampah.jpg') }}'">
                     @else
                         <img src="#" alt="Preview" style="display: none;">
                     @endif

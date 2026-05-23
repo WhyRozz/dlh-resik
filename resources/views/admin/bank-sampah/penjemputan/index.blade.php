@@ -4,7 +4,7 @@
 
 @push('styles')
     {{-- FUNGSI: Memuat file CSS khusus untuk halaman penjemputan --}}
-    <link rel="stylesheet" href="{{ asset('css/penjemputan.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/penjemputan.css?v=' . time()) }}">
 @endpush
 
 @section('content')
@@ -115,7 +115,7 @@
                 </td>
                 <td style="padding: 14px 20px;">
                     @if ($item->foto)
-                    <img src="{{ asset('storage/' . $item->foto) }}" alt="Foto Penjemputan"
+                    <img src="{{ asset('uploads/' . $item->foto) }}" alt="Foto Penjemputan"
                         style="width: 64px; height: 52px; object-fit: cover; border-radius: 7px;">
                     @else
                     <img src="{{ asset('images/no-image.png') }}" alt="No Image"
@@ -290,6 +290,6 @@
 
 @push('scripts')
     {{-- FUNGSI: Memuat file JS eksternal yang berisi semua fungsi interaksi halaman --}}
-    <script src="{{ asset('js/penjemputan.js') }}"></script>
+    <script src="{{ asset('js/penjemputan.js?v=' . time()) }}"></script>
 @endpush
 @endsection

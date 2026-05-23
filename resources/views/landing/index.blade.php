@@ -219,8 +219,8 @@
                     Nikmati kemudahan layanan pengelolaan sampah dan Bank Sampah dalam satu aplikasi digital yang cepat,
                     efisien, dan ramah pengguna.
                 </p>
-                <a href="https://drive.google.com/file/d/1RJLPEwUK9LQbHHdUTWy_asPKgr3FeJ9E/view?usp=sharing"
-                    class="btn-download" target="_blank">
+                
+                <a href="{{ route('download.apk') }}" class="btn-download">
                     DOWNLOAD APK
                 </a>
             </div>

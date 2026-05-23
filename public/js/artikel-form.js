@@ -1,7 +1,3 @@
-/**
- * Script untuk Form Artikel Admin
- */
-
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('artikelForm');
     const uploadArea = document.getElementById('uploadArea');
@@ -400,11 +396,4 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.target === this) hideErrorModal();
         });
     }
-    
-    // CATATAN: Logic untuk auto-show error/success preview & redirect
-    // HARUS diletakkan di Blade file (form.blade.php) karena pakai syntax Blade {{ }} dan @if
-    // Contoh di Blade:
-    // @if($errors->any()) <script>showError(window.ArtikelFormConfig.errors[0]);</script> @endif
-    // @if(isset($artikel) && $artikel->foto) <script>showPreview(window.ArtikelFormConfig.existingFoto);</script> @endif
-    // @if(session('success')) <script>window.location.href = "...";</script> @endif
 });

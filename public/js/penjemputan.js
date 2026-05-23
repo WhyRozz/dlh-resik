@@ -51,31 +51,46 @@ function initLiveSearch() {
 }
 
 // ===== MODAL DETAIL =====
-
 /**
  * FUNGSI: Fetch dan tampilkan detail penjemputan via AJAX
  * PARAM: {number} id - ID penjemputan yang akan ditampilkan
  * INTERAKSI: Dipanggil via onclick pada baris tabel
  */
 function showDetail(id) {
+    const modal = document.getElementById('detailModal');
     fetch(`/admin/bank-sampah/penjemputan/${id}/detail`)
         .then(response => response.json())
         .then(data => {
+            // ✅ DEBUG: Lihat apa yang dikirim API
+            console.log('🔍 Data dari API:', data);
+            console.log('📷 Foto value:', data.foto);
+            
             document.getElementById('modalNo').value = data.id;
             document.getElementById('modalNamaAdmin').value = data.nama_admin;
             document.getElementById('modalWaktu').value = new Date(data.waktu).toLocaleString('id-ID');
             document.getElementById('modalBerat').value = parseFloat(data.berat).toFixed(2) + ' Kg';
             document.getElementById('modalLokasi').value = data.lokasi || '-';
             document.getElementById('modalKeterangan').value = data.keterangan || '-';
-            const imgUrl = data.foto ? `/storage/${data.foto}` : '/images/no-image.png';
-            document.getElementById('modalFoto').src = imgUrl;
-            document.getElementById('detailModal').style.display = 'flex';
+            
+            // ✅ BUILD URL GAMBAR
+            const imgUrl = data.foto ? `/uploads/${data.foto}` : '/images/no-image.png';
+            console.log('🖼️ URL Gambar:', imgUrl);
+            
+            // ✅ SET SRC
+            const imgElement = document.getElementById('modalFoto');
+            imgElement.src = imgUrl;
+            
+            // ✅ DEBUG: Cek apakah src berubah
+            console.log('📸 Image src sekarang:', imgElement.src);
+            
+            modal.style.display = 'flex';
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('❌ ERROR:', error);
             alert('Gagal mengambil data detail.');
         });
 }
+
 
 /**
  * FUNGSI: Menutup modal detail penjemputan
@@ -198,3 +213,11 @@ document.addEventListener('DOMContentLoaded', function() {
         alert(window.PenjemputanConfig.errorMessage);
     }
 });
+
+
+
+// Ekspos fungsi ke global
+window.showDetail = showDetail;
+window.closeModal = closeModal;
+window.showConfirm = showConfirm;
+window.closeConfirmModal = closeConfirmModal;

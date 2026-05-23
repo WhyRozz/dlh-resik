@@ -269,4 +269,31 @@
 }
 
 
+/* =========================================
+   MAIN CONTENT LAYOUT
+   ========================================= */
 
+.admin-wrapper{
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.main-content{
+    padding: 25px 30px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Mobile */
+@media (max-width: 768px){
+    .admin-wrapper{
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .main-content{
+        padding: 15px;
+    }
+}

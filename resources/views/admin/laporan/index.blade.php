@@ -48,7 +48,7 @@
 
                             $isEditable = $status === 'Diproses';
                             $fotoUrl = $foto
-                                ? asset('storage/' . $foto)
+                                ? asset('uploads/' . str_replace(['storage/', 'uploads/'], '', $foto))
                                 : 'https://via.placeholder.com/300x200?text=Tidak+Ada+Foto';
                         @endphp
 

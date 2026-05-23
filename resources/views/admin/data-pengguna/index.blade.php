@@ -5,7 +5,7 @@
 
 @push('styles')
 <!-- Fungsi: Memuat file CSS khusus untuk halaman data pengguna -->
-<link rel="stylesheet" href="{{ asset('css/data-pengguna.css') }}">
+<link rel="stylesheet" href="{{ asset('css/data-pengguna.css?v=' . time()) }}">
 @endpush
 
 @section('content')

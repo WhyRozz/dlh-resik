@@ -8,16 +8,6 @@
     <link rel="stylesheet" href="{{ asset('css/account.css') }}">
 @endpush
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="alert alert-error">{{ session('error') }}</div>
-@endif
-@if($errors->any())
-    <div class="alert alert-error">{{ $errors->first() }}</div>
-@endif
-
 @section('content')
 <div class="content-header">
     <h2>Kelola Akun Admin</h2>
@@ -46,7 +36,7 @@
         <div class="btn-group">
             @if($akunUtama)
                 <button class="btn btn-outline" 
-                    onclick="requestOTPForAction('edit_admin', {{ $akunUtama->id_admin }}, '{{ addslashes($akunUtama->email) }}')">
+                    onclick="requestOTPForAction('edit', {{ $akunUtama->id_admin }}, '{{ addslashes($akunUtama->email) }}')">
                     Edit
                 </button>
             @else
@@ -71,10 +61,10 @@
         </div>
         <div class="btn-group">
             @if(isset($tambahan[0]))
-                <button class="btn btn-outline" 
-                    onclick="requestOTPForAction('edit_admin', {{ $tambahan[0]->id_admin }}, '{{ addslashes($tambahan[0]->email) }}')">
-                    Edit
-                </button>
+            <button class="btn btn-outline" 
+                onclick="requestOTPForAction('edit', {{ $tambahan[0]->id_admin }}, '{{ addslashes($tambahan[0]->email) }}')">
+                Edit
+            </button>
             @else
                 <button class="btn btn-primary" onclick="showAdminForm()">Tambah Akun</button>
             @endif
@@ -279,7 +269,7 @@
 
 @include('admin.account.partials.modals')
 
-{{-- 🔗 BRIDGE: Pass dynamic Laravel data ke JS eksternal --}}
+{{-- 🔗 BRIDGE: Pass dynamic Laravel data ke JS --}}
 <script>
     window.AccountConfig = {
         csrfToken: "{{ csrf_token() }}",
@@ -292,7 +282,10 @@
 </script>
 
 @push('scripts')
+    <!-- Load SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('js/account.js') }}"></script>
+    
+    <!-- Load account.js eksternal (dengan versioning untuk cache busting) -->
+    <script src="{{ asset('js/account.js?v=' . time()) }}"></script>
 @endpush
 @endsection

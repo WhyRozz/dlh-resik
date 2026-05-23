@@ -6,6 +6,8 @@
 
 {{-- Fallback variables jika controller tidak mengirim --}}
 @php
+    use Illuminate\Support\Str;
+    
     $bulanList = $bulanList ?? [
         1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
         5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
@@ -133,17 +135,16 @@
         </div>
     </div>
 
-    <!-- Chart & Table Section -->
-    <div class="dashboard-grid">
-        <!-- Chart Section -->
         <div class="chart-card">
-            <div class="card-header">
-                <h3>📊 Statistik Laporan Pengaduan Sampah Ilegal</h3>
-                <span class="card-period">{{ $bulanList[$selectedBulan] }} {{ $selectedTahun }}</span>
-            </div>
+        <div class="card-header">
+            <h3>📊 Statistik Laporan Pengaduan Sampah Ilegal</h3>
+            <span class="card-period">{{ $bulanList[$selectedBulan] }} {{ $selectedTahun }}</span>
+        </div>
+        <div class="chart-wrapper">
             <div class="chart-container">
                 <canvas id="laporanChart"></canvas>
             </div>
+        </div>
         </div>
 
         <!-- Tabel Laporan Sampah Illegal -->
@@ -152,6 +153,7 @@
                 <h3>🗂️ Laporan Sampah Illegal</h3>
                 <a href="{{ route('admin.laporan.index') }}" class="btn-view-all">Lihat Semua</a>
             </div>
+            <div class="table-wrapper">
             <div class="table-responsive" id="tableContainer">
                 <table class="data-table">
                     <thead>
@@ -186,13 +188,19 @@
                             {{-- Status (kolom: status) --}}
                             <td>
                                 @php
-                                    $statusClass = match($laporan->status ?? '') {
-                                        'Diterima' => 'badge-success',
-                                        'Diproses' => 'badge-warning',
-                                        'Ditolak' => 'badge-danger',
-                                        'Ditarik' => 'badge-secondary',
-                                        default => 'badge-secondary'
-                                    };
+                                    $status = $laporan->status ?? '';
+
+                                if ($status === 'Diterima') {
+                                        $statusClass = 'badge-success';
+                                    } elseif ($status === 'Diproses') {
+                                        $statusClass = 'badge-warning';
+                                    } elseif ($status === 'Ditolak') {
+                                        $statusClass = 'badge-danger';
+                                    } elseif ($status === 'Ditarik') {
+                                        $statusClass = 'badge-secondary';
+                                    } else {
+                                        $statusClass = 'badge-secondary';
+                                }
                                 @endphp
                                 <span class="badge {{ $statusClass }}">{{ $laporan->status ?? 'Pending' }}</span>
                             </td>
@@ -235,5 +243,8 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/admin-dashboard.css') }}">
 @endpush
+
+@stack('styles')
+@stack('scripts')
 
 @endsection

@@ -1,8 +1,3 @@
-{{-- 
-    Mobile Hamburger Navbar - Complete Component
-    Usage: @include('partials.mobile-navbar')
---}}
-
 @php
     // Get current user info
     $user = auth()->user();
@@ -16,8 +11,10 @@
 
 <nav class="mobile-navbar">
     <div class="mobile-navbar-brand">
-        {{-- <img src="{{ asset('assets/logo.png') }}" alt="Logo" class="mobile-logo"> --}}
-        {{-- <span class="mobile-title">@yield('page-title-mobile', 'RESIK')</span> --}}
+        <img src="{{ asset('assets/logo-dlh.png') }}" alt="Logo" class="mobile-logo">
+        <div class="mobile-brand-text">
+        <span class="mobile-brand-title">DLH Nganjuk</span>
+        </div>
     </div>
 
     {{-- Hamburger Button --}}
