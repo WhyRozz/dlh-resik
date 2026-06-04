@@ -1,7 +1,7 @@
 /* ========================================
    LANDING PAGE RESIK - STYLES
    File: public/css/landing.css
-   Project: SIMPELSI - DLH Resik
+   Project: DLH Resik
    ======================================== */
 
 /* ===== RESET & BASE ===== */
@@ -188,6 +188,9 @@ body {
 
 .text-green {
     color: #2e8b57;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); 
+    -webkit-font-smoothing: antialiased; 
+    -moz-osx-font-smoothing: grayscale; 
 }
 
 .hero-buttons .btn {
@@ -652,21 +655,30 @@ body {
 
     .about-content-flex {
         flex-direction: column;
-        text-align: center;
+        align-items: center;      /* ✅ KUNCI: Pusatkan item flex secara horizontal */
+        text-align: center;       /* ✅ Pusatkan teks */
         gap: 20px;
+        padding: 0 15px;          /* ✅ Jarak aman dari pinggir layar HP */
     }
 
     .about-icon {
         display: flex;
         justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 15px;
     }
 
     .about-icon img {
-        width: 100px;
+        width: 100px;             /* ✅ Ukuran proporsional di HP */
+        height: auto;
+        display: block;
+        margin: 0 auto;           /* ✅ Cadangan centering */
     }
 
     .about-title {
         text-align: center;
+        margin-top: 0;
     }
 
     .about-description {
@@ -716,22 +728,6 @@ body {
         color: white;
     }
 }
-
-@media (min-width: 769px) {
-    .about-content-flex {
-        flex-direction: column !important;
-        align-items: center !important;
-    }
-
-    .about-icon {
-        margin-bottom: 30px !important;
-    }
-
-    .about-icon img {
-        width: 150px !important;
-    }
-}
-
 
 .footer-section:nth-child(2) {
     padding-left: 150px; 

@@ -133,5 +133,3 @@
     </nav>
 </aside>
 
-<!-- Fungsi: Overlay transparan untuk mobile yang menutup sidebar saat diklik -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>

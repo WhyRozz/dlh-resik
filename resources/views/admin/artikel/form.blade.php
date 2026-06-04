@@ -7,7 +7,7 @@
 
 @push('styles')
     {{-- FUNGSI: Memuat file CSS khusus untuk halaman form artikel --}}
-    <link rel="stylesheet" href="{{ asset('css/artikel-form.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/artikel-form.css?v=' . time()) }}">
 @endpush
 
 @section('content')
@@ -156,7 +156,7 @@
 
 @push('scripts')
     {{-- FUNGSI: Memuat file JS eksternal yang berisi semua fungsi form handling --}}
-    <script src="{{ asset('js/artikel-form.js') }}"></script>
+    <script src="{{ asset('js/artikel-form.js?v=' . time()) }}"></script>
     
     {{-- FUNGSI: Auto-show error modal jika ada validation errors dari Laravel --}}
     @if($errors->any())

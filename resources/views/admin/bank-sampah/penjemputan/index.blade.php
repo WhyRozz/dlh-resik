@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Daftar Penjemputan')
+@section('title', 'Bank Sampah - Daftar Penjemputan')
 
 @push('styles')
     {{-- FUNGSI: Memuat file CSS khusus untuk halaman penjemputan --}}
@@ -81,112 +81,91 @@
         </div>
     </div>
 
-    {{-- ✅ GREEN DIVIDER --}}
+    {{-- GREEN DIVIDER --}}
     <div class="green-divider"></div>
 
-    {{-- ✅ TABLE CONTAINER --}}
-    <table id="penjemputanTable" class="data-table" style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr style="background: #f8f9fa; border-bottom: 1px solid #e0e0e0;">
-                <th
-                    style="padding: 14px 20px 14px 35px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">
-                    No</th>
-                <th style="padding: 14px 20px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">
-                    Gambar</th>
-                <th style="padding: 14px 20px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">
-                    Nama Admin</th>
-                <th style="padding: 14px 20px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">
-                    Waktu</th>
-                <th style="padding: 14px 20px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">
-                    Berat</th>
-                <th style="padding: 14px 20px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">
-                    Status</th>
-                <th style="padding: 14px 20px; text-align: left; font-weight: 600; color: #666; font-size: 0.85rem;">
-                    Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($penjemputans as $index => $item)
-            <tr onclick="showDetail({{ $item->id }})"
-                style="cursor: pointer; border-bottom: 1px solid #f2f2f2;">
-
-                <td style="padding: 14px 20px; color: #333;">
-                    {{ $penjemputans->firstItem() + $index }}
-                </td>
-                <td style="padding: 14px 20px;">
-                    @if ($item->foto)
-                    <img src="{{ asset('uploads/' . $item->foto) }}" alt="Foto Penjemputan"
-                        style="width: 64px; height: 52px; object-fit: cover; border-radius: 7px;">
-                    @else
-                    <img src="{{ asset('images/no-image.png') }}" alt="No Image"
-                        style="width: 64px; height: 52px; object-fit: cover; border-radius: 7px; background: #e9ecef;">
-                    @endif
-                </td>
-                <td style="padding: 14px 20px; color: #333; font-weight: 500;">{{ $item->nama_admin }}</td>
-                <td style="padding: 14px 20px; color: #333;">
-                    {{ \Carbon\Carbon::parse($item->waktu)->format('d-m-Y, H:i') }}
-                </td>
-                <td style="padding: 14px 20px; color: #333; font-weight: 600;">{{ number_format($item->berat, 2) }}
-                    Kg</td>
-                <td style="padding: 14px 20px;">
-                    @php
-                    $badgeClass = match ($item->status) {
-                    'diproses' => 'status-diproses',
-                    'disetujui' => 'status-berhasil',
-                    'ditolak' => 'status-ditolak',
-                    default => 'status-diproses',
-                    };
-                    @endphp
-                    <span class="status-badge {{ $badgeClass }}"
-                        style="padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;">
-                        {{ ucfirst($item->status) }}
-                    </span>
-                </td>
-                <td style="padding: 14px 20px;" onclick="event.stopPropagation()">
-                    <div class="aksi-wrapper" style="display: flex; gap: 8px;">
-                        @if ($item->status === 'diproses')
-                        <form id="form-approve-{{ $item->id }}"
-                            action="{{ route('admin.bank-sampah.penjemputan.approve', $item->id) }}"
-                            method="POST" style="display: inline;">
-                            @csrf @method('PATCH')
-                            <button type="button" class="btn-approve" title="Setujui"
-                                onclick="showConfirm('approve', {{ $item->id }})"
-                                style="width: 32px; height: 32px; border: none; border-radius: 50%; background: #43a047; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-check" style="font-size: 14px;"></i>
-                            </button>
-                        </form>
-                        <form id="form-reject-{{ $item->id }}"
-                            action="{{ route('admin.bank-sampah.penjemputan.reject', $item->id) }}"
-                            method="POST" style="display: inline;">
-                            @csrf @method('DELETE')
-                            <button type="button" class="btn-reject" title="Tolak"
-                                onclick="showConfirm('reject', {{ $item->id }})"
-                                style="width: 32px; height: 32px; border: none; border-radius: 50%; background: #e53935; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-times" style="font-size: 14px;"></i>
-                            </button>
-                        </form>
+    {{-- ✅ TABLE CONTAINER (PENTING: Ini membuat tampilan sama dengan Penarikan) --}}
+    <div class="table-container">
+        <table id="penjemputanTable" class="data-table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Gambar</th>
+                    <th>Nama Petugas</th>
+                    <th>Waktu</th>
+                    <th>Berat</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($penjemputans as $index => $item)
+                <tr onclick="showDetail({{ $item->id }})">
+                    <td>{{ $penjemputans->firstItem() + $index }}</td>
+                    <td>
+                        @if ($item->foto)
+                            <img src="{{ asset('uploads/' . $item->foto) }}" alt="Foto Penjemputan">
                         @else
-                        <span style="color: #999; font-size: 12px; font-style: italic;">✓ Selesai</span>
+                            <img src="{{ asset('images/no-image.png') }}" alt="No Image" class="no-img">
                         @endif
-                    </div>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 40px 20px; color: #aaa;">
-                    <i class="fas fa-inbox" style="font-size: 28px; margin-bottom: 8px; display: block;"></i>
-                    Tidak ada data penjemputan.
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+                    </td>
+                    <td>{{ $item->nama_admin }}</td>
+                    <td>{{ \Carbon\Carbon::parse($item->waktu)->format('d-m-Y, H:i') }}</td>
+                    <td>{{ number_format($item->berat, 2) }} Kg</td>
+                    <td>
+                        @php
+                        $badgeClass = match ($item->status) {
+                            'diproses' => 'status-diproses',
+                            'disetujui' => 'status-berhasil',
+                            'ditolak' => 'status-ditolak',
+                            default => 'status-diproses',
+                        };
+                        @endphp
+                        <span class="status-badge {{ $badgeClass }}">{{ ucfirst($item->status) }}</span>
+                    </td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="aksi-wrapper">
+                            @if ($item->status === 'diproses')
+                            <form id="form-approve-{{ $item->id }}"
+                                  action="{{ route('admin.bank-sampah.penjemputan.approve', $item->id) }}"
+                                  method="POST">
+                                @csrf @method('PATCH')
+                                <button type="button" class="btn-approve" title="Setujui"
+                                        onclick="showConfirm('approve', {{ $item->id }})">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </form>
+                            <form id="form-reject-{{ $item->id }}"
+                                  action="{{ route('admin.bank-sampah.penjemputan.reject', $item->id) }}"
+                                  method="POST">
+                                @csrf @method('DELETE')
+                                <button type="button" class="btn-reject" title="Tolak"
+                                        onclick="showConfirm('reject', {{ $item->id }})">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                            @else
+                            <span class="aksi-selesai">✓ Selesai</span>
+                            @endif
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        Tidak ada data penjemputan.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
-    {{-- Pagination (Jika ada) --}}
+    {{-- Pagination --}}
     @if (method_exists($penjemputans, 'links'))
-    <div
-        style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 15px 20px 0 20px; border-top: 1px solid #e0e0e0;">
-        <div style="font-size: 0.9rem; color: #666;">
+    <div class="pagination-container">
+        <div>
             Menampilkan {{ $penjemputans->firstItem() ?? 0 }} - {{ $penjemputans->lastItem() ?? 0 }} dari
             {{ $penjemputans->total() ?? 0 }} data
         </div>

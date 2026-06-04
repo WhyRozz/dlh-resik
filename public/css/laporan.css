@@ -1,22 +1,17 @@
-
-th:nth-child(3) {
-    text-align: center !important;
-}
-
-
 /* --- HEADER & SEARCH (DIPERSINGKAT) --- */
 .page-search-bar {
-    margin-top: -50px;
+    margin-top: 0px;
     display: flex;
-    justify-content: flex-end; /* Rata kanan */
-    padding-right: 100px;
+    justify-content: flex-end; 
+    padding-right: 20px;
 }
 .page-search-bar .search-input {
     width: 100%;
-    max-width: 400px;
+    max-width: 280px;
     padding: 10px 18px;
     border: 2px solid #e0e0e0;
     border-radius: 25px;
+    height: 20px;
     font-size: 14px;
     background: #f8f9fa;
 }
@@ -36,7 +31,7 @@ th:nth-child(3) {
     color: #2e8b57;
     font-size: 20px;
     font-weight: 700;
-    margin: 0 0 18px 0;
+    margin: 0 0 15px 0;
     padding-bottom: 12px;
     border-bottom: 2px solid #4caf50;
 }
@@ -203,8 +198,10 @@ th {
 }
 
 /* =========================================
-   RESPONSIVE (DIGABUNG & DIRAPIKAN)
+   RESPONSIVE MOBILE (CLEAN & MERGED)
    ========================================= */
+
+/* Tablet & Mobile (≤768px) */
 @media (max-width: 768px) {
     /* Header & Search */
     .content-header-wrapper {
@@ -212,27 +209,160 @@ th {
         align-items: flex-start;
         gap: 10px;
     }
-    .search-bar-wrapper {
+    .search-bar-wrapper,
+    .page-search-bar {
         width: 100%;
         max-width: 100%;
+        margin-top: -10px;
+        padding: 0px 0px;
+        justify-content: center;
+    }
+    .page-search-bar .search-input {
+        max-width: 100%;
+    }
+
+    /* Content Card */
+    .content-card {
+        padding: 15px 20px;
+    }
+
+    /* Table & Horizontal Scroll */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 10px;
+    }
+    table {
+        min-width: 650px;
+        font-size: 13px;
+    }
+    th, td {
+        padding: 10px 8px;
+    }
+    .status-badge {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+
+    /* ✅ FIX KHUSUS: DETAIL ROW (PENTING) */
+    .detail-row {
+        padding: 12px 8px;
     }
     
-    /* Detail Row */
-    .detail-content { flex-direction: column; }
-    .detail-image { flex: 0 0 100%; max-width: 100%; }
-    .detail-image img { max-height: 250px; }
-    .btn-group { flex-direction: column; }
-    .btn-group button { width: 100%; }
+    /* Ubah layout jadi tumpuk ke bawah (Vertikal) */
+    .detail-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Hapus lebar 400px paksa dari desktop */
+    .detail-image {
+        flex: 0 0 100%;       /* Lebar 100% */
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+        background: #f5f5f5;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* Gambar menyesuaikan layar, tidak perlu scroll samping */
+    .detail-image img {
+        width: 100%;
+        height: auto;
+        max-height: 250px;    /* Batas tinggi biar tidak terlalu panjang */
+        object-fit: cover;    /* Gambar tetap rapi */
+        display: block;
+    }
+
+    /* Form diperbolehkan mengecil (min-width dihapus) */
+    .detail-form {
+        width: 100%;
+        min-width: 0;         
+        padding: 0;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    /* Input & Textarea full width */
+    .form-input, .form-textarea {
+        padding: 10px 12px;
+        font-size: 16px;      /* Mencegah zoom otomatis di iOS */
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-textarea {
+        min-height: 60px;
+    }
+
+    .status-options {
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* Buttons Full Width & Rapi */
+    .btn-group {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .btn-group button,
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+
+    /* Pagination Centered */
+    .pagination-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 10px 0;
+    }
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }
 
+/* Small Mobile (≤480px) */
 @media (max-width: 480px) {
-    .detail-image img { max-height: 200px; }
-    .status-options { flex-direction: column; gap: 10px; }
-    .search-input { padding: 8px 15px; font-size: 13px; }
+    .content-card {
+        padding: 10px 15px;
+    }
+    table {
+        font-size: 12px;
+        min-width: 580px;
+    }
+    th, td {
+        padding: 8px 6px;
+    }
+    /* Gambar lebih kecil lagi di HP kecil */
+    .detail-image img {
+        max-height: 180px;
+    }
+    .search-input {
+        padding: 8px 15px;
+        font-size: 13px;
+    }
+    .status-options {
+        flex-direction: column;
+        gap: 6px;
+    }
+    .form-input, .form-textarea {
+        font-size: 16px;                /* Tetap 16px untuk mencegah zoom iOS */
+        padding: 10px;
+    }
 }
 
-
-/* Pagination Styles */
+/* =========================================
+   PAGINATION STYLES (DESKTOP & MOBILE)
+   ========================================= */
 .pagination-container {
     margin-top: 1.5rem;
     display: flex;
@@ -240,7 +370,7 @@ th {
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
-    padding: 15px 20px 0 20px;
+    padding: 15px 20px 0;
     border-top: 1px solid #e0e0e0;
     font-size: 0.9rem;
     color: #666;
@@ -289,116 +419,13 @@ th {
     background: #f9fafb;
 }
 
-/* Hide Laravel pagination info text */
+/* Hide Laravel default pagination text */
 .pagination-container small,
-.pagination+small,
-.pagination~small,
+.pagination + small,
+.pagination ~ small,
 .pagination-info,
-.text-muted {
-    display: none !important;
-}
-
-
+.text-muted,
 .pagination-container p,
 .pagination-container .text-sm.text-gray-700 {
-    display: none !important;
+    display: none;
 }
-
-
-/* =========================================
-   TAMBAHAN RESPONSIVE MOBILE (MINIMAL)
-   ========================================= */
-
-@media (max-width: 768px) {
-    /* Fix search bar di mobile */
-    .page-search-bar {
-        margin-top: 10px !important;
-        padding-right: 15px !important;
-        padding-left: 15px;
-        justify-content: center !important;
-    }
-    
-    .page-search-bar .search-input {
-        max-width: 100% !important;
-    }
-    
-    /* Fix content card padding di mobile */
-    .content-card {
-        padding: 15px 20px !important;
-    }
-    
-    /* Enable scroll horizontal untuk tabel */
-    .table-container {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    /* Paksa tabel bisa di-scroll */
-    table {
-        min-width: 650px;
-        font-size: 13px;
-    }
-    
-    /* Perkecil padding cell di mobile */
-    th, td {
-        padding: 10px 8px !important;
-    }
-    
-    /* Perkecil status badge */
-    .status-badge {
-        font-size: 10px !important;
-        padding: 3px 6px !important;
-    }
-    
-    /* Detail form di mobile */
-    .detail-content {
-        flex-direction: column !important;
-    }
-    
-    .detail-image {
-        flex: 0 0 100% !important;
-    }
-    
-    .detail-form {
-        min-width: 100% !important;
-    }
-    
-    /* Tombol full width di mobile */
-    .btn-group {
-        flex-direction: column !important;
-    }
-    
-    .btn-group button {
-        width: 100% !important;
-    }
-    
-    /* Pagination di mobile */
-    .pagination-container {
-        flex-direction: column !important;
-        gap: 10px;
-        padding: 15px 10px 0 10px !important;
-    }
-    
-    .pagination {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-}
-
-/* Untuk layar sangat kecil */
-@media (max-width: 480px) {
-    .content-card {
-        padding: 10px 15px !important;
-    }
-    
-    table {
-        font-size: 12px;
-        min-width: 600px;
-    }
-    
-    .detail-image img {
-        max-height: 200px;
-    }
-}
-
-

@@ -54,7 +54,7 @@ class TpsController extends Controller
         ], [
             'nama_tps.required' => 'Nama TPS wajib diisi.',
             'lokasi.required' => 'Koordinat GPS wajib diisi.',
-            'lokasi.regex' => 'Format koordinat tidak valid. Gunakan: -7.601478,111.943225',
+            'lokasi.regex' => 'Format koordinat tidak valid. Gunakan titik koordinat yang benar',
             'alamat.required' => 'Alamat Lengkap wajib diisi.',
             'kapasitas.string' => 'Kapasitas harus berupa angka & teks.',
         ]);
@@ -79,9 +79,8 @@ class TpsController extends Controller
     ], [
         'nama_tps.required' => 'Nama TPS wajib diisi.',
         'lokasi.required'   => 'Lokasi koordinat wajib diisi.',
-        'lokasi.regex'      => 'Format koordinat harus Latitude,Longitude (contoh: -7.123,112.456).',
+        'lokasi.regex' => 'Format koordinat tidak valid. Gunakan titik koordinat yang benar',
         'alamat.required'   => 'Alamat wajib diisi.',
-        // Hapus pesan error integer karena tipenya string/varchar
     ]);
 
     $tps = Tps::findOrFail($id);
@@ -90,15 +89,27 @@ class TpsController extends Controller
     return redirect()->route('admin.tps.index')->with('success', 'Data TPS berhasil diperbarui!');
 }
 
-    /**
-     * Hapus TPS
-     */
-    public function destroy($id)
-    {
+/**
+ * Hapus TPS via AJAX
+ */
+public function destroy($id)
+{
+    try {
         $tps = Tps::findOrFail($id);
         $tps->delete();
-
-        return redirect()->route('admin.tps.index')
-            ->with('success', 'Data TPS berhasil dihapus!');
+        
+        // ✅ Return JSON untuk AJAX
+        return response()->json([
+            'success' => true,
+            'message' => 'Data TPS berhasil dihapus!'
+        ]);
+        
+    } catch (\Exception $e) {
+        // ✅ Return error JSON
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menghapus: ' . $e->getMessage()
+        ], 500);
     }
+}
 }

@@ -28,6 +28,7 @@
                 <a href="#tentang" class="nav-link">TENTANG KAMI</a>
                 <a href="#fitur" class="nav-link">FITUR</a>
                 <a href="#jenis" class="nav-link">JENIS SAMPAH</a>
+                <a href="#download" class="nav-link">DOWNLOAD APK</a>
                 <a href="{{ route('admin.login') }}" class="btn-login">
                     <img src="{{ asset('assets/button-login.png') }}" alt="Login">
                     LOGIN ADMIN
@@ -41,7 +42,7 @@
         <!-- Background Image -->
         <div class="hero-bg">
             <video autoplay muted loop playsinline>
-                <source src="{{ asset('assets/VIDEO1.mp4') }}" type="video/mp4">
+                <source src="{{ asset('assets/landingpage.mp4') }}" type="video/mp4">
             </video>
             <div class="hero-overlay"></div>
         </div>
@@ -49,10 +50,10 @@
         <!-- Content -->
         <div class="hero-content container">
             <div class="hero-text">
-                <h1 class="hero-title">
-                    Kelola Lingkungan<br>
-                    Untuk Nganjuk yang<br>
-                    <span class="text-green">Lebih Bersih & Asri</span>
+                <h1 class="hero-title" data-text="Kelola Lingkungan Untuk Nganjuk yang Lebih Bersih & Asri">
+                    <span class="title-line">Kelola Lingkungan</span><br>
+                    <span class="title-line">Untuk Nganjuk yang</span><br>
+                    <span class="title-line text-green">Lebih Bersih & Asri</span>
                 </h1>
                 <p class="hero-subtitle">
                     Bersama RESIK, wujudkan Nganjuk yang bersih<br>
@@ -273,10 +274,10 @@
 
 @push('styles')
     {{-- FUNGSI: Memuat file CSS eksternal untuk landing page --}}
-    <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/landing.css?v=' . time()) }}">
 @endpush
 
 @push('scripts')
     {{-- FUNGSI: Memuat file JS eksternal untuk interaksi landing page --}}
-    <script src="{{ asset('js/landing.js') }}"></script>
+    <script src="{{ asset('js/landing.js?v=' . time()) }}"></script>
 @endpush

@@ -41,8 +41,6 @@
     @include('admin.partials.sidebar') 
 
     @include('admin.partials.mobile-navbar')
-
-        @include('admin.partials.navbar')
         <div class="admin-wrapper">
         <main>
             @yield('content')

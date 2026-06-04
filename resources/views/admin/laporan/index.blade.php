@@ -5,7 +5,7 @@
 @section('page-title-mobile', 'LAPORAN')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/laporan.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/laporan.css?v=' . time()) }}">
 @endpush
 
 @section('content')
@@ -19,11 +19,11 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>NAMA</th>
-                        <th>LOKASI</th>
-                        <th>STATUS</th>
-                        <th>TANGGAL</th>
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th style="text-align: center;">Lokasi</th>
+                        <th>Status</th>
+                        <th>Tanggal</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,12 +54,12 @@
 
                         {{-- Row Utama --}}
                         <tr onclick="toggleDetail({{ $id }})" style="cursor: pointer;">
-                            <td data-label="ID">{{ $laporanList->firstItem() + $loop->index }}</td>
-                            <td data-label="NAMA">{{ $nama }}</td>
-                            <td data-label="LOKASI">{{ $lokasi }}</td>
-                            <td data-label="STATUS"><span
+                            <td data-label="No">{{ $laporanList->firstItem() + $loop->index }}</td>
+                            <td data-label="Nama">{{ $nama }}</td>
+                            <td data-label="Lokasi">{{ $lokasi }}</td>
+                            <td data-label="Status"><span
                                     class="status-badge status-{{ $statusClass }}">{{ $status }}</span></td>
-                            <td data-label="TANGGAL">{{ $tanggal }}</td>
+                            <td data-label="Tanggal">{{ $tanggal }}</td>
                         </tr>
 
                         {{-- Row Detail (Expandable) --}}
@@ -130,9 +130,9 @@
                                             </div>
                                             <div class="btn-group">
                                                 <button type="button" class="btn-secondary"
-                                                    onclick="closeDetail({{ $id }})">TUTUP</button>
+                                                    onclick="closeDetail({{ $id }})">Tutup</button>
                                                 <button type="button" class="btn-primary"
-                                                    onclick="updateStatus({{ $id }})">SIMPAN STATUS</button>
+                                                    onclick="updateStatus({{ $id }})">Simpan</button>
                                             </div>
                                         @else
                                             {{-- Read Only View --}}
@@ -197,5 +197,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/laporan.js') }}"></script>
+    <script src="{{ asset('js/laporan.js?v=' . time()) }}"></script>
 @endpush

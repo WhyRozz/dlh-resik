@@ -5,24 +5,26 @@
 @section('page-title-mobile', 'AKUN')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/account.css') }}">
+<link rel="stylesheet" href="{{ asset('css/account.css?v=' . time()) }}">
 @endpush
 
 @section('content')
+{{-- Header dengan Judul + Search Bar Sejajar --}}
 <div class="content-header">
     <h2>Kelola Akun Admin</h2>
+    
+    <div class="search-wrapper-akun">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchAkun" class="search-input-akun" placeholder="Cari akun petugas...">
+    </div>
 </div>
 
-<div class="search-wrapper-akun">
-    <i class="fas fa-search search-icon"></i>
-    <input type="text" id="searchAkun" class="search-input-akun" placeholder="Cari akun petugas berdasarkan nama atau email">
-</div>
-
+{{-- Cards Akun Admin --}}
 <div class="accounts-grid">
-    <!-- Akun Utama -->
+    {{-- Akun Utama --}}
     <div class="account-card">
         <div class="card-header">
-            <div class="card-title"><span>🔒</span> Akun Utama WEB</div>
+            <div class="card-title"> <img src="{{ asset('assets/secure.png') }}" alt="Lock" style="width: 20px; height: 20px; margin-right: 0px; vertical-align: middle;">Akun Utama WEB </div>
             <span class="badge-default">DEFAULT</span>
         </div>
         <div class="account-info">
@@ -45,10 +47,10 @@
         </div>
     </div>
 
-    <!-- Akun Kedua -->
+    {{-- Akun Kedua --}}
     <div class="account-card">
         <div class="card-header">
-            <div class="card-title"><span>👤</span> Akun Kedua WEB</div>
+            <div class="card-title"> <img src="{{ asset('assets/user1.png') }}" alt="Lock" style="width: 20px; height: 20px; margin-right: 0px; vertical-align: middle;">Akun Kedua WEB </div>
             <span class="badge-default">DEFAULT</span>
         </div>
         <div class="account-info">
@@ -65,94 +67,88 @@
                 onclick="requestOTPForAction('edit', {{ $tambahan[0]->id_admin }}, '{{ addslashes($tambahan[0]->email) }}')">
                 Edit
             </button>
-            @else
-                <button class="btn btn-primary" onclick="showAdminForm()">Tambah Akun</button>
             @endif
         </div>
     </div>
 </div>
 
-<hr style="margin: 40px 0; border: none; border-top: 2px solid #e0e0e0;">
-
-<!-- Section Petugas -->
-<div class="petugas-section" style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 20px;">
+{{-- Section Petugas --}}
+<div class="petugas-section">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-        <h3 style="color: #20A726; margin: 0; font-size: 18px; font-weight: 600;">Daftar Akun Petugas Mobile</h3>
-        <button type="button" class="btn-tambah-akun" 
-                onclick="openPetugasModal('add')"
-                style="background: #20A726; color: white; padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; white-space: nowrap;">
+        <h3>Daftar Akun Petugas Mobile</h3>
+        <button type="button" class="btn-tambah-akun" onclick="openPetugasModal('add')">
             + Tambah Akun
         </button>
     </div>
 
     <div class="petugas-table-container">
         @if($petugas->count() > 0)
-            <!-- Desktop Table -->
-            <div class="desktop-table" style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
-                    <thead style="background: #e6f2e6;">
+            {{-- Desktop Table --}}
+            <div class="desktop-table">
+                <table class="data-table">
+                    <thead>
                         <tr>
-                            <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 5%;">No</th>
-                            <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 18%;">Nama Petugas</th>
-                            <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 22%;">Email</th>
-                            <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 12%;">No Telpon</th>
-                            <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 25%;">Wilayah Kerja</th>
-                            <th style="padding: 12px 10px; text-align: center; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 10%;">Kata Sandi</th>
-                            <th style="padding: 12px 10px; text-align: center; border-bottom: 2px solid #ddd; font-weight: 600; color: #333; width: 8%;">Aksi</th>
+                            <th style="width: 5%;">No</th>
+                            <th style="width: 18%;">Nama Petugas</th>
+                            <th style="width: 22%;">Email</th>
+                            <th style="width: 12%;">No Telpon</th>
+                            <th style="width: 25%; text-align: center;">Wilayah Kerja</th>
+                            <th style="width: 10%; text-align: center;">Kata Sandi</th>
+                            <th style="width: 8%; text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @php
                         $levelNames = [
                             'petugas_dlh' => 'Petugas DLH',
-                            'bank_sampah_kelurahan_kauman_kauman_nganjuk' => 'BS Kel. Kauman',
-                            'bank_sampah_kramat_bersih_kramat_nganjuk' => 'BS Kramat Bersih',
-                            'bank_sampah_kelurahan_cangkringan_cangkringan_nganjuk' => 'BS Kel. Cangkringan',
-                            'bank_sampah_ngudi_sariro_jatirejo_nganjuk' => 'BS Ngudi Sariro',
-                            'bank_sampah_margo_utomo_begadung_nganjuk' => 'BS Margo Utomo',
-                            'bank_sampah_sejahtera_kartoharjo_nganjuk' => 'BS Sejahtera',
-                            'bank_sampah_melati_kedungdowo_nganjuk' => 'BS Melati',
-                            'bank_sampah_anggrek_werungotok_nganjuk' => 'BS Anggrek',
-                            'bank_sampah_sumber_rejeki_werungotok_nganjuk' => 'BS Sumber Rejeki',
-                            'bank_sampah_beringin_hijau_ringinanom_nganjuk' => 'BS Beringin Hijau',
-                            'bank_sampah_ploso_ploso_nganjuk' => 'BS Ploso',
-                            'bank_sampah_mulyo_agung_kudu_kertosono' => 'BS Mulyo Agung',
-                            'bank_sampah_estu_sae_petak_bagor' => 'BS Estu Sae',
-                            'bank_sampah_desa_ngangkatan_ngangkatan_rejoso' => 'BS Desa Ngangkatan',
-                            'bank_sampah_desa_jegreg_jegreg_lengkong' => 'BS Desa Jegreg',
-                            'bank_sampah_musirkidul_musirkidul_rejoso' => 'BS Musirkidul',
-                            'bank_sampah_tanjung_tanjunganom_tanjunganom' => 'BS Tanjung',
-                            'bank_sampah_flamboyan_loceret_loceret' => 'BS Flamboyan',
-                            'bank_sampah_pelita_bogo_nganjuk' => 'BS Pelita',
-                            'bank_sampah_desa_getas_getas_tanjunganom' => 'BS Desa Getas',
-                            'bank_sampah_mbejaji_juwet_ngronggot' => 'BS Mbejaji',
-                            'bank_sampah_kedondong_kedondong_bagor' => 'BS Kedondong',
-                            'bank_sampah_sinar_terang_jampes_pace' => 'BS Sinar Terang',
-                            'bank_sampah_desa_blongko_blongko_ngetos' => 'BS Desa Blongko',
-                            'bank_sampah_bukur_bukur_patianrowo' => 'BS Bukur',
-                            'bank_sampah_bungur_makmur_bungur_sukomoro' => 'BS Bungur Makmur',
-                            'bank_sampah_seger_waras_mabung_baron' => 'BS Seger Waras',
-                            'bank_sampah_maju_bahagia_gondanglegi_prambon' => 'BS Maju Bahagia',
-                            'bank_sampah_barokah_kemlokolegi_baron' => 'BS Barokah',
-                            'bank_sampah_dahlia_senjayan_gondang' => 'BS Dahlia',
-                            'bank_sampah_cengkok_cengkok_ngronggot' => 'BS Cengkok',
-                            'bank_sampah_induk_salepok_omahe_nganjuk_kedondong_bagor' => 'BS Induk Salepok Omahe',
+                            'bank_sampah_kelurahan_kauman_kauman_nganjuk' => 'Bank Sampah KELURAHAN KAUMAN (Kauman, Nganjuk)',
+                            'bank_sampah_kramat_bersih_kramat_nganjuk' => 'Bank Sampah KRAMAT BERSIH (Kramat, Nganjuk)',
+                            'bank_sampah_kelurahan_cangkringan_cangkringan_nganjuk' => 'Bank Sampah KELURAHAN CANGKRINGAN (Cangkringan, Nganjuk)',
+                            'bank_sampah_ngudi_sariro_jatirejo_nganjuk' => 'Bank Sampah NGUDI SARIRO (Jatirejo, Nganjuk)',
+                            'bank_sampah_margo_utomo_begadung_nganjuk' => 'Bank Sampah MARGO UTOMO (Begadung, Nganjuk)',
+                            'bank_sampah_sejahtera_kartoharjo_nganjuk' => 'Bank Sampah SEJAHTERA (Kartoharjo, Nganjuk)',
+                            'bank_sampah_melati_kedungdowo_nganjuk' => 'Bank Sampah MELATI (Kedungdowo, Nganjuk)',
+                            'bank_sampah_anggrek_werungotok_nganjuk' => 'Bank Sampah ANGGREK (Werungotok, Nganjuk)',
+                            'bank_sampah_sumber_rejeki_werungotok_nganjuk' => 'Bank Sampah SUMBER REJEKI (Werungotok, Nganjuk)',
+                            'bank_sampah_beringin_hijau_ringinanom_nganjuk' => 'Bank Sampah BERINGIN HIJAU (Ringinanom, Nganjuk)',
+                            'bank_sampah_ploso_ploso_nganjuk' => 'Bank Sampah PLOSO (Ploso, Nganjuk)',
+                            'bank_sampah_mulyo_agung_kudu_kertosono' => 'Bank Sampah MULYO AGUNG (Kudu, Kertosono)',  
+                            'bank_sampah_estu_sae_petak_bagor' => 'Bank Sampah ESTU SAE (Petak, Bagor)',
+                            'bank_sampah_desa_ngangkatan_ngangkatan_rejoso' => 'Bank Sampah DESA NGANGKATAN (Ngangkatan, Rejoso)',
+                            'bank_sampah_desa_jegreg_jegreg_lengkong' => 'Bank Sampah DESA JEGREG (Jegreg, Lengkong)',
+                            'bank_sampah_musirkidul_musirkidul_rejoso' => 'Bank Sampah MUSIRKIDUL (Musirkidul, Rejoso)',
+                            'bank_sampah_tanjung_tanjunganom_tanjunganom' => 'Bank Sampah TANJUNG (Tanjunganom, Tanjunganom)',
+                            'bank_sampah_flamboyan_loceret_loceret' => 'Bank Sampah FLAMBOYAN (Loceret, Loceret)',
+                            'bank_sampah_pelita_bogo_nganjuk' => 'Bank Sampah PELITA (Bogo, Nganjuk)',
+                            'bank_sampah_desa_getas_getas_tanjunganom' => 'Bank Sampah DESA GETAS (Getas, Tanjunganom)',
+                            'bank_sampah_mbejaji_juwet_ngronggot' => 'Bank Sampah MBEJAJI (Juwet, Ngronggot)',
+                            'bank_sampah_kedondong_kedondong_bagor' => 'Bank Sampah KEDONDONG (Kedondong, Bagor)',
+                            'bank_sampah_sinar_terang_jampes_pace' => 'Bank Sampah SINAR TERANG (Jampes, Pace)',
+                            'bank_sampah_desa_blongko_blongko_ngetos' => 'Bank Sampah DESA BLONGKO (Blongko, Ngetos)',
+                            'bank_sampah_bukur_bukur_patianrowo' => 'Bank Sampah BUKUR (Bukur, Patianrowo)',
+                            'bank_sampah_bungur_makmur_bungur_sukomoro' => 'Bank Sampah BUNGUR MAKMUR (Bungur, Sukomoro)',
+                            'bank_sampah_seger_waras_mabung_baron' => 'Bank Sampah SEGER WARAS (Mabung, Baron)',
+                            'bank_sampah_maju_bahagia_gondanglegi_prambon' => 'Bank Sampah MAJU BAHAGIA (Gondanglegi, Prambon)',
+                            'bank_sampah_barokah_kemlokolegi_baron' => 'Bank Sampah BAROKAH (Kemlokolegi, Baron)',
+                            'bank_sampah_dahlia_senjayan_gondang' => 'Bank Sampah DAHLIA (Senjayan, Gondang)',
+                            'bank_sampah_cengkok_cengkok_ngronggot' => 'Bank Sampah CENGKOK (Cengkok, Ngronggot)',
+                            'bank_sampah_induk_salepok_omahe_nganjuk_kedondong_bagor' => 'Bank Sampah Induk SALEPOK OMAHE NGANJUK (Kedondong, Bagor)',
                         ];
                         @endphp
                         @foreach($petugas as $index => $p)
-                            <tr style="border-bottom: 1px solid #eee;">
-                                <td style="padding: 12px 10px;">{{ $index + 1 }}</td>
-                                <td style="padding: 12px 10px; font-weight: 500;">{{ htmlspecialchars($p->nama_lengkap) }}</td>
-                                <td style="padding: 12px 10px; word-break: break-all;">{{ htmlspecialchars($p->email) }}</td>
-                                <td style="padding: 12px 10px;">{{ htmlspecialchars($p->no_telepon) }}</td>
-                                <td style="padding: 12px 10px;">
-                                    <span class="badge-wilayah" style="display: inline-block; padding: 4px 10px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; font-size: 11px; font-weight: 500; white-space: nowrap;">
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td style="font-weight: 500;">{{ htmlspecialchars($p->nama_lengkap) }}</td>
+                                <td style="word-break: break-all;">{{ htmlspecialchars($p->email) }}</td>
+                                <td>{{ htmlspecialchars($p->no_telepon) }}</td>
+                                <td>
+                                    <span class="badge-wilayah">
                                         {{ $levelNames[$p->level] ?? $p->level }}
                                     </span>
                                 </td>
-                                <td style="padding: 12px 10px; text-align: center;">••••••••</td>
-                                <td style="padding: 12px 10px; text-align: center;">
-                                    <div style="display: flex; gap: 5px; justify-content: center;">
+                                <td style="text-align: center;">••••••••</td>
+                                <td style="text-align: center;">
+                                    <div class="actions">
                                         <button type="button" 
                                         onclick='openPetugasModal("edit", {{ json_encode([
                                             "id" => $p->id_petugas,
@@ -161,14 +157,12 @@
                                             "telpon" => $p->no_telepon,
                                             "level" => $p->level
                                         ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }})'
-                                        style="padding: 6px 10px; background: #fff3cd; color: #856404; border: none; border-radius: 4px; cursor: pointer;" 
-                                        title="Edit">
+                                        class="btn-icon btn-edit" title="Edit">
                                             <img src="{{ asset('assets/icons/edit.png') }}" alt="Edit" style="width: 16px; height: 16px;">
                                         </button>
                                         
                                         <button onclick="confirmDelete({{ $p->id_petugas }})" 
-                                        style="padding: 6px 10px; background: #f8d7da; color: #721c24; border: none; border-radius: 4px; cursor: pointer;"
-                                        title="Hapus">
+                                        class="btn-icon btn-delete" title="Hapus">
                                             <img src="{{ asset('assets/icons/delete.png') }}" alt="Hapus" style="width: 16px; height: 16px;">
                                         </button>
                                     </div>
@@ -179,7 +173,7 @@
                 </table>
             </div>
 
-            <!-- Mobile Card View -->
+            {{-- Mobile Card View --}}
             <div class="mobile-cards">
                 @foreach($petugas as $index => $p)
                 <div class="petugas-card" data-search="{{ strtolower($p->nama_lengkap . ' ' . $p->email . ' ' . $p->no_telepon) }}">
@@ -207,26 +201,22 @@
                     <div class="card-body-mobile">
                         <div class="card-row">
                             <span class="card-label">Nama Petugas:</span>
-                            <span class="card-value" style="font-weight: 600; color: #333;">{{ htmlspecialchars($p->nama_lengkap) }}</span>
+                            <span class="card-value" style="font-weight: 600;">{{ htmlspecialchars($p->nama_lengkap) }}</span>
                         </div>
-                        
                         <div class="card-row">
                             <span class="card-label">Email:</span>
                             <span class="card-value" style="word-break: break-all;">{{ htmlspecialchars($p->email) }}</span>
                         </div>
-                        
                         <div class="card-row">
                             <span class="card-label">No. Telepon:</span>
                             <span class="card-value">{{ htmlspecialchars($p->no_telepon) }}</span>
                         </div>
-                        
                         <div class="card-row">
                             <span class="card-label">Wilayah Kerja:</span>
                             <span class="badge-wilayah-mobile">
                                 {{ $levelNames[$p->level] ?? $p->level }}
                             </span>
                         </div>
-                        
                         <div class="card-row">
                             <span class="card-label">Kata Sandi:</span>
                             <span class="card-value">••••••••</span>
@@ -245,7 +235,7 @@
     </div>
 </div>
 
-<!-- Delete Modal -->
+{{-- Delete Modal --}}
 <div id="deleteModal" class="modal" style="display: none;">
     <div style="background: white; padding: 30px; border-radius: 10px; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin: 20px;">
         <h4 style="margin-top: 0; color: #333; font-size: 18px; margin-bottom: 15px;">Konfirmasi Hapus</h4>
@@ -269,7 +259,7 @@
 
 @include('admin.account.partials.modals')
 
-{{-- 🔗 BRIDGE: Pass dynamic Laravel data ke JS --}}
+{{-- Config JS --}}
 <script>
     window.AccountConfig = {
         csrfToken: "{{ csrf_token() }}",
@@ -282,10 +272,7 @@
 </script>
 
 @push('scripts')
-    <!-- Load SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Load account.js eksternal (dengan versioning untuk cache busting) -->
     <script src="{{ asset('js/account.js?v=' . time()) }}"></script>
 @endpush
 @endsection

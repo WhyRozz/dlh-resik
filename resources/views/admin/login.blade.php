@@ -7,7 +7,7 @@
     <link rel="shortcut icon" href="{{ asset('assets/logo-dlh.png') }}" type="image/x-icon">
     
     {{-- FUNGSI: Memuat file CSS eksternal untuk halaman login --}}
-    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/login.css?v=' . time()) }}">
     
     {{-- FUNGSI: Set background image via inline style karena pakai {{ asset() }} --}}
     <style>
@@ -89,6 +89,6 @@
     </script>
 
     {{-- FUNGSI: Memuat file JS eksternal untuk interaksi login --}}
-    <script src="{{ asset('js/login.js') }}"></script>
+    <script src="{{ asset('js/login.js?v=' . time()) }}"></script>
 </body>
 </html>

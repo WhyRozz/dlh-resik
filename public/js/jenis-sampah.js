@@ -2,10 +2,11 @@
  * Jenis Sampah - Modal & Form Handler
  */
 
+// Pastikan DOM sudah loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Loaded - Initializing...');
+    
     initModals();
-    initAlerts();
-    initImageUpload();
 });
 
 function initModals() {
@@ -26,19 +27,6 @@ function initModals() {
             });
         }
     });
-}
-
-function initAlerts() {
-    // Auto hide alert after 5 seconds
-    setTimeout(function() {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function(alert) {
-            alert.style.animation = 'slideUp 0.3s ease';
-            setTimeout(function() {
-                alert.remove();
-            }, 300);
-        });
-    }, 5000);
 }
 
 /**
@@ -78,37 +66,6 @@ function openModal(type, id = null, jenis = '', satuan = '', harga = 0, gambar =
     modal.classList.add('active');
 }
 
-
-function previewImage(input) {
-    const preview = document.getElementById('imagePreview');
-    const uploadText = input.parentElement.querySelector('p');
-    
-    if (input.files && input.files[0] && preview) {
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            preview.innerHTML = '';
-            
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.alt = 'Preview';
-            img.style.width = '100%';
-            img.style.height = '100%';
-            img.style.objectFit = 'contain';
-            
-            preview.style.display = 'block';
-            preview.appendChild(img);
-            
-            if (uploadText) {
-                uploadText.textContent = 'Klik untuk ganti foto';
-            }
-        };
-        
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
-
 /**
  * Close add/edit modal
  */
@@ -116,39 +73,28 @@ function closeModal() {
     document.getElementById('formModal').classList.remove('active');
 }
 
-function initImageUpload() {
-    const imageUpload = document.querySelector('.image-upload');
-    const fileInput = document.getElementById('gambar');
-    
-    if (imageUpload && fileInput) {
-        imageUpload.addEventListener('click', function(e) {
-            if (e.target.closest('.image-preview img')) {
-                return;
-            }
-            e.stopPropagation();
-            fileInput.click();
-        });
-        
-        fileInput.addEventListener('change', function(e) {
-            e.stopPropagation();
-            previewImage(this);
-        });
-        
-        fileInput.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    }
-}
-
-
-
 /**
  * Open delete confirmation modal
  */
 function confirmDelete(id, name) {
-    document.getElementById('deleteName').textContent = name;
-    document.getElementById('deleteForm').action = `/admin/bank-sampah/jenis-sampah/${id}`;
-    document.getElementById('deleteModal').classList.add('active');
+    Swal.fire({
+        title: 'Hapus Data?',
+        text: `Apakah Anda yakin ingin menghapus "${name}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        position: 'center'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Submit form delete
+            document.getElementById('deleteForm').action = `/admin/bank-sampah/jenis-sampah/${id}`;
+            document.getElementById('deleteForm').submit();
+        }
+    });
 }
 
 /**
@@ -158,4 +104,53 @@ function closeDeleteModal() {
     document.getElementById('deleteModal').classList.remove('active');
 }
 
+// Search Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const clearSearch = document.getElementById('clearSearch');
+    const table = document.querySelector('.table-container table');
+    const tbody = table.querySelector('tbody');
+    const rows = tbody.querySelectorAll('tr');
 
+    // Show/hide clear button
+    if (searchInput && clearSearch) {
+        searchInput.addEventListener('input', function() {
+            if (this.value.length > 0) {
+                clearSearch.style.display = 'block';
+            } else {
+                clearSearch.style.display = 'none';
+            }
+            filterTable(this.value);
+        });
+
+        // Clear search
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            clearSearch.style.display = 'none';
+            filterTable('');
+            searchInput.focus();
+        });
+    }
+
+    // Filter table function
+    function filterTable(searchTerm) {
+        const term = searchTerm.toLowerCase();
+        
+        rows.forEach(row => {
+            // Skip empty state row
+            if (row.querySelector('.empty-state')) {
+                return;
+            }
+            
+            const jenis = row.cells[2]?.textContent.toLowerCase() || '';
+            const satuan = row.cells[3]?.textContent.toLowerCase() || '';
+            const harga = row.cells[4]?.textContent.toLowerCase() || '';
+            
+            if (jenis.includes(term) || satuan.includes(term) || harga.includes(term)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+});

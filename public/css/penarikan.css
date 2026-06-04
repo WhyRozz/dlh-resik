@@ -7,7 +7,7 @@
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    margin-top: -50px;
+    margin-top: 0px;
     padding: 5px 20px 20px 20px;
 }
 
@@ -143,13 +143,16 @@
     background: #2e8b57;
     border-radius: 99px;
     margin: 0.5rem 0 1.5rem 0;
+    position: relative;
+    top: 5px;
 }
 
 /* Page Header (Export Button) */
 .page-header {
     display: flex;
+    margin-top: 0px; 
     justify-content: flex-end;
-    margin-bottom: 1rem;
+
 }
 
 .btn-cetak {
@@ -171,14 +174,17 @@
 }
 
 .icon-excel {
-    width: 18px;
-    height: 18px;
+    width: 25px;
+    height: 25px;
 }
 
 /* Table Container */
 .table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     overflow-x: auto;
-    margin-top: 1rem;
+    border: 1px solid #e0e0e0;
 }
 
 .data-table {
@@ -187,9 +193,8 @@
     background: white;
 }
 
-.data-table thead tr {
-    background: #e6f2e6;
-    border-bottom: 1px solid #e0e0e0;
+.data-table thead {
+    background: #e8f5e9;  /* Warna hijau lebih soft seperti Setor */
 }
 
 .data-table th {
@@ -198,10 +203,12 @@
     font-weight: 600;
     color: #666;
     font-size: 0.85rem;
+    border-bottom: 1px solid #e0e0e0;
+    white-space: nowrap;  /* Agar header tidak wrap */
 }
 
 .data-table tbody tr {
-    border-bottom: 1px solid #f2f2f2;
+    border-bottom: 1px solid #e0e0e0;
     cursor: pointer;
     transition: background 0.2s ease;
 }
@@ -210,9 +217,14 @@
     background: #f8f9fa;
 }
 
+.data-table tbody tr:last-child td {
+    border-bottom: none;  /* Hilangkan border di row terakhir */
+}
+
 .data-table td {
     padding: 14px 20px;
     color: #333;
+    vertical-align: middle;  /* Agar teks di tengah vertikal */
 }
 
 .member-name {
@@ -886,12 +898,32 @@
 @media (max-width: 480px) {
     /* 1. Perbaiki scroll tabel agar stabil & sinkron */
     .table-container {
-        overflow-x: auto !important;
+        overflow-x: auto;
         -webkit-overflow-scrolling: touch; /* Smooth scroll iOS */
         border-radius: 8px;
     }
+    
+    .page-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2e8b57;
+    margin-top: -30px;   
+    margin-bottom: 10px; 
+    text-align: left;
+    white-space: normal;
+    width: 100%;
+    display: block;
+    }
+
+    .header-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 15px 10px;
+    }
+    
     .data-table {
-        display: table !important;
+        display: table;
         min-width: 700px; /* Paksa scroll horizontal rapi */
     }
 
@@ -901,21 +933,21 @@
     .search-wrapper,
     .btn-cetak,
     .btn-action {
-        min-height: 44px !important;
+        min-height: 44px;
     }
     
     /* Tombol aksi bulat biar tetap proporsional */
     .btn-action {
-        width: 44px !important;
-        height: 44px !important;
+        width: 44px;
+        height: 44px;
     }
 
     /* 3. Pagination rapi & tidak tumpuk */
     .pagination-container {
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 10px !important;
-        padding: 15px 10px !important;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 10px;
         text-align: center;
     }
     .pagination {
@@ -932,7 +964,7 @@
 
     /* 4. Modal aman di layar kecil */
     .modal-container {
-        width: 95% !important;
+        width: 95%;
         margin: 10px;
         max-height: 85vh;
     }
@@ -942,7 +974,7 @@
     
     /* 5. Form di modal lebih rapi */
     .form-grid {
-        gap: 10px;
+        gap: 15px;
     }
     .form-input,
     .form-textarea,

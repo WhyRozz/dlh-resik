@@ -1,10 +1,10 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Setor - Bank Sampah')
+@section('title', 'Bank Sampah - Data Setor')
 
 @push('styles')
     {{-- FUNGSI: Memuat file CSS khusus untuk halaman data setor --}}
-    <link rel="stylesheet" href="{{ asset('css/setor.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/setor.css?v=' . time()) }}">
 @endpush
 
 @section('content')
@@ -159,6 +159,6 @@
 
 @push('scripts')
     {{-- FUNGSI: Memuat file JS eksternal yang berisi semua fungsi interaksi halaman --}}
-    <script src="{{ asset('js/setor.js') }}"></script>
+    <script src="{{ asset('js/setor.js?v=' . time()) }}"></script>
 @endpush
 @endsection

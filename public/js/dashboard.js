@@ -141,5 +141,3 @@ window.addEventListener('resize', function() {
         }
     }, 250);
 });
-
-

@@ -22,7 +22,6 @@
                 <i class="fas fa-times"></i> Tutup
             </button>
         </div>
-        
     </div>
 </div>
 

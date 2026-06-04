@@ -307,10 +307,11 @@
         display: none !important;
     }
     
+    /* ✅ FIX: Padding 10px saja, tidak ada space kosong */
     .admin-wrapper,
     .main-content {
         margin-left: 0 !important;
-        padding-top: 70px !important;
+        padding-top: 10px !important;
     }
     
     .mobile-menu-dropdown {
@@ -334,9 +335,6 @@
     }
 }
 
-
-/* Tambahkan di bagian paling bawah mobile-hamburger.css */
-
 /* ===== SHOW/HIDE LOGIC ===== */
 
 /* Desktop: Sidebar visible, Mobile navbar hidden */
@@ -352,27 +350,5 @@
     
     .admin-wrapper {
         margin-left: 260px !important;
-    }
-}
-
-/* Mobile: Sidebar hidden, Mobile navbar visible */
-@media (max-width: 768px) {
-    .sidebar,
-    .sidebar-desktop,
-    .desktop-navbar {
-        display: none !important;
-    }
-    
-    .mobile-navbar {
-        display: flex !important;
-    }
-    
-    .admin-wrapper {
-        margin-left: 0 !important;
-        padding-top: 60px !important; /* Space untuk navbar mobile */
-    }
-    
-    .main-content {
-        padding: 20px 12px !important;
     }
 }

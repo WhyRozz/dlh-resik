@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 <!-- Fungsi: Menetapkan judul halaman untuk halaman data pengguna -->
-@section('title', 'RESIK - Data Pengguna')
+@section('title', 'Data Pengguna - RESIK')
 
 @push('styles')
 <!-- Fungsi: Memuat file CSS khusus untuk halaman data pengguna -->
@@ -78,11 +78,11 @@
             <tr>
                 <th>No</th>
                 <th>Nama Pengguna</th>
-                <th>Email</th>
+                <th style="text-align: center;">Email</th>
                 <th>Jenis Kelamin</th>
-                <th>No Telp</th>
-                <th>Pekerjaan</th>
-                <th>Saldo</th>
+                <th style="text-align: center;">No Telp</th>
+                <th style="text-align: center;">Pekerjaan</th>
+                <th style="text-align: center;">Saldo</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -220,6 +220,6 @@
 
 @push('scripts')
 <!-- Fungsi: Memuat file JavaScript eksternal untuk handle modal dan interaksi data pengguna -->
-<script src="{{ asset('js/data-pengguna.js') }}"></script>
+<script src="{{ asset('js/data-pengguna.js?v=' . time()) }}"></script>
 @endpush
 @endsection

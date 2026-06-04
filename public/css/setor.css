@@ -32,7 +32,7 @@
     background: white;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    margin-top: -50px;
+    margin-top: 0px;
     /* Fix: Tarik ke atas */
     padding: 5px 20px 20px 20px;
     margin-bottom: 0;
@@ -488,6 +488,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
+    align-items: stretch; 
 }
 
 .form-group {
@@ -503,13 +504,17 @@
 }
 
 .form-group input {
-    padding: 10px 14px;
+    height: 44px;              /* ← TAMBAHKAN INI */
+    padding: 0 14px;           /* ← UBAH dari 10px 14px */
     border: 1px solid var(--gray-300);
     border-radius: 8px;
     font-size: 0.95rem;
     background: var(--gray-50);
     color: var(--gray-700);
     transition: border-color 0.2s;
+    box-sizing: border-box;    /* ← TAMBAHKAN INI */
+    display: flex;             /* ← TAMBAHKAN INI */
+    align-items: center;       /* ← TAMBAHKAN INI */
 }
 
 .form-group input[readonly] {
@@ -519,9 +524,11 @@
 .form-group input.highlight {
     background: var(--light-green);
     border-color: var(--primary-green);
-    font-weight: 600;
+    font-weight: 700;          /* ← UBAH dari 600 ke 700 */
     color: var(--primary-green);
-    font-size: 1.1rem;
+    font-size: 1rem;           /* ← UBAH dari 1.1rem ke 1rem */
+    height: 44px;              /* ← TAMBAHKAN INI */
+    padding: 0 14px;           /* ← TAMBAHKAN INI */
 }
 
 .form-group input:focus {

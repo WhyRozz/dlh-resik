@@ -1,7 +1,7 @@
 /* ========================================
    ADMIN DASHBOARD - COMPLETE CSS
    File: public/css/admin-dashboard.css
-   Project: SIMPELSI - DLH Resik
+   Project: RESIK - DLH Resik
    ======================================== */
 
 /* ===== RESET & BASE ===== */
@@ -256,7 +256,7 @@ body.fade-in-ready .main-content {
 .main-content {
     flex: 1;
     margin-left: 250px;
-    padding: 80px 20px 40px;
+    padding: 20px 20px 40px;  /* ✅ FIX: 80px → 20px */
     background: #f9f9f9;
     min-height: 100vh;
     opacity: 1;
@@ -511,8 +511,9 @@ th {
     --radius: 16px;
 }
 
+/* ===== DASHBOARD CONTAINER - FIX SPACE KOSONG ===== */
 .dashboard-container {
-    padding: 24px;
+    padding: 0 24px 24px;  /* ✅ FIX: Atas 0, bukan 24px */
     background: var(--bg-page);
     min-height: 100vh;
     font-family: 'Inter', system-ui, sans-serif;
@@ -688,7 +689,6 @@ th {
     font-weight: 600;
     color: var(--text-secondary);
     font-size: 12px;
-    text-transform: uppercase;
     letter-spacing: 0.05em;
     border-bottom: 2px solid var(--border-color);
     background: #f8fafc;
@@ -753,18 +753,20 @@ th {
     opacity: 0.6;
 }
 
-
 /* ========================================
-   📱 MOBILE RESPONSIVE - FINAL (VERTIKAL)
-   TANPA !IMPORTANT, TANPA DUPLIKASI
+   📱 MOBILE RESPONSIVE - FINAL
    ======================================== */
 @media (max-width: 768px) {
     /* Hide desktop layout */
     .sidebar-desktop, .header-desktop { display: none; }
     
-    /* Main & Dashboard wrapper */
-    .main-content { margin-left: 0; padding: 70px 12px 20px; width: 100%; }
-    .dashboard-container { padding: 12px; }
+    /* Main & Dashboard wrapper - FIX PADDING */
+    .main-content {
+        margin-left: 0; 
+        padding: -80px 82px 20px;  /* ✅ FIX: 70px → 10px */
+        width: 100%; 
+    }
+    .dashboard-container { padding: 0 12px 12px; }  /* ✅ FIX: Atas 0 */
     .dashboard-header { flex-direction: column; align-items: stretch; gap: 12px; }
     .page-title { font-size: 20px; }
     .page-subtitle { font-size: 13px; }
@@ -787,12 +789,11 @@ th {
     .card-header h3 { font-size: 16px; }
     .chart-container { height: 200px; }
     
-    /* ===== TABLE → CARD VERTICAL (SEPERTI SS) ===== */
+    /* ===== TABLE → CARD VERTICAL ===== */
     .table-card .table-responsive { overflow: visible; margin: 0; padding: 0; }
     .data-table thead { display: none; }
     .data-table tbody { display: block; }
     
-    /* Kartu Utama (Row) */
     .data-table tbody tr {
         display: block;
         margin-bottom: 16px;
@@ -804,7 +805,6 @@ th {
         width: 100%;
     }
     
-    /* Cell diubah jadi block ke bawah */
     .data-table td {
         display: block;
         padding: 6px 0;
@@ -814,19 +814,16 @@ th {
         width: 100%;
     }
     
-    /* Label di atas data */
     .data-table td::before {
         content: attr(data-label);
         display: block;
         font-size: 11px;
         font-weight: 600;
         color: #6b7280;
-        text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-bottom: 4px;
     }
     
-    /* Fallback nama kolom jika HTML belum pakai data-label */
     .data-table td:nth-child(1)::before { content: "No"; }
     .data-table td:nth-child(2)::before { content: "Nama Pelapor"; }
     .data-table td:nth-child(3)::before { content: "Lokasi"; }
@@ -834,7 +831,6 @@ th {
     .data-table td:nth-child(5)::before { content: "Status"; }
     .data-table td:nth-child(6)::before { content: "Tanggal"; }
     
-    /* Komponen dalam kartu */
     .user-info { justify-content: flex-start; gap: 8px; flex-wrap: nowrap; }
     .user-avatar { width: 26px; height: 26px; font-size: 11px; }
     .badge, .badge-type { margin-top: 4px; }
@@ -842,7 +838,7 @@ th {
 
 /* Small Mobile */
 @media (max-width: 480px) {
-    .dashboard-container { padding: 8px; }
+    .dashboard-container { padding: 0 8px 8px; }
     .stats-grid { grid-template-columns: 1fr; }
     .chart-container { height: 180px; }
     .stat-value { font-size: 16px; }
@@ -857,3 +853,20 @@ th {
 /* Global helpers */
 html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
 body { -webkit-tap-highlight-color: transparent; }
+
+
+/* ===== JARAK ANTARA GRAFIK DAN TABEL ===== */
+.chart-card {
+    margin-bottom: 30px;  /* ← Jarak bawah grafik */
+}
+
+.table-card {
+    margin-top: 0;  /* Reset margin atas */
+}
+
+/* Untuk Mobile */
+@media (max-width: 1024px) {
+    .chart-card {
+        margin-bottom: 24px;
+    }
+}

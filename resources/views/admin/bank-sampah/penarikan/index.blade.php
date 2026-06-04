@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Penarikan')
+@section('title', 'Bank Sampah - Data Penarikan')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/penarikan.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/penarikan.css?v=' . time()) }}">
 @endpush
 
 @section('content')
@@ -56,6 +56,21 @@
                 </form>
             </div>
 
+
+            {{-- Export Button --}}
+            <div class="page-header">
+                <form method="GET" action="{{ route('admin.bank-sampah.penarikan.export') }}" id="exportForm">
+                    <input type="hidden" name="bulan" value="{{ request('bulan') }}">
+                    <input type="hidden" name="tahun" value="{{ request('tahun') }}">
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                    <button type="submit" class="btn-cetak">
+                        <img src="{{ asset('assets/icons/excel.png') }}" alt="Excel" class="icon-excel">
+                        Export Excel
+                    </button>
+                </form>
+            </div>
+
+
             {{-- Search --}}
             <div class="top-search">
                 <div class="search-wrapper">
@@ -66,20 +81,8 @@
             </div>
         </div>
 
-        {{-- Export Button --}}
-        <div class="page-header">
-            <form method="GET" action="{{ route('admin.bank-sampah.penarikan.export') }}" id="exportForm">
-                <input type="hidden" name="bulan" value="{{ request('bulan') }}">
-                <input type="hidden" name="tahun" value="{{ request('tahun') }}">
-                <input type="hidden" name="status" value="{{ request('status') }}">
-                <button type="submit" class="btn-cetak">
-                    <img src="{{ asset('assets/icons/excel.png') }}" alt="Excel" class="icon-excel">
-                    Export Excel
-                </button>
-            </form>
-        </div>
-
         <div class="green-divider"></div>
+
 
         {{-- Table --}}
         <div class="table-container">
@@ -268,5 +271,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/penarikan.js') }}"></script>
+    <script src="{{ asset('js/penarikan.js?v=' . time()) }}"></script>
 @endpush

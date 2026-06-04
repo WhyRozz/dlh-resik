@@ -47,40 +47,6 @@ class AccountController extends Controller
     }
 
     /**
-     * Simpan akun baru
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'email' => 'required|email|max:255|unique:admin,email',
-            'password' => 'required|string|min:8|max:50|regex:/^[a-zA-Z0-9\s]+$/',
-        ], [
-            'password.regex' => 'Sandi tidak boleh mengandung karakter spesial. Hanya boleh huruf, angka, dan spasi.',
-        ]);
-
-        // Cek batas maksimal akun
-        if (Admin::count() >= self::MAX_ADMIN_ACCOUNTS) {
-            return back()->with('error', 'Jumlah akun admin sudah mencapai batas maksimal (3).');
-        }
-
-        // Hash & encrypt password
-        $hashedPassword = Hash::make($validated['password']);
-        $encryptedPassword = EncryptionService::encrypt($validated['password']);
-
-        if (!$hashedPassword || !$encryptedPassword) {
-            return back()->with('error', 'Gagal membuat hash/enkripsi password.');
-        }
-
-        Admin::create([
-            'email' => $validated['email'],
-            'password' => $hashedPassword,
-            'password_encrypted' => $encryptedPassword,
-        ]);
-
-        return redirect()->route('admin.akun.index')->with('success', 'Akun berhasil ditambahkan.');
-    }
-
-    /**
      * Update akun existing
      */
     public function update(Request $request, $id)
@@ -163,7 +129,7 @@ class AccountController extends Controller
         // Kirim email
         try {
             Mail::raw("
-                🔐 Kode OTP Admin RESIK: {$otp}
+                Kode OTP Admin RESIK: {$otp}
                 
                 Berlaku selama " . self::OTP_EXPIRE_MINUTES . " menit.
                 

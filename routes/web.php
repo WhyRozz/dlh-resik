@@ -95,7 +95,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // ── Kelola Akun Admin (dengan OTP) ──
         Route::prefix('akun')->name('akun.')->group(function () {
             Route::get('/', [AccountController::class, 'index'])->name('index');
-            Route::post('/', [AccountController::class, 'store'])->name('store');
             Route::get('/{id}', [AccountController::class, 'show'])->name('show');
             Route::put('/{id}', [AccountController::class, 'update'])->name('update');
             Route::get('/get-admin-emails', [AccountController::class, 'getAdminEmails'])->name('get-emails');
@@ -152,6 +151,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/{id}/detail', [PenjemputanController::class, 'show'])->name('show');
                 Route::patch('/{id}/approve', [PenjemputanController::class, 'approve'])->name('approve');
                 Route::delete('/{id}/reject', [PenjemputanController::class, 'reject'])->name('reject');
+                Route::post('/store', [PenjemputanController::class, 'storeFromAdmin'])->name('store');
+                Route::get('/list/{adminId}', [PenjemputanController::class, 'indexByAdmin'])->name('list');                
             });
 
             // ── Setor Sampah ──

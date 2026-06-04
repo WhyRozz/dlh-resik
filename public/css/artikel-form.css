@@ -179,6 +179,9 @@
 .form-textarea {
     resize: vertical;
     min-height: 180px;
+    text-align: justify;        /* Rata kiri-kanan */
+    text-justify: inter-word;   /* Spasi otomatis rapi */
+    line-height: 1.8;           /* Jarak antar baris lebih lega */
 }
 
 .error-text {
@@ -194,48 +197,57 @@
     justify-content: flex-end;
     margin-top: 30px;
     padding-top: 25px;
+    border-top: 1px solid #e0e0e0; /* Garis pemisah modern */
     width: 100%;
 }
 
 .btn {
-    padding: 12px 30px;
+    padding: 10px 24px;         /* Lebih compact */
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;         /* Sudut lebih halus */
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    min-height: 48px;
+    min-height: 25px;           /* Tidak terlalu besar */
+    gap: 8px;
 }
 
 .btn-batal {
-    background: #e0e0e0;
-    color: #666;
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
 }
 .btn-batal:hover {
-    background: #d0d0d0;
+    background: #e2e8f0;
+    border-color: #94a3b8;
     transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {
-    background: #2e8b57;
+    background: linear-gradient(135deg, #2e8b57 0%, #257046 100%);
     color: white;
-}
-.btn-primary:hover {
-    background: #226b42;
-    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
 }
+.btn-primary:hover {
+    background: linear-gradient(135deg, #257046 0%, #1e5a3a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(46, 139, 87, 0.4);
+}
+.btn-primary:active {
+    transform: translateY(0);
+}
 .btn-primary:disabled {
-    background: #999;
+    background: #cbd5e1;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 /* Modal */
@@ -323,7 +335,11 @@
         gap: 12px;
     }
 
-    .btn { width: 100%; }
+    .btn { 
+        width: 100%; 
+        padding: 12px 20px; 
+        min-height: 44px; 
+    }
     
     .modal-header, .modal-body, .modal-footer {
         padding-left: 20px;

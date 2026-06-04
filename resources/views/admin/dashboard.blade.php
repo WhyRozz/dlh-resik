@@ -161,7 +161,7 @@
                             <th>No</th>
                             <th>Nama Pelapor</th>
                             <th>Lokasi</th>
-                            <th>Jenis Sampah</th>
+                            <th>Keterangan</th>
                             <th>Status</th>
                             <th>Tanggal</th>
                         </tr>
@@ -236,12 +236,12 @@
 
 @push('scripts')
     {{-- FUNGSI: Memuat file JS eksternal untuk inisialisasi chart --}}
-    <script src="{{ asset('js/dashboard.js') }}"></script>
+    <script src="{{ asset('js/dashboard.js?v=' . time()) }}"></script>
 @endpush
 
 {{-- FUNGSI: Memuat file CSS eksternal untuk dashboard admin --}}
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/admin-dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin-dashboard.css?v=' . time()) }}">
 @endpush
 
 @stack('styles')

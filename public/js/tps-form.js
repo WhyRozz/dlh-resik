@@ -1,7 +1,3 @@
-/**
- * Script untuk Form TPS Admin
- */
-
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('tpsForm');
     const lokasiInput = document.querySelector('textarea[name="lokasi"]');
@@ -48,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Validasi format koordinat
             if (lokasi && !/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/.test(lokasi)) {
-                showErrorPopup('Format koordinat tidak valid. Gunakan: -7.601478,111.943225');
+            showErrorPopup('Format koordinat tidak valid. Gunakan titik koordinat yang benar');
                 return;
             }
 

@@ -1,32 +1,48 @@
 @extends('layouts.admin')
 
-@section('title', 'RESIK - Jenis & Harga Sampah')
+@section('title', 'Bank Sampah - Jenis & Harga Sampah')
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/jenis-sampah.css') }}">
+<link rel="stylesheet" href="{{ asset('css/jenis-sampah.css?v=' . time()) }}">
 @endpush
 
 @section('content')
 <div class="page-container">
-    <!-- Header -->
-    <div class="page-header">
+    
+    {{-- 1. SEARCH BAR (Baris atas sendiri, pojok kanan) --}}
+    <div class="search-top">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Cari jenis sampah...">
+            <button type="button" id="clearSearch" class="clear-btn" style="display: none;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    {{-- 2. JUDUL & TOMBOL (Sejajar di baris kedua) --}}
+    <div class="content-header">
         <h2 class="page-title">Daftar Jenis & Harga Sampah</h2>
-        <!-- ✅ Tambah: Link ke halaman create, bukan modal -->
         <a href="{{ route('admin.bank-sampah.jenis-sampah.create') }}" class="btn-add">
-            <i class="fas fa-plus"></i> Tambah Jenis Sampah
+            <i class="fas fa-plus"></i> Tambah
         </a>
     </div>
+    
+    {{-- 3. GARIS HIJAU --}}
+    <div class="green-divider"></div>
+    
+    {{-- Tabel tetap sama di bawah --}}
 
     <!-- Table Container -->
     <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th style="width: 50px;">No</th>
-                    <th style="width: 100px;">Gambar</th>
-                    <th>Jenis</th>
-                    <th style="width: 100px;">Satuan</th>
-                    <th style="width: 150px;">Harga</th>
-                    <th style="width: 100px;">Aksi</th>
+                    <th style="width: 10%;">No</th>
+                    <th style="width: 20%;">Gambar</th>
+                    <th style="width: 20%;">Jenis</th>
+                    <th style="width: 20%;">Satuan</th>
+                    <th style="width: 20%;">Harga</th>
+                    <th style="text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -103,24 +119,44 @@
         </div>
     </div>
 </div>
-
-@if(session('success'))
-<div class="alert alert-success">
-    {{ session('success') }}
-</div>
-@endif
-
-@if($errors->any())
-<div class="alert alert-danger">
-    <ul style="margin: 0; padding-left: 20px;">
-        @foreach($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-</div>
-@endif
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/jenis-sampah.js') }}"></script>
+    {{-- SweetAlert2 CDN --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="{{ asset('js/jenis-sampah.js?v=' . time()) }}"></script>
+    
+        {{-- SweetAlert Notifikasi (Blade syntax akan diproses di sini!) --}}
+    @if(session('success'))
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: '{{ session('success') }}',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            position: 'center'
+        });
+    </script>
+    @endif
+
+    @if($errors->any())
+    <script>
+        let errorHtml = '<ul style="text-align: left; margin: 10px 0; padding-left: 20px;">';
+        @foreach($errors->all() as $error)
+            errorHtml += '<li>{{ $error }}</li>';
+        @endforeach
+        errorHtml += '</ul>';
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Terjadi Kesalahan!',
+            html: errorHtml,
+            confirmButtonColor: '#dc2626',
+            position: 'center'
+        });
+    </script>  
+    @endif
 @endpush
