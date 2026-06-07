@@ -29,6 +29,7 @@ class AuthController extends Controller
             'tanggal_lahir' => 'nullable|date',
             'alamat' => 'nullable|string',
             'id_dinas' => 'required_if:pekerjaan,ASN / PNS|nullable|exists:dinas,id_dinas',
+            'id_desa' => 'required_if:pekerjaan,Masyarakat Umum|nullable|exists:desa,id_desa',
         ]);
 
         if ($validator->fails()) {
@@ -58,6 +59,7 @@ class AuthController extends Controller
                 'jenis_kelamin' => $request->jenis_kelamin,
                 'tanggal_lahir' => $request->tanggal_lahir,
                 'alamat' => $request->alamat,
+                'id_desa' => $request->id_desa,
                 'barcode_id' => $barcode_id,
                 'saldo' => 0.00,
             ]);
@@ -134,7 +136,7 @@ class AuthController extends Controller
         $password = $request->password;
 
         // 1. Cek tabel Masyarakat
-        $user = Masyarakat::where('email', $email)->first();
+        $user = Masyarakat::with('desa.kecamatan')->where('email', $email)->first();
         if ($user && Hash::check($password, $user->password)) {
             return response()->json([
                 'status' => 'success',

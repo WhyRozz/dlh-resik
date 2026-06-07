@@ -6,6 +6,8 @@ use App\Models\TransaksiSetor;
 use App\Models\JenisSampah;
 use App\Models\Masyarakat;
 use App\Models\Pns;
+use App\Models\Kecamatan;
+use App\Models\Desa;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +16,7 @@ class SetorController extends Controller
 {
     public function index(Request $request)
     {
-        $query = TransaksiSetor::with(['masyarakat', 'pns', 'jenisSampah', 'petugas'])
+        $query = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns', 'jenisSampah', 'petugas'])
             ->orderBy('tanggal_transaksi', 'desc');
 
         // Filter Pencarian
@@ -46,6 +48,20 @@ class SetorController extends Controller
             $query->whereYear('tanggal_transaksi', $request->tahun);
         }
 
+        // Filter Kecamatan
+        if ($request->filled('kecamatan_id')) {
+            $query->whereHas('masyarakat.desa', function($q) use ($request) {
+                $q->where('id_kecamatan', $request->kecamatan_id);
+            });
+        }
+
+        // Filter Desa
+        if ($request->filled('desa_id')) {
+            $query->whereHas('masyarakat.desa', function($q) use ($request) {
+                $q->where('id_desa', $request->desa_id);
+            });
+        }
+
         // Pagination & Statistik
         $setorData = $query->paginate(15);
 
@@ -63,21 +79,30 @@ class SetorController extends Controller
 
         $tahunList = collect(range(date('Y') - 5, date('Y') + 5));
 
+        // Data untuk filter wilayah
+        $kecamatans = Kecamatan::orderBy('nama_kecamatan')->get();
+        $desas = collect();
+        if ($request->filled('kecamatan_id')) {
+            $desas = Desa::where('id_kecamatan', $request->kecamatan_id)
+                ->orderBy('nama_desa')
+                ->get();
+        }
+
         // AJAX Response
         if ($request->ajax()) {
             return response()->json([
-                'table' => view('admin.bank-sampah.setor-sampah.index', compact('setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah', 'tahunList'))->render()
+                'table' => view('admin.bank-sampah.setor-sampah.index', compact('setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah', 'tahunList', 'kecamatans', 'desas'))->render()
             ]);
         }
 
         return view('admin.bank-sampah.setor-sampah.index', compact(
-            'setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah', 'tahunList'
+            'setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah', 'tahunList', 'kecamatans', 'desas'
         ));
     }
 
     public function detail($id): JsonResponse
     {
-        $data = TransaksiSetor::with(['masyarakat', 'pns', 'jenisSampah', 'petugas'])
+        $data = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns', 'jenisSampah', 'petugas'])
             ->findOrFail($id);
         return response()->json($data);
     }

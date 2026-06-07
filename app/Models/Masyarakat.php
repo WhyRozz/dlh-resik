@@ -26,6 +26,7 @@ class Masyarakat extends Authenticatable
         'jenis_kelamin',
         'tanggal_lahir',
         'alamat',
+        'id_desa',
         'foto',
         'barcode_id',
         'saldo',
@@ -62,5 +63,10 @@ class Masyarakat extends Authenticatable
     public function penarikan()
     {
         return $this->hasMany(Penarikan::class, 'id_masyarakat', 'id_masyarakat');
+    }
+
+    public function desa()
+    {
+        return $this->belongsTo(Desa::class, 'id_desa',  'id_desa');
     }
 }

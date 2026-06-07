@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DinasController;
+use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\Api\ArtikelController;
 use App\Http\Controllers\Api\PenarikanController;
 use App\Http\Controllers\Api\LaporanController;
@@ -41,7 +42,6 @@ Route::post('/profile', [ProfileController::class, 'update']);
 
 Route::post('/cari-pengguna', [SetorController::class, 'cariPengguna']);
 
-Route::post('/cari-pengguna', [SetorController::class, 'cariPengguna']);
 Route::post('/transaksi-setor', [App\Http\Controllers\Api\SetorController::class, 'store']);
 Route::get('/riwayat-setor', [SetorController::class, 'riwayatSetor']);
 // Penjemputan
@@ -64,6 +64,10 @@ Route::post('/penjemputan/store', [PenjemputanController::class, 'store']);
 // ==================== RIWAYAT ADMIN (TERPISAH) ====================
 Route::get('/riwayat-setor-admin/{id_petugas}', [RiwayatSetorAdminController::class, 'index']);
 Route::get('/riwayat-penjemputan-admin/{id_petugas}', [RiwayatPenjemputanController::class, 'index']);
+
+// Wilayah (Kecamatan & Desa)
+Route::get('/kecamatans', [WilayahController::class, 'kecamatans']);
+Route::get('/desas', [WilayahController::class, 'desas']);
 
 
 

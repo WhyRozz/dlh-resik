@@ -60,6 +60,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [DataPenggunaController::class, 'index'])->name('index');
             Route::get('/export', [DataPenggunaController::class, 'export'])->name('export');
 
+            // Route API desa by kecamatan
+            Route::get('/desa/{kecamatan_id}', [DataPenggunaController::class, 'getDesaByKecamatan'])
+                ->name('desa-by-kecamatan');    
+
             // API untuk detail user (modal)
             Route::get('/api/{type}/{id}', [DataPenggunaController::class, 'show'])
                 ->where(['type' => 'masyarakat|pns'])

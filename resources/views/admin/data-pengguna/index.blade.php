@@ -52,7 +52,7 @@
     </div>
 </div>
 
-<!-- Fungsi: Group tombol filter untuk switching kategori pengguna (All/ASN/Masyarakat) -->
+<!-- Fungsi: Group tombol filter untuk switching kategori pengguna + Filter Wilayah -->
 <div class="filter-group">
     <!-- Fungsi: Filter Semua Pengguna -->
     <a href="{{ route('admin.data-pengguna.index', ['filter' => 'all']) }}"
@@ -69,6 +69,35 @@
         class="filter-btn {{ $filter == 'masyarakat' ? 'active' : '' }}">
         <i class="fas fa-user-friends"></i> Masyarakat
     </a>
+    
+    <!-- ✅ FILTER WILAYAH (SEJAJAR DI KANAN) -->
+    <div class="filter-wilayah-inline">
+        <select name="kecamatan_id" id="filterKecamatan" class="filter-select">
+            <option value="">Semua Kecamatan</option>
+            @foreach($kecamatans as $kec)
+                <option value="{{ $kec->id_kecamatan }}" {{ request('kecamatan_id') == $kec->id_kecamatan ? 'selected' : '' }}>
+                    {{ $kec->nama_kecamatan }}
+                </option>
+            @endforeach
+        </select>
+        
+        <select name="desa_id" id="filterDesa" class="filter-select">
+            <option value="">Semua Desa</option>
+            @foreach($desas as $desa)
+                <option value="{{ $desa->id_desa }}" {{ request('desa_id') == $desa->id_desa ? 'selected' : '' }}>
+                    {{ $desa->nama_desa }}
+                </option>
+            @endforeach
+        </select>
+        
+        <button type="button" id="btnFilterWilayah" class="filter-btn-action">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        
+        <button type="button" id="btnResetWilayah" class="filter-btn-reset">
+            <i class="fas fa-redo"></i> Reset
+        </button>
+    </div>
 </div>
 
 <!-- Fungsi: Container tabel dengan pagination untuk menampilkan data pengguna -->
@@ -145,7 +174,12 @@
 
     <!-- Fungsi: Pagination links dengan mempertahankan parameter filter -->
     <div class="pagination-wrapper">
-        {{ $users->appends(['filter' => $filter])->links('pagination.custom') }}
+        {{ $users->appends([
+        'filter' => $filter,
+        'search' => $search,
+        'kecamatan_id' => $kecamatanId,
+        'desa_id' => $desaId
+        ])->links('pagination.custom') }}
     </div>
 </div>
 
@@ -160,49 +194,72 @@
         <div class="modal-body">
             <!-- Fungsi: Grid layout untuk menampilkan field-field detail pengguna -->
             <div class="user-grid">
-                <div class="info-item full-width">
+                <!-- Baris 1 -->
+                <div class="info-item">
                     <label>Nama Lengkap</label>
                     <span id="modalNama">-</span>
                 </div>
                 <div class="info-item">
-                    <label>Jenis Kelamin</label>
-                    <span id="modalJenisKelamin">-</span>
+                    <label>Alamat</label>
+                    <span id="modalAlamat">-</span>
                 </div>
+
+                <!-- Baris 2 -->
                 <div class="info-item">
                     <label>Email</label>
                     <span id="modalEmail">-</span>
                 </div>
                 <div class="info-item">
-                    <label>No Telepon</label>
-                    <span id="modalTelp">-</span>
-                </div>
-                <div class="info-item">
                     <label>Tanggal Lahir</label>
                     <span id="modalTglLahir">-</span>
                 </div>
+
+                <!-- Baris 3 -->
                 <div class="info-item">
-                    <label>Pekerjaan/Dinas</label>
-                    <span id="modalPekerjaan">-</span>
+                    <label>No Telepon</label>
+                    <span id="modalTelp">-</span>
                 </div>
                 <div class="info-item">
                     <label>Kode Anggota</label>
                     <span id="modalKodeAnggota">-</span>
                 </div>
+
+                <!-- Baris 4 -->
                 <div class="info-item">
-                <label>Barcode ID</label>
-                <span id="modalBarcodeId">-</span>
+                    <label>Jenis Kelamin</label>
+                    <span id="modalJenisKelamin">-</span>
                 </div>
                 <div class="info-item">
-                    <!-- Fungsi: Saldo ditampilkan dengan warna hijau dan font bold -->
-                    <label>Saldo Bank Sampah</label>
-                    <span id="modalSaldo" style="color: #2e8b57; font-weight: bold;">-</span>
+                    <label>Barcode ID</label>
+                    <span id="modalBarcodeId">-</span>
                 </div>
-                <div class="info-item full-width">
+
+                <!-- Baris 5 -->
+                <div class="info-item">
+                    <label>Pekerjaan</label>
+                    <span id="modalPekerjaan">-</span>
+                </div>
+                <div class="info-item">
                     <label>Terdaftar Sejak</label>
                     <span id="modalCreated">-</span>
                 </div>
+
+                <!-- Baris 6 -->
+                <div class="info-item">
+                    <label>Kecamatan</label>
+                    <span id="modalKecamatan">-</span>
+                </div>
+                <div class="info-item">
+                    <label>Saldo Bank Sampah</label>
+                    <span id="modalSaldo" style="color: #2e8b57; font-weight: bold;">-</span>
+                </div>
+
+                <!-- Baris 7 -->
+                <div class="info-item">
+                    <label>Desa/Kelurahan</label>
+                    <span id="modalDesa">-</span>
+                </div>
             </div>
-        </div>
         <div class="modal-footer">
             <button class="btn-primary" onclick="closeModal()">Tutup</button>
         </div>
@@ -221,5 +278,49 @@
 @push('scripts')
 <!-- Fungsi: Memuat file JavaScript eksternal untuk handle modal dan interaksi data pengguna -->
 <script src="{{ asset('js/data-pengguna.js?v=' . time()) }}"></script>
+
+<script>
+document.getElementById('filterKecamatan').addEventListener('change', function() {
+    const kecId = this.value;
+    const desaSelect = document.getElementById('filterDesa');
+    
+    desaSelect.innerHTML = '<option value="">Semua Desa</option>';
+    
+    if (kecId) {
+        fetch(`{{ route('admin.data-pengguna.desa-by-kecamatan', ['kecamatan_id' => 'KECAMATAN_ID_PLACEHOLDER']) }}`.replace('KECAMATAN_ID_PLACEHOLDER', kecId))
+            .then(res => res.json())
+            .then(data => {
+                desaSelect.innerHTML = '<option value="">Semua Desa</option>';
+                data.forEach(d => {
+                    desaSelect.innerHTML += `<option value="${d.id_desa}">${d.nama_desa}</option>`;
+                });
+            });
+    } else {
+        desaSelect.innerHTML = '<option value="">Semua Desa</option>';
+    }
+});
+
+document.getElementById('btnFilterWilayah').addEventListener('click', function() {
+    const kecId = document.getElementById('filterKecamatan').value;
+    const desaId = document.getElementById('filterDesa').value;
+    const url = new URL(window.location.href);
+    
+    if (kecId) url.searchParams.set('kecamatan_id', kecId);
+    else url.searchParams.delete('kecamatan_id');
+    
+    if (desaId) url.searchParams.set('desa_id', desaId);
+    else url.searchParams.delete('desa_id');
+    
+    window.location.href = url.toString();
+});
+
+// TAMBAHKAN INI setelah script btnFilterWilayah
+document.getElementById('btnResetWilayah').addEventListener('click', function() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('kecamatan_id');
+    url.searchParams.delete('desa_id');
+    window.location.href = url.toString();
+});
+</script>
 @endpush
 @endsection

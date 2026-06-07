@@ -50,6 +50,39 @@
                             onclick="window.location.href='{{ route('admin.bank-sampah.setor.index') }}'">
                             <i class="fas fa-undo"></i> Reset
                         </button>
+
+
+                        {{-- ✅ FILTER WILAYAH (KECAMATAN & DESA) --}}
+<div class="filter-wilayah-inline">
+    <select name="kecamatan_id" id="filterKecamatan" class="filter-select">
+        <option value="">Semua Kecamatan</option>
+        @foreach($kecamatans as $kec)
+            <option value="{{ $kec->id_kecamatan }}" {{ request('kecamatan_id') == $kec->id_kecamatan ? 'selected' : '' }}>
+                {{ $kec->nama_kecamatan }}
+            </option>
+        @endforeach
+    </select>
+    
+    <select name="desa_id" id="filterDesa" class="filter-select" {{ !request('kecamatan_id') ? 'disabled' : '' }}>
+        <option value="">Semua Desa</option>
+        @if(request('kecamatan_id'))
+            @foreach($desas as $desa)
+                <option value="{{ $desa->id_desa }}" {{ request('desa_id') == $desa->id_desa ? 'selected' : '' }}>
+                    {{ $desa->nama_desa }}
+                </option>
+            @endforeach
+        @endif
+    </select>
+    
+    <button type="button" id="btnFilterWilayah" class="btn-filter">
+        <i class="fas fa-filter"></i> Filter
+    </button>
+    
+    <button type="button" id="btnResetWilayah" class="btn-filter reset">
+        <i class="fas fa-redo"></i> Reset
+    </button>
+</div>
+                        
                     </div>
                 </form>
             </div>
@@ -160,5 +193,55 @@
 @push('scripts')
     {{-- FUNGSI: Memuat file JS eksternal yang berisi semua fungsi interaksi halaman --}}
     <script src="{{ asset('js/setor.js?v=' . time()) }}"></script>
+
+    <script>
+// Cascading dropdown: Kecamatan → Desa
+document.getElementById('filterKecamatan').addEventListener('change', function() {
+    const kecId = this.value;
+    const desaSelect = document.getElementById('filterDesa');
+    
+    // Reset desa dropdown
+    desaSelect.innerHTML = '<option value="">Semua Desa</option>';
+    desaSelect.disabled = !kecId;
+    
+    if (kecId) {
+        // Fetch desa dari API
+        fetch(`/admin/data-pengguna/desa/${kecId}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.id_desa;
+                    option.textContent = d.nama_desa;
+                    desaSelect.appendChild(option);
+                });
+            })
+            .catch(err => console.error('Error fetching desa:', err));
+    }
+});
+
+// Tombol Filter Wilayah
+document.getElementById('btnFilterWilayah').addEventListener('click', function() {
+    const kecId = document.getElementById('filterKecamatan').value;
+    const desaId = document.getElementById('filterDesa').value;
+    const url = new URL(window.location.href);
+    
+    if (kecId) url.searchParams.set('kecamatan_id', kecId);
+    else url.searchParams.delete('kecamatan_id');
+    
+    if (desaId) url.searchParams.set('desa_id', desaId);
+    else url.searchParams.delete('desa_id');
+    
+    window.location.href = url.toString();
+});
+
+// Tombol Reset Wilayah
+document.getElementById('btnResetWilayah').addEventListener('click', function() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('kecamatan_id');
+    url.searchParams.delete('desa_id');
+    window.location.href = url.toString();
+});
+</script>
 @endpush
 @endsection
