@@ -12,51 +12,6 @@
         <div class="header-wrapper">
             <h1 class="page-title">Data Penarikan</h1>
 
-            {{-- Filter --}}
-            <div class="filter-section">
-                <form method="GET" action="{{ route('admin.bank-sampah.penarikan.index') }}" id="filterForm">
-                    <div class="filter-group">
-                        <select name="bulan" class="filter-select">
-                            <option value="">Semua Bulan</option>
-                            @for ($i = 1; $i <= 12; $i++)
-                                <option value="{{ $i }}" {{ request('bulan') == $i ? 'selected' : '' }}>
-                                    {{ date('F', mktime(0, 0, 0, $i, 1)) }}
-                                </option>
-                            @endfor
-                        </select>
-
-                        <select name="tahun" class="filter-select">
-                            <option value="">Semua Tahun</option>
-                            @foreach ($tahunList as $tahun)
-                                <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
-                                    {{ $tahun }}
-                                </option>
-                            @endforeach
-                        </select>
-
-                        <select name="status" class="filter-select">
-                            <option value="">Semua Status</option>
-                            <option value="diproses" {{ request('status') == 'diproses' ? 'selected' : '' }}>Diproses
-                            </option>
-                            <option value="berhasil" {{ request('status') == 'berhasil' ? 'selected' : '' }}>Berhasil
-                            </option>
-                            <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                        </select>
-
-                        <button type="submit" class="btn-filter">
-                            <i class="fas fa-filter"></i> Filter
-                        </button>
-
-                        @if (request('bulan') || request('tahun') || request('status'))
-                            <button type="button" class="btn-filter reset" onclick="resetFilter()">
-                                <i class="fas fa-undo"></i> Reset
-                            </button>
-                        @endif
-                    </div>
-                </form>
-            </div>
-
-
             {{-- Export Button --}}
             <div class="page-header">
                 <form method="GET" action="{{ route('admin.bank-sampah.penarikan.export') }}" id="exportForm">
@@ -70,7 +25,6 @@
                 </form>
             </div>
 
-
             {{-- Search --}}
             <div class="top-search">
                 <div class="search-wrapper">
@@ -81,92 +35,172 @@
             </div>
         </div>
 
-        <div class="green-divider"></div>
+        {{-- Filter --}}
+        <div class="filter-section">
+            <form method="GET" action="{{ route('admin.bank-sampah.penarikan.index') }}" id="filterForm">
+                <div class="filter-group">
+                    <select name="bulan" class="filter-select">
+                        <option value="">Semua Bulan</option>
+                        @for ($i = 1; $i <= 12; $i++)
+                            <option value="{{ $i }}" {{ request('bulan') == $i ? 'selected' : '' }}>
+                                {{ date('F', mktime(0, 0, 0, $i, 1)) }}
+                            </option>
+                        @endfor
+                    </select>
 
+                    <select name="tahun" class="filter-select">
+                        <option value="">Semua Tahun</option>
+                        @foreach ($tahunList as $tahun)
+                            <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
+                                {{ $tahun }}
+                            </option>
+                        @endforeach
+                    </select>
 
-        {{-- Table --}}
-        <div class="table-container">
-            <table class="data-table" id="penarikanTable">
-                <thead>
-                    <tr>
-                        <th width="5%">No</th>
-                        <th width="20%">Nama Pengguna</th>
-                        <th width="18%">Tanggal Penarikan</th>
-                        <th width="15%">Jumlah Uang</th>
-                        <th width="17%">E-Wallet</th>
-                        <th width="12%">Status</th>
-                        <th width="13%">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($penarikans as $index => $penarikan)
-                        <tr>
-                            {{-- 1. Nomor Urut --}}
-                            <td>{{ $penarikans->firstItem() + $index }}</td>
+                    <select name="status" class="filter-select">
+                        <option value="">Semua Status</option>
+                        <option value="diproses" {{ request('status') == 'diproses' ? 'selected' : '' }}>Diproses
+                        </option>
+                        <option value="berhasil" {{ request('status') == 'berhasil' ? 'selected' : '' }}>Berhasil
+                        </option>
+                        <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                    </select>
 
-                            {{-- 2. Nama Anggota --}}
-                            <td><span class="member-name">{{ $penarikan->nama_user ?? 'Unknown' }}</span></td>
+                    <button type="submit" class="btn-filter">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
 
-                            {{-- 3. Tanggal --}}
-                            <td>
-                                <span class="date-main">{{ $penarikan->tanggal_penarikan->format('d M Y') }}</span>
-                                <span class="date-time">{{ $penarikan->tanggal_penarikan->format('H:i') }}</span>
-                            </td>
+                    @if (request('bulan') || request('tahun') || request('status'))
+                        <button type="button" class="btn-filter reset" onclick="resetFilter()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    @endif
 
-                            {{-- 4. Jumlah Uang --}}
-                            <td><span class="amount">Rp {{ number_format($penarikan->jumlah_uang, 0, ',', '.') }}</span>
-                            </td>
+                    {{-- Filter Kecamatan --}}
+                    <select name="kecamatan_id" id="filterKecamatan" class="filter-select">
+                        <option value="">Semua Kecamatan</option>
+                        @foreach ($kecamatans as $kec)
+                            <option value="{{ $kec->id_kecamatan }}"
+                                {{ request('kecamatan_id') == $kec->id_kecamatan ? 'selected' : '' }}>
+                                {{ $kec->nama_kecamatan }}
+                            </option>
+                        @endforeach
+                    </select>
 
-                            {{-- 5. E-Wallet --}}
-                            <td>
-                                <span class="wallet-type">{{ $penarikan->jenis_ewallet ?? '-' }}</span>
-                                <span class="wallet-number">{{ $penarikan->nomor_ewallet ?? '' }}</span>
-                            </td>
+                    {{-- Filter Desa --}}
+                    <select name="desa_id" id="filterDesa" class="filter-select"
+                        {{ !request('kecamatan_id') ? 'disabled' : '' }}>
+                        <option value="">Semua Desa</option>
+                        @if (request('kecamatan_id'))
+                            @foreach ($desas as $desa)
+                                <option value="{{ $desa->id_desa }}"
+                                    {{ request('desa_id') == $desa->id_desa ? 'selected' : '' }}>
+                                    {{ $desa->nama_desa }}
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
 
-                            {{-- 6. ✅ STATUS (Badge: Diproses/Disetujui/Ditolak) --}}
-                            <td>
-                                @php
-                                    $statusClass = match ($penarikan->status) {
-                                        'berhasil' => 'status-berhasil',
-                                        'ditolak' => 'status-ditolak',
-                                        default => 'status-diproses',
-                                    };
-                                    $statusText = ucfirst($penarikan->status);
-                                @endphp
-                                <span class="status-badge {{ $statusClass }}">{{ $statusText }}</span>
-                            </td>
+                    {{-- Tombol Filter Wilayah (SETELAH dropdown) --}}
+                    <button type="button" id="btnFilterWilayah" class="btn-filter">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
 
-                            {{-- 7. ✅ AKSI (Icon Mata 👁️) --}}
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-view"
-                                        onclick="showDetail({{ $penarikan->id_penarikan }})" title="Lihat Detail">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr class="empty-row">
-                            <td colspan="7">
-                                <i class="fas fa-inbox"
-                                    style="font-size: 48px; opacity: 0.3; display: block; margin-bottom: 8px;"></i>
-                                Belum ada data penarikan
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    {{-- Tombol Reset Wilayah (SETELAH tombol filter) --}}
+                    <button type="button" id="btnResetWilayah" class="btn-filter reset" style="display: none;">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </form>
         </div>
+    </div>
 
-        {{-- Pagination --}}
-        @if ($penarikans->hasPages())
-            <div class="pagination-container">
-                <div>Menampilkan {{ $penarikans->firstItem() }} - {{ $penarikans->lastItem() }} dari
-                    {{ $penarikans->total() }} data</div>
-                {{ $penarikans->links() }}
-            </div>
-        @endif
+    <div class="green-divider"></div>
+
+
+    {{-- Table --}}
+    <div class="table-container">
+        <table class="data-table" id="penarikanTable">
+            <thead>
+                <tr>
+                    <th width="5%">No</th>
+                    <th width="20%">Nama Pengguna</th>
+                    <th width="18%">Tanggal Penarikan</th>
+                    <th width="15%">Jumlah Uang</th>
+                    <th width="17%">E-Wallet</th>
+                    <th width="12%">Status</th>
+                    <th width="13%">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($penarikans as $index => $penarikan)
+                    <tr>
+                        {{-- 1. Nomor Urut --}}
+                        <td>{{ $penarikans->firstItem() + $index }}</td>
+
+                        {{-- 2. Nama Anggota --}}
+                        <td><span class="member-name">{{ $penarikan->nama_user ?? 'Unknown' }}</span></td>
+
+                        {{-- 3. Tanggal --}}
+                        <td>
+                            <span class="date-main">{{ $penarikan->tanggal_penarikan->format('d M Y') }}</span>
+                            <span class="date-time">{{ $penarikan->tanggal_penarikan->format('H:i') }}</span>
+                        </td>
+
+                        {{-- 4. Jumlah Uang --}}
+                        <td><span class="amount">Rp {{ number_format($penarikan->jumlah_uang, 0, ',', '.') }}</span>
+                        </td>
+
+                        {{-- 5. E-Wallet --}}
+                        <td>
+                            <span class="wallet-type">{{ $penarikan->jenis_ewallet ?? '-' }}</span>
+                            <span class="wallet-number">{{ $penarikan->nomor_ewallet ?? '' }}</span>
+                        </td>
+
+                        {{-- 6. ✅ STATUS (Badge: Diproses/Disetujui/Ditolak) --}}
+                        <td>
+                            @php
+                                $statusClass = match ($penarikan->status) {
+                                    'berhasil' => 'status-berhasil',
+                                    'ditolak' => 'status-ditolak',
+                                    default => 'status-diproses',
+                                };
+                                $statusText = ucfirst($penarikan->status);
+                            @endphp
+                            <span class="status-badge {{ $statusClass }}">{{ $statusText }}</span>
+                        </td>
+
+                        {{-- 7. ✅ AKSI (Icon Mata 👁️) --}}
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-action btn-view" onclick="showDetail({{ $penarikan->id_penarikan }})"
+                                    title="Lihat Detail">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr class="empty-row">
+                        <td colspan="7">
+                            <i class="fas fa-inbox"
+                                style="font-size: 48px; opacity: 0.3; display: block; margin-bottom: 8px;"></i>
+                            Belum ada data penarikan
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    {{-- Pagination --}}
+    @if ($penarikans->hasPages())
+        <div class="pagination-container">
+            <div>Menampilkan {{ $penarikans->firstItem() }} - {{ $penarikans->lastItem() }} dari
+                {{ $penarikans->total() }} data</div>
+            {{ $penarikans->links() }}
+        </div>
+    @endif
     </div>
 
     {{-- Modal Detail --}}
@@ -272,4 +306,70 @@
 
 @push('scripts')
     <script src="{{ asset('js/penarikan.js?v=' . time()) }}"></script>
+
+    <script>
+        // Cascading dropdown: Kecamatan → Desa
+        document.getElementById('filterKecamatan').addEventListener('change', function() {
+            const kecId = this.value;
+            const desaSelect = document.getElementById('filterDesa');
+
+            // Reset desa dropdown
+            desaSelect.innerHTML = '<option value="">Semua Desa</option>';
+            desaSelect.disabled = !kecId;
+
+            if (kecId) {
+                // Fetch desa dari API
+                fetch(`/admin/data-pengguna/desa/${kecId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        data.forEach(d => {
+                            const option = document.createElement('option');
+                            option.value = d.id_desa;
+                            option.textContent = d.nama_desa;
+                            desaSelect.appendChild(option);
+                        });
+                    })
+                    .catch(err => console.error('Error fetching desa:', err));
+            }
+        });
+
+        // Tombol Filter Wilayah
+        document.getElementById('btnFilterWilayah').addEventListener('click', function() {
+            const kecId = document.getElementById('filterKecamatan').value;
+            const desaId = document.getElementById('filterDesa').value;
+            const url = new URL(window.location.href);
+
+            if (kecId) url.searchParams.set('kecamatan_id', kecId);
+            else url.searchParams.delete('kecamatan_id');
+
+            if (desaId) url.searchParams.set('desa_id', desaId);
+            else url.searchParams.delete('desa_id');
+
+            window.location.href = url.toString();
+        });
+
+        // Fungsi toggle tombol Reset Wilayah
+        function toggleResetWilayah() {
+            const btnResetWilayah = document.getElementById('btnResetWilayah');
+            const kecId = document.getElementById('filterKecamatan')?.value || '';
+            const desaId = document.getElementById('filterDesa')?.value || '';
+
+            if (kecId || desaId) {
+                btnResetWilayah.style.display = 'inline-flex';
+            } else {
+                btnResetWilayah.style.display = 'none';
+            }
+        }
+
+        // Tombol Reset Wilayah
+        document.getElementById('btnResetWilayah').addEventListener('click', function() {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('kecamatan_id');
+            url.searchParams.delete('desa_id');
+            window.location.href = url.toString();
+        });
+
+        // Panggil saat halaman load
+        toggleResetWilayah();
+    </script>
 @endpush

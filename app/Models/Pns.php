@@ -28,6 +28,7 @@ class Pns extends Authenticatable
         'alamat',
         'foto',
         'id_dinas',
+        'id_desa',
         'barcode_id',
         'saldo',
         'total_setoran',
@@ -69,5 +70,10 @@ class Pns extends Authenticatable
     public function penarikan()
     {
         return $this->hasMany(Penarikan::class, 'id_pns', 'id_pns');
+    }
+
+    public function desa()
+    {
+        return $this->belongsTo(Desa::class, 'id_desa', 'id_desa');
     }
 }

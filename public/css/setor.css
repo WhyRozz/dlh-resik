@@ -63,12 +63,16 @@
     border: none;
     margin: 0;
     flex-shrink: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;  
 }
 
 .filter-group {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    justify-content: center; 
     flex-wrap: nowrap;
 }
 

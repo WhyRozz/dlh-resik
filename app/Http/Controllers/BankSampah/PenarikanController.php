@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Penarikan;
 use App\Models\Masyarakat;
 use App\Models\Pns;
+use App\Models\Kecamatan;
+use App\Models\Desa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +25,7 @@ class PenarikanController extends Controller
     public function index(Request $request)  // ✅ Pastikan ada $request
     {
         // ✅ LANGKAH 1: Ubah jadi $query dulu (JANGAN langsung paginate)
-        $query = Penarikan::with(['masyarakat', 'pns']);
+        $query = Penarikan::with(['masyarakat.desa.kecamatan', 'pns.desa.kecamatan']);
 
         // ✅ LANGKAH 2: ➕ TAMBAH FILTER DI SINI (setelah $query, sebelum paginate)
         if ($request->filled('bulan')) {
@@ -36,11 +38,42 @@ class PenarikanController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Filter Kecamatan
+        if ($request->filled('kecamatan_id')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('masyarakat.desa', function ($sub) use ($request) {
+                    $sub->where('id_kecamatan', $request->kecamatan_id);
+                })->orWhereHas('pns.desa', function ($sub) use ($request) {
+                    $sub->where('id_kecamatan', $request->kecamatan_id);
+                });
+            });
+        }
+
+        // Filter Desa
+        if ($request->filled('desa_id')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('masyarakat.desa', function ($sub) use ($request) {
+                    $sub->where('id_desa', $request->desa_id);
+                })->orWhereHas('pns.desa', function ($sub) use ($request) {
+                    $sub->where('id_desa', $request->desa_id);
+                });
+            });
+        }
+
         // ✅ LANGKAH 3: Baru paginate setelah filter
         $penarikans = $query->orderBy('tanggal_penarikan', 'desc')->paginate(15);
 
         // ✅ LANGKAH 4: ➕ Ambil tahun list (sebelum return)
         $tahunList = collect(range(date('Y') - 5, date('Y') + 5));
+
+        // Data untuk filter wilayah
+        $kecamatans = Kecamatan::orderBy('nama_kecamatan')->get();
+        $desas = collect();
+        if ($request->filled('kecamatan_id')) {
+            $desas = Desa::where('id_kecamatan', $request->kecamatan_id)
+                ->orderBy('nama_desa')
+                ->get();
+        }
 
         // ✅(UNTUK NAMA USER)
         foreach ($penarikans as $penarikan) {
@@ -52,7 +85,7 @@ class PenarikanController extends Controller
         }
 
         // ✅ LANGKAH 5: ➕ Tambah 'tahunList' di compact
-        return view('admin.bank-sampah.penarikan.index', compact('penarikans', 'tahunList'));
+        return view('admin.bank-sampah.penarikan.index', compact('penarikans', 'tahunList', 'kecamatans', 'desas'));
     }
 
     /**
@@ -223,6 +256,5 @@ class PenarikanController extends Controller
         $filename = 'Data_Penarikan_' . date('Y-m-d_His') . '.xlsx';
 
         return Excel::download(new PenarikanExport($filter), $filename);
-    } // ← ✅ export() DITUTUP DI SINI
-
+    }
 }

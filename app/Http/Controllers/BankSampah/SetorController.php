@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\BankSampah;
 
 use App\Http\Controllers\Controller;
@@ -8,6 +9,7 @@ use App\Models\Masyarakat;
 use App\Models\Pns;
 use App\Models\Kecamatan;
 use App\Models\Desa;
+use App\Models\Dinas;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -16,28 +18,28 @@ class SetorController extends Controller
 {
     public function index(Request $request)
     {
-        $query = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns', 'jenisSampah', 'petugas'])
+        $query = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns.dinas', 'jenisSampah', 'petugas'])
             ->orderBy('tanggal_transaksi', 'desc');
 
         // Filter Pencarian
         if ($request->filled('search')) {
             $keyword = $request->search;
-            $query->where(function($q) use ($keyword) {
-                $q->whereHas('masyarakat', function($sub) use ($keyword) {
+            $query->where(function ($q) use ($keyword) {
+                $q->whereHas('masyarakat', function ($sub) use ($keyword) {
+                    $sub->where('nama', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhereHas('pns', function ($sub) use ($keyword) {
                         $sub->where('nama', 'like', '%' . $keyword . '%');
                     })
-                    ->orWhereHas('pns', function($sub) use ($keyword) {
-                        $sub->where('nama', 'like', '%' . $keyword . '%');
-                    })
-                    ->orWhereHas('petugas', function($sub) use ($keyword) {
+                    ->orWhereHas('petugas', function ($sub) use ($keyword) {
                         $sub->where('nama_lengkap', 'like', '%' . $keyword . '%');
                     })
-                    ->orWhereHas('jenisSampah', function($sub) use ($keyword) {
+                    ->orWhereHas('jenisSampah', function ($sub) use ($keyword) {
                         $sub->where('jenis', 'like', '%' . $keyword . '%');
                     });
             });
         } // ✅ FIX 1: Closing brace untuk if search
-        
+
         // Filter Bulan
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal_transaksi', $request->bulan);
@@ -50,15 +52,22 @@ class SetorController extends Controller
 
         // Filter Kecamatan
         if ($request->filled('kecamatan_id')) {
-            $query->whereHas('masyarakat.desa', function($q) use ($request) {
+            $query->whereHas('masyarakat.desa', function ($q) use ($request) {
                 $q->where('id_kecamatan', $request->kecamatan_id);
             });
         }
 
-        // Filter Desa
+        // Filter Desa (untuk Masyarakat)
         if ($request->filled('desa_id')) {
-            $query->whereHas('masyarakat.desa', function($q) use ($request) {
+            $query->whereHas('masyarakat.desa', function ($q) use ($request) {
                 $q->where('id_desa', $request->desa_id);
+            });
+        }
+
+        // Filter Dinas (untuk PNS)
+        if ($request->filled('dinas_id')) {
+            $query->whereHas('pns', function ($q) use ($request) {
+                $q->where('id_dinas', $request->dinas_id);
             });
         }
 
@@ -69,7 +78,7 @@ class SetorController extends Controller
         $totalSetor   = TransaksiSetor::count();
         $totalBerat   = TransaksiSetor::sum('berat') ?? 0;
         $totalNilai   = TransaksiSetor::sum('total_rupiah') ?? 0;
-        
+
         // Hitung nasabah unik
         $totalNasabah = DB::table('transaksi_setor')
             ->select(DB::raw('COUNT(DISTINCT id_masyarakat) + COUNT(DISTINCT id_pns) as total'))
@@ -88,21 +97,33 @@ class SetorController extends Controller
                 ->get();
         }
 
+        // Data untuk filter dinas
+        $dinasList = Dinas::orderBy('nama_dinas')->get();
+
         // AJAX Response
         if ($request->ajax()) {
             return response()->json([
-                'table' => view('admin.bank-sampah.setor-sampah.index', compact('setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah', 'tahunList', 'kecamatans', 'desas'))->render()
+                'table' => view('admin.bank-sampah.setor-sampah.index', compact('setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah', 'tahunList', 'kecamatans', 'desas', 'dinasList'))->render()
             ]);
         }
 
         return view('admin.bank-sampah.setor-sampah.index', compact(
-            'setorData', 'totalSetor', 'totalBerat', 'totalNilai', 'totalNasabah', 'jenisSampah', 'tahunList', 'kecamatans', 'desas'
+            'setorData',
+            'totalSetor',
+            'totalBerat',
+            'totalNilai',
+            'totalNasabah',
+            'jenisSampah',
+            'tahunList',
+            'kecamatans',
+            'desas',
+            'dinasList'
         ));
     }
 
     public function detail($id): JsonResponse
     {
-        $data = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns', 'jenisSampah', 'petugas'])
+        $data = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns.dinas', 'jenisSampah', 'petugas'])
             ->findOrFail($id);
         return response()->json($data);
     }
@@ -163,12 +184,11 @@ class SetorController extends Controller
                     ->increment('total_setoran', $selisihBerat);
             }
             DB::commit();
-            
+
             return response()->json([
                 'success' => '✅ Koreksi berhasil!',
                 'data' => $transaksi->load(['masyarakat', 'pns', 'jenisSampah'])
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -228,7 +248,6 @@ class SetorController extends Controller
 
             DB::commit();
             return redirect()->back()->with('success', '✅ Data setoran berhasil disimpan! Saldo pengguna telah ditambahkan.');
-            
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', '❌ Terjadi kesalahan: ' . $e->getMessage());
