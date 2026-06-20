@@ -252,6 +252,8 @@
                 const tipeFilter = document.getElementById('tipeFilter').value;
                 const url = new URL(window.location.href);
 
+                url.searchParams.set('tipe_filter', tipeFilter);
+
                 if (tipeFilter === 'wilayah') {
                     // Filter berdasarkan wilayah (kecamatan & desa)
                     const kecId = document.getElementById('filterKecamatan').value;
@@ -300,7 +302,6 @@
                     // Sembunyikan filter wilayah, tampilkan filter dinas
                     filterWilayah.style.display = 'none';
                     filterDinas.style.display = 'inline-flex';
-                    btnFilterWilayah.style.display = 'none';
 
                     // Reset nilai filter wilayah
                     document.getElementById('filterKecamatan').value = '';
@@ -332,11 +333,6 @@
                     btnResetWilayah.style.display = 'none';
                 }
             }
-
-            // Update event listener untuk filter dinas
-            document.getElementById('filterDinasSelect')?.addEventListener('change', function() {
-                toggleResetWilayah();
-            });
 
             // Panggil saat halaman load
             toggleFilterType();

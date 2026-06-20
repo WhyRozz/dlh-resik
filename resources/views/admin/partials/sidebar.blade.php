@@ -21,20 +21,21 @@
 
             <!-- Fungsi: Menu Laporan Sampah Ilegal dengan wildcard route matching -->
             <li class="nav-item {{ request()->routeIs('admin.laporan*') ? 'active' : '' }}">
-            <a href="{{ route('admin.laporan.index') }}">
-                <img src="{{ asset('assets/icons/laporan_sampah.png') }}" alt="Laporan" class="custom-icon">
-                <span>Laporan Sampah Ilegal</span>
-            </a>
-            {{-- ✅ Badge DIPINDAH ke DALAM <li> --}}
-            <span class="notif-badge-wrapper" onclick="openNotifModal('laporan')" title="Lihat notifikasi">
-                <span id="badge-laporan" class="notif-badge" style="display:none;">0</span>
-            </span>
+                <a href="{{ route('admin.laporan.index') }}">
+                    <img src="{{ asset('assets/icons/laporan_sampah.png') }}" alt="Laporan" class="custom-icon">
+                    <span>Laporan Sampah Ilegal</span>
+                </a>
+                {{-- ✅ Badge DIPINDAH ke DALAM <li> --}}
+                <span class="notif-badge-wrapper" onclick="openNotifModal('laporan')" title="Lihat notifikasi">
+                    <span id="badge-laporan" class="notif-badge" style="display:none;">0</span>
+                </span>
             </li>
 
             <!-- Fungsi: Menu dropdown Bank Sampah dengan toggle expand/collapse -->
             <li class="nav-item has-dropdown {{ request()->routeIs('admin.bank-sampah*') ? 'active open' : '' }}">
                 <!-- Fungsi: Trigger dropdown dengan onclick toggle -->
-                <a href="javascript:void(0)" class="dropdown-toggle" aria-expanded="false" onclick="toggleDropdown(this)">
+                <a href="javascript:void(0)" class="dropdown-toggle" aria-expanded="false"
+                    onclick="toggleDropdown(this)">
                     <div class="nav-link-text">
                         <!-- Fungsi: Icon menu Bank Sampah -->
                         <img src="{{ asset('assets/icons/bank_sampah.png') }}" alt="Bank-Sampah" class="custom-icon">
@@ -53,27 +54,32 @@
                         </a>
                     </li>
                     <!-- Fungsi: Sub-menu Data Penarikan -->
-                    <li><a href="{{ route('admin.bank-sampah.penarikan.index') }}" class="{{ request()->routeIs('admin.bank-sampah.penarikan.index') ? 'active' : '' }}">Data Penarikan</a>
+                    <li><a href="{{ route('admin.bank-sampah.penarikan.index') }}"
+                            class="{{ request()->routeIs('admin.bank-sampah.penarikan.index') ? 'active' : '' }}">Data
+                            Penarikan</a>
                         <!-- ✅ Badge Notifikasi -->
-                        <span class="notif-badge-wrapper" onclick="openNotifModal('penarikan')" title="Lihat notifikasi">
+                        <span class="notif-badge-wrapper" onclick="openNotifModal('penarikan')"
+                            title="Lihat notifikasi">
                             <span id="badge-penarikan" class="notif-badge" style="display:none;">0</span>
                         </span>
                     </li>
                     <!-- Fungsi: Sub-menu Jenis & Harga Sampah -->
-                    <li><a href="{{ route('admin.bank-sampah.jenis-sampah.index') }}" class="{{ request()->routeIs('admin.bank-sampah.jenis-sampah.index') ? 'active' : '' }}">Jenis & Harga Sampah</a></li>
-                    
-                    
+                    <li><a href="{{ route('admin.bank-sampah.jenis-sampah.index') }}"
+                            class="{{ request()->routeIs('admin.bank-sampah.jenis-sampah.index') ? 'active' : '' }}">Jenis
+                            & Harga Sampah</a></li>
+
+
                     <!-- Fungsi: Sub-menu Penjemputan -->
                     <li>
                         <a href="{{ route('admin.bank-sampah.penjemputan.index') }}"
-                           class="{{ request()->routeIs('admin.bank-sampah.penjemputan*') ? 'active' : '' }}">
+                            class="{{ request()->routeIs('admin.bank-sampah.penjemputan*') ? 'active' : '' }}">
                             Penjemputan
                         </a>
-                        
+
                         <!-- Badge Notifikasi (Struktur sama dengan Data Penarikan) -->
-                        <span class="notif-badge-wrapper" 
-                              onclick="openNotifModal('penjemputan'); event.stopPropagation(); return false;" 
-                              title="Lihat notifikasi">
+                        <span class="notif-badge-wrapper"
+                            onclick="openNotifModal('penjemputan'); event.stopPropagation(); return false;"
+                            title="Lihat notifikasi">
                             <span id="badge-penjemputan" class="notif-badge" style="display:none;">0</span>
                         </span>
                     </li>
@@ -107,13 +113,38 @@
                 </a>
             </li>
 
-            <!-- Fungsi: Menu Kelola Akun dengan wildcard route matching -->
-            <li class="nav-item {{ request()->routeIs('admin.akun*') ? 'active' : '' }}">
-                <a href="{{ route('admin.akun.index') }}">
-                    <!-- Fungsi: Icon menu Kelola Akun -->
-                    <img src="{{ asset('assets/icons/kelola_akun.png') }}" alt="Kelola-Akun" class="custom-icon">
-                    <span>Kelola Akun</span>
+            {{-- Fungsi: Menu dropdown Kelola Akun dengan toggle expand/collapse --}}
+            <li
+                class="nav-item has-dropdown {{ request()->routeIs('admin.akun*') || request()->routeIs('admin.sub-admin*') ? 'active open' : '' }}">
+                {{-- Fungsi: Trigger dropdown dengan onclick toggle --}}
+                <a href="javascript:void(0)" class="dropdown-toggle" aria-expanded="false"
+                    onclick="toggleDropdown(this)">
+                    <div class="nav-link-text">
+                        {{-- Fungsi: Icon menu Kelola Akun --}}
+                        <img src="{{ asset('assets/icons/kelola_akun.png') }}" alt="Kelola-Akun" class="custom-icon">
+                        <span>Kelola Akun</span>
+                    </div>
+                    {{-- Fungsi: Icon panah dropdown yang berputar saat aktif --}}
+                    <i class="fas fa-chevron-down arrow"></i>
                 </a>
+                {{-- Fungsi: Sub-menu untuk Kelola Akun --}}
+                <ul class="sub-menu">
+                    {{-- Fungsi: Sub-menu Super Admin & Petugas --}}
+                    <li>
+                        <a href="{{ route('admin.akun.index') }}"
+                            class="{{ request()->routeIs('admin.akun.index') ? 'active' : '' }}">
+                            Super Admin & Petugas
+                        </a>
+                    </li>
+                    {{-- Fungsi: Sub-menu Sub Admin Desa (Coming Soon) --}}
+                    <li>
+                        <a href="javascript:void(0)" class="coming-soon" title="Fitur ini sedang dalam pengembangan">
+                            Sub Admin Desa
+                            <span class="badge badge-info"
+                                style="font-size: 10px; padding: 2px 6px; margin-left: 5px;">Soon</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
         </ul>
 
@@ -132,4 +163,3 @@
         </div>
     </nav>
 </aside>
-

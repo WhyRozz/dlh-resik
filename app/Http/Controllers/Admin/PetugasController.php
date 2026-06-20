@@ -11,43 +11,6 @@ use Illuminate\Support\Facades\Log;
 
 class PetugasController extends Controller
 {
-    // ✅ Daftar level petugas yang valid
-    protected $validPetugasLevels = [
-        'petugas_dlh',
-        'bank_sampah_kelurahan_kauman_kauman_nganjuk',
-        'bank_sampah_kramat_bersih_kramat_nganjuk',
-        'bank_sampah_kelurahan_cangkringan_cangkringan_nganjuk',
-        'bank_sampah_ngudi_sariro_jatirejo_nganjuk',
-        'bank_sampah_margo_utomo_begadung_nganjuk',
-        'bank_sampah_sejahtera_kartoharjo_nganjuk',
-        'bank_sampah_melati_kedungdowo_nganjuk',
-        'bank_sampah_anggrek_werungotok_nganjuk',
-        'bank_sampah_sumber_rejeki_werungotok_nganjuk',
-        'bank_sampah_beringin_hijau_ringinanom_nganjuk',
-        'bank_sampah_ploso_ploso_nganjuk',
-        'bank_sampah_mulyo_agung_kudu_kertosono',
-        'bank_sampah_estu_sae_petak_bagor',
-        'bank_sampah_desa_ngangkatan_ngangkatan_rejoso',
-        'bank_sampah_desa_jegreg_jegreg_lengkong',
-        'bank_sampah_musirkidul_musirkidul_rejoso',
-        'bank_sampah_tanjung_tanjunganom_tanjunganom',
-        'bank_sampah_flamboyan_loceret_loceret',
-        'bank_sampah_pelita_bogo_nganjuk',
-        'bank_sampah_desa_getas_getas_tanjunganom',
-        'bank_sampah_mbejaji_juwet_ngronggot',
-        'bank_sampah_kedondong_kedondong_bagor',
-        'bank_sampah_sinar_terang_jampes_pace',
-        'bank_sampah_desa_blongko_blongko_ngetos',
-        'bank_sampah_bukur_bukur_patianrowo',
-        'bank_sampah_bungur_makmur_bungur_sukomoro',
-        'bank_sampah_seger_waras_mabung_baron',
-        'bank_sampah_maju_bahagia_gondanglegi_prambon',
-        'bank_sampah_barokah_kemlokolegi_baron',
-        'bank_sampah_dahlia_senjayan_gondang',
-        'bank_sampah_cengkok_cengkok_ngronggot',
-        'bank_sampah_induk_salepok_omahe_nganjuk_kedondong_bagor',
-    ];
-
     /**
      * Simpan petugas baru (AJAX - RETURN JSON)
      */
@@ -59,8 +22,16 @@ class PetugasController extends Controller
                 'email' => 'required|email|max:150|unique:petugas,email',
                 'password' => 'required|string|min:8|max:50', // ✅ TANPA REGEX - boleh karakter spesial
                 'no_telepon' => 'required|string|max:15',
-                'level' => 'required|in:' . implode(',', $this->validPetugasLevels),
-            ], [
+                'level' => [
+                    'required',
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        // Validasi custom: harus 'petugas_dlh' atau 'bank_sampah_{id_desa}'
+                        if ($value !== 'petugas_dlh' && !preg_match('/^bank_sampah_\d+$/', $value)) {
+                            $fail('Pilih wilayah kerja yang valid.');
+                        }
+                    }
+                ], 
                 'email.unique' => 'Email sudah terdaftar.',
                 'level.in' => 'Pilih level petugas yang valid.',
             ]);
@@ -82,7 +53,6 @@ class PetugasController extends Controller
                 'success' => true,
                 'message' => 'Akun petugas berhasil ditambahkan.'
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -111,8 +81,15 @@ class PetugasController extends Controller
                 'email' => 'required|email|max:150|unique:petugas,email,' . $id . ',id_petugas',
                 'password' => 'nullable|string|min:8|max:50', // ✅ TANPA REGEX - boleh karakter spesial
                 'no_telepon' => 'required|string|max:15',
-                'level' => 'required|in:' . implode(',', $this->validPetugasLevels),
-            ], [
+                'level' => [
+                    'required',
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        if ($value !== 'petugas_dlh' && !preg_match('/^bank_sampah_\d+$/', $value)) {
+                            $fail('Pilih wilayah kerja yang valid.');
+                        }
+                    }
+                ], 
                 'email.unique' => 'Email sudah terdaftar.',
                 'level.in' => 'Pilih level petugas yang valid.',
             ]);
@@ -136,7 +113,6 @@ class PetugasController extends Controller
                 'success' => true,
                 'message' => 'Akun petugas berhasil diperbarui.'
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -156,37 +132,36 @@ class PetugasController extends Controller
      * Hapus petugas (AJAX - RETURN JSON)
      */
     /**
- * Hapus petugas (AJAX - RETURN JSON)
- */
-public function destroy($id)
-{
-    try {
-        // ✅ GUNAKAN find() bukan findOrFail()
-        $petugas = Petugas::find($id);
-        
-        // ✅ CEK apakah data ada
-        if (!$petugas) {
+     * Hapus petugas (AJAX - RETURN JSON)
+     */
+    public function destroy($id)
+    {
+        try {
+            // ✅ GUNAKAN find() bukan findOrFail()
+            $petugas = Petugas::find($id);
+
+            // ✅ CEK apakah data ada
+            if (!$petugas) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data petugas tidak ditemukan atau sudah dihapus.'
+                ], 404);
+            }
+
+            $petugas->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Akun petugas berhasil dihapus.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error delete petugas: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Data petugas tidak ditemukan atau sudah dihapus.'
-            ], 404);
+                'message' => 'Gagal menghapus: ' . $e->getMessage()
+            ], 500);
         }
-        
-        $petugas->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Akun petugas berhasil dihapus.'
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Error delete petugas: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal menghapus: ' . $e->getMessage()
-        ], 500);
     }
-}
 
     /**
      * Get data petugas untuk edit (JSON)

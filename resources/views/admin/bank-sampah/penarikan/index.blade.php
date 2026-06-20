@@ -12,6 +12,45 @@
         <div class="header-wrapper">
             <h1 class="page-title">Data Penarikan</h1>
 
+            {{-- ✅ FORM FILTER UTAMA (Bulan, Tahun, Status) --}}
+            <form method="GET" action="{{ route('admin.bank-sampah.penarikan.index') }}" id="filterFormUtama"
+                class="header-filters">
+                <select name="bulan" class="filter-select">
+                    <option value="">Semua Bulan</option>
+                    @for ($i = 1; $i <= 12; $i++)
+                        <option value="{{ $i }}" {{ request('bulan') == $i ? 'selected' : '' }}>
+                            {{ date('F', mktime(0, 0, 0, $i, 1)) }}
+                        </option>
+                    @endfor
+                </select>
+
+                <select name="tahun" class="filter-select">
+                    <option value="">Semua Tahun</option>
+                    @foreach ($tahunList as $tahun)
+                        <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
+                            {{ $tahun }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <select name="status" class="filter-select">
+                    <option value="">Semua Status</option>
+                    <option value="diproses" {{ request('status') == 'diproses' ? 'selected' : '' }}>Diproses</option>
+                    <option value="berhasil" {{ request('status') == 'berhasil' ? 'selected' : '' }}>Berhasil</option>
+                    <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                </select>
+
+                <button type="submit" class="btn-filter">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+
+                @if (request('bulan') || request('tahun') || request('status'))
+                    <button type="button" class="btn-filter reset" onclick="resetFilter()">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                @endif
+            </form>
+
             {{-- Export Button --}}
             <div class="page-header">
                 <form method="GET" action="{{ route('admin.bank-sampah.penarikan.export') }}" id="exportForm">
@@ -35,78 +74,66 @@
             </div>
         </div>
 
-        {{-- Filter --}}
+        {{-- Filter Wilayah --}}
         <div class="filter-section">
             <form method="GET" action="{{ route('admin.bank-sampah.penarikan.index') }}" id="filterForm">
                 <div class="filter-group">
-                    <select name="bulan" class="filter-select">
-                        <option value="">Semua Bulan</option>
-                        @for ($i = 1; $i <= 12; $i++)
-                            <option value="{{ $i }}" {{ request('bulan') == $i ? 'selected' : '' }}>
-                                {{ date('F', mktime(0, 0, 0, $i, 1)) }}
-                            </option>
-                        @endfor
-                    </select>
-
-                    <select name="tahun" class="filter-select">
-                        <option value="">Semua Tahun</option>
-                        @foreach ($tahunList as $tahun)
-                            <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
-                                {{ $tahun }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    <select name="status" class="filter-select">
-                        <option value="">Semua Status</option>
-                        <option value="diproses" {{ request('status') == 'diproses' ? 'selected' : '' }}>Diproses
+                    {{-- ✅ TIPE FILTER (Wilayah atau Dinas) --}}
+                    <select name="tipe_filter" id="tipeFilter" class="filter-select" onchange="toggleFilterType()">
+                        <option value="wilayah"
+                            {{ request('tipe_filter') === 'wilayah' || !request('tipe_filter') ? 'selected' : '' }}>
+                            Berdasarkan Wilayah
                         </option>
-                        <option value="berhasil" {{ request('status') == 'berhasil' ? 'selected' : '' }}>Berhasil
+                        <option value="dinas" {{ request('tipe_filter') === 'dinas' ? 'selected' : '' }}>
+                            Berdasarkan Dinas
                         </option>
-                        <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                     </select>
 
-                    <button type="submit" class="btn-filter">
-                        <i class="fas fa-filter"></i> Filter
-                    </button>
-
-                    @if (request('bulan') || request('tahun') || request('status'))
-                        <button type="button" class="btn-filter reset" onclick="resetFilter()">
-                            <i class="fas fa-undo"></i> Reset
-                        </button>
-                    @endif
-
-                    {{-- Filter Kecamatan --}}
-                    <select name="kecamatan_id" id="filterKecamatan" class="filter-select">
-                        <option value="">Semua Kecamatan</option>
-                        @foreach ($kecamatans as $kec)
-                            <option value="{{ $kec->id_kecamatan }}"
-                                {{ request('kecamatan_id') == $kec->id_kecamatan ? 'selected' : '' }}>
-                                {{ $kec->nama_kecamatan }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    {{-- Filter Desa --}}
-                    <select name="desa_id" id="filterDesa" class="filter-select"
-                        {{ !request('kecamatan_id') ? 'disabled' : '' }}>
-                        <option value="">Semua Desa</option>
-                        @if (request('kecamatan_id'))
-                            @foreach ($desas as $desa)
-                                <option value="{{ $desa->id_desa }}"
-                                    {{ request('desa_id') == $desa->id_desa ? 'selected' : '' }}>
-                                    {{ $desa->nama_desa }}
+                    {{-- ✅ FILTER WILAYAH (Kecamatan & Desa) --}}
+                    <div id="filterWilayah" style="{{ request('tipe_filter') === 'dinas' ? 'display:none;' : '' }}">
+                        <select name="kecamatan_id" id="filterKecamatan" class="filter-select">
+                            <option value="">Semua Kecamatan</option>
+                            @foreach ($kecamatans as $kec)
+                                <option value="{{ $kec->id_kecamatan }}"
+                                    {{ request('kecamatan_id') == $kec->id_kecamatan ? 'selected' : '' }}>
+                                    {{ $kec->nama_kecamatan }}
                                 </option>
                             @endforeach
-                        @endif
-                    </select>
+                        </select>
 
-                    {{-- Tombol Filter Wilayah (SETELAH dropdown) --}}
+                        <select name="desa_id" id="filterDesa" class="filter-select"
+                            {{ !request('kecamatan_id') ? 'disabled' : '' }}>
+                            <option value="">Semua Desa</option>
+                            @if (request('kecamatan_id'))
+                                @foreach ($desas as $desa)
+                                    <option value="{{ $desa->id_desa }}"
+                                        {{ request('desa_id') == $desa->id_desa ? 'selected' : '' }}>
+                                        {{ $desa->nama_desa }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+                    {{-- ✅ FILTER DINAS --}}
+                    <div id="filterDinas" style="{{ request('tipe_filter') === 'dinas' ? '' : 'display:none;' }}">
+                        <select name="dinas_id" id="filterDinasSelect" class="filter-select">
+                            <option value="">Semua Dinas</option>
+                            @foreach ($dinasList as $dinas)
+                                <option value="{{ $dinas->id_dinas }}"
+                                    {{ request('dinas_id') == $dinas->id_dinas ? 'selected' : '' }}>
+                                    {{ $dinas->nama_dinas }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Tombol Filter Wilayah --}}
                     <button type="button" id="btnFilterWilayah" class="btn-filter">
                         <i class="fas fa-filter"></i> Filter
                     </button>
 
-                    {{-- Tombol Reset Wilayah (SETELAH tombol filter) --}}
+                    {{-- Tombol Reset Wilayah --}}
                     <button type="button" id="btnResetWilayah" class="btn-filter reset" style="display: none;">
                         <i class="fas fa-undo"></i> Reset
                     </button>
@@ -223,6 +250,30 @@
                         <input type="text" id="detail-nama" class="form-input" readonly>
                     </div>
 
+                    {{-- Pekerjaan --}}
+                    <div class="form-group">
+                        <label class="form-label">Pekerjaan</label>
+                        <input type="text" id="detail-tipe" class="form-input" readonly>
+                    </div>
+
+                    {{-- Untuk Masyarakat: Kecamatan & Desa --}}
+                    <div id="detail-wilayah-group" class="form-row" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Kecamatan</label>
+                            <input type="text" id="detail-kecamatan" class="form-input" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Desa</label>
+                            <input type="text" id="detail-desa" class="form-input" readonly>
+                        </div>
+                    </div>
+
+                    {{-- Untuk PNS: Dinas --}}
+                    <div id="detail-dinas-group" class="form-group" style="display: none;">
+                        <label class="form-label">Dinas</label>
+                        <input type="text" id="detail-dinas" class="form-input" readonly>
+                    </div>
+
                     <div class="form-group">
                         <label class="form-label">Tanggal Pengajuan</label>
                         <input type="text" id="detail-tanggal" class="form-input" readonly>
@@ -333,43 +384,96 @@
             }
         });
 
-        // Tombol Filter Wilayah
+        // Tombol Filter Wilayah (handle kedua tipe filter)
         document.getElementById('btnFilterWilayah').addEventListener('click', function() {
-            const kecId = document.getElementById('filterKecamatan').value;
-            const desaId = document.getElementById('filterDesa').value;
+            const tipeFilter = document.getElementById('tipeFilter').value;
             const url = new URL(window.location.href);
 
-            if (kecId) url.searchParams.set('kecamatan_id', kecId);
-            else url.searchParams.delete('kecamatan_id');
+            url.searchParams.set('tipe_filter', tipeFilter);
 
-            if (desaId) url.searchParams.set('desa_id', desaId);
-            else url.searchParams.delete('desa_id');
+            if (tipeFilter === 'wilayah') {
+                // Filter berdasarkan wilayah (kecamatan & desa)
+                const kecId = document.getElementById('filterKecamatan').value;
+                const desaId = document.getElementById('filterDesa').value;
+
+                if (kecId) url.searchParams.set('kecamatan_id', kecId);
+                else url.searchParams.delete('kecamatan_id');
+
+                if (desaId) url.searchParams.set('desa_id', desaId);
+                else url.searchParams.delete('desa_id');
+
+                // Hapus parameter dinas
+                url.searchParams.delete('dinas_id');
+            } else if (tipeFilter === 'dinas') {
+                // Filter berdasarkan dinas
+                const dinasId = document.getElementById('filterDinasSelect').value;
+
+                if (dinasId) url.searchParams.set('dinas_id', dinasId);
+                else url.searchParams.delete('dinas_id');
+
+                // Hapus parameter wilayah
+                url.searchParams.delete('kecamatan_id');
+                url.searchParams.delete('desa_id');
+            }
 
             window.location.href = url.toString();
         });
-
-        // Fungsi toggle tombol Reset Wilayah
-        function toggleResetWilayah() {
-            const btnResetWilayah = document.getElementById('btnResetWilayah');
-            const kecId = document.getElementById('filterKecamatan')?.value || '';
-            const desaId = document.getElementById('filterDesa')?.value || '';
-
-            if (kecId || desaId) {
-                btnResetWilayah.style.display = 'inline-flex';
-            } else {
-                btnResetWilayah.style.display = 'none';
-            }
-        }
 
         // Tombol Reset Wilayah
         document.getElementById('btnResetWilayah').addEventListener('click', function() {
             const url = new URL(window.location.href);
             url.searchParams.delete('kecamatan_id');
             url.searchParams.delete('desa_id');
+            url.searchParams.delete('dinas_id');
+            url.searchParams.delete('tipe_filter');
             window.location.href = url.toString();
         });
 
+        // Toggle Filter Type (Wilayah atau Dinas)
+        function toggleFilterType() {
+            const tipeFilter = document.getElementById('tipeFilter').value;
+            const filterWilayah = document.getElementById('filterWilayah');
+            const filterDinas = document.getElementById('filterDinas');
+            const btnFilterWilayah = document.getElementById('btnFilterWilayah');
+
+            if (tipeFilter === 'dinas') {
+                // Sembunyikan filter wilayah, tampilkan filter dinas
+                filterWilayah.style.display = 'none';
+                filterDinas.style.display = 'inline-flex';
+
+                // Reset nilai filter wilayah
+                document.getElementById('filterKecamatan').value = '';
+                document.getElementById('filterDesa').value = '';
+                document.getElementById('filterDesa').disabled = true;
+            } else {
+                // Sembunyikan filter dinas, tampilkan filter wilayah
+                filterDinas.style.display = 'none';
+                filterWilayah.style.display = 'inline-flex';
+                btnFilterWilayah.style.display = 'inline-flex';
+
+                // Reset nilai filter dinas
+                document.getElementById('filterDinasSelect').value = '';
+            }
+
+            toggleResetWilayah();
+        }
+
+        // Toggle tombol Reset Wilayah
+        function toggleResetWilayah() {
+            const btnResetWilayah = document.getElementById('btnResetWilayah');
+            const kecId = document.getElementById('filterKecamatan')?.value || '';
+            const desaId = document.getElementById('filterDesa')?.value || '';
+            const dinasId = document.getElementById('filterDinasSelect')?.value || '';
+
+            if (kecId || desaId || dinasId) {
+                btnResetWilayah.style.display = 'inline-flex';
+            } else {
+                btnResetWilayah.style.display = 'none';
+            }
+        }
+
         // Panggil saat halaman load
+        toggleFilterType();
         toggleResetWilayah();
     </script>
 @endpush

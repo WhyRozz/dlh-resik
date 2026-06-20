@@ -21,6 +21,14 @@
     flex-wrap: nowrap;
 }
 
+/* Header Filters (Bulan, Tahun, Status) */
+.header-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
 .page-title {
     margin: 0;
     color: #2e8b57;
@@ -430,6 +438,24 @@
 
 .modal-overlay.active {
     display: flex;
+}
+
+/* Form row untuk 2 kolom */
+.modal-container .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.modal-container .form-row .form-group {
+    width: 100%;
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 768px) {
+    .modal-container .form-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 .modal-container {

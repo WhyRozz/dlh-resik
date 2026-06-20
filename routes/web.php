@@ -62,7 +62,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Route API desa by kecamatan
             Route::get('/desa/{kecamatan_id}', [DataPenggunaController::class, 'getDesaByKecamatan'])
-                ->name('desa-by-kecamatan');    
+                ->name('desa-by-kecamatan');
 
             // API untuk detail user (modal)
             Route::get('/api/{type}/{id}', [DataPenggunaController::class, 'show'])
@@ -98,19 +98,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // ── Kelola Akun Admin (dengan OTP) ──
         Route::prefix('akun')->name('akun.')->group(function () {
+            // ✅ ROUTE INDEX (tanpa parameter)
             Route::get('/', [AccountController::class, 'index'])->name('index');
-            Route::get('/{id}', [AccountController::class, 'show'])->name('show');
-            Route::put('/{id}', [AccountController::class, 'update'])->name('update');
-            Route::get('/get-admin-emails', [AccountController::class, 'getAdminEmails'])->name('get-emails');
-            Route::post('/send-otp', [AccountController::class, 'processSendOtp'])->name('send-otp');
 
-            // OTP
+            // ✅ ROUTE SPESIFIK (WAJIB DI ATAS /{id})
+            Route::get('/kecamatan', [AccountController::class, 'getKecamatan'])->name('kecamatan');
+            Route::get('/get-desa', [AccountController::class, 'getDesaWithKecamatan'])->name('get-desa');
+            Route::get('/get-admin-emails', [AccountController::class, 'getAdminEmails'])->name('get-emails');
+
+            // ✅ ROUTE POST (tidak akan konflik dengan {id})
+            Route::post('/send-otp', [AccountController::class, 'processSendOtp'])->name('send-otp');
             Route::post('/request-otp', [AccountController::class, 'requestOtp'])->name('request-otp');
             Route::post('/verify-otp', [AccountController::class, 'verifyOtp'])->name('verify-otp');
-
-            // AJAX Password
             Route::post('/ajax/get-password', [AccountController::class, 'getPasswordPlaceholder'])->name('ajax.get-password');
             Route::post('/ajax/get-password-raw', [AccountController::class, 'getPasswordRaw'])->name('ajax.get-password-raw');
+
+            // ❌ ROUTE DENGAN PARAMETER {id} - WAJIB DI PALING BAWAH
+            Route::get('/{id}', [AccountController::class, 'show'])->name('show');
+            Route::put('/{id}', [AccountController::class, 'update'])->name('update');
         });
 
         // ── Kelola Petugas (tanpa OTP) ──
@@ -156,7 +161,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::patch('/{id}/approve', [PenjemputanController::class, 'approve'])->name('approve');
                 Route::delete('/{id}/reject', [PenjemputanController::class, 'reject'])->name('reject');
                 Route::post('/store', [PenjemputanController::class, 'storeFromAdmin'])->name('store');
-                Route::get('/list/{adminId}', [PenjemputanController::class, 'indexByAdmin'])->name('list');                
+                Route::get('/list/{adminId}', [PenjemputanController::class, 'indexByAdmin'])->name('list');
             });
 
             // ── Setor Sampah ──
@@ -209,12 +214,12 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 // ── Download APK Route (Public) ──
 Route::get('/download-apk', function () {
     $filePath = public_path('downloads/resik.apk');
-    
+
     // Cek apakah file ada
     if (!file_exists($filePath)) {
         abort(404, 'File APK tidak ditemukan. Silakan hubungi administrator.');
     }
-    
+
     // Download dengan header yang tepat untuk APK
     return response()->download($filePath, 'RESIK.apk', [
         'Content-Type' => 'application/vnd.android.package-archive',

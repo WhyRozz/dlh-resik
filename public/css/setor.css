@@ -725,3 +725,68 @@
         padding: 15px;
     }
 }
+
+/* =========================================
+   FIX: SERAGAMKAN LEBAR FIELD DI MODAL
+   ========================================= */
+
+/* Pastikan semua form-group di modal punya lebar konsisten */
+#detailModal .form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Untuk field full width */
+#detailModal .form-group.full {
+    width: 100%;
+    grid-column: 1 / -1;
+}
+
+/* Untuk field dalam form-row (2 kolom) */
+#detailModal .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    width: 100%;
+}
+
+#detailModal .form-row .form-group {
+    width: 100%;
+    min-width: 0; /* Mencegah overflow */
+}
+
+/* Pastikan semua input field lebar 100% */
+#detailModal .form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0; /* Mencegah overflow pada flex/grid */
+}
+
+/* Khusus untuk section lokasi (Kecamatan/Desa atau Dinas) */
+#detailModal #d_lokasi_section {
+    width: 100%;
+}
+
+#detailModal #d_wilayah_group,
+#detailModal #d_desa_group,
+#detailModal #d_dinas_group {
+    width: 100%;
+}
+
+/* Untuk Dinas (full width) */
+#detailModal #d_dinas_group.full {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 768px) {
+    #detailModal .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    #detailModal .form-group.full {
+        width: 100%;
+    }
+}

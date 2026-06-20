@@ -8,6 +8,7 @@ use App\Models\Masyarakat;
 use App\Models\Pns;
 use App\Models\Kecamatan;
 use App\Models\Desa;
+use App\Models\Dinas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ class PenarikanController extends Controller
     public function index(Request $request)  // ✅ Pastikan ada $request
     {
         // ✅ LANGKAH 1: Ubah jadi $query dulu (JANGAN langsung paginate)
-        $query = Penarikan::with(['masyarakat.desa.kecamatan', 'pns.desa.kecamatan']);
+        $query = Penarikan::with(['masyarakat.desa.kecamatan', 'pns.dinas']);
 
         // ✅ LANGKAH 2: ➕ TAMBAH FILTER DI SINI (setelah $query, sebelum paginate)
         if ($request->filled('bulan')) {
@@ -60,6 +61,13 @@ class PenarikanController extends Controller
             });
         }
 
+        // Filter Dinas (untuk PNS)
+        if ($request->filled('dinas_id')) {
+            $query->whereHas('pns', function ($q) use ($request) {
+                $q->where('id_dinas', $request->dinas_id);
+            });
+        }
+
         // ✅ LANGKAH 3: Baru paginate setelah filter
         $penarikans = $query->orderBy('tanggal_penarikan', 'desc')->paginate(15);
 
@@ -75,6 +83,9 @@ class PenarikanController extends Controller
                 ->get();
         }
 
+        // Data untuk filter dinas
+        $dinasList = Dinas::orderBy('nama_dinas')->get();
+
         // ✅(UNTUK NAMA USER)
         foreach ($penarikans as $penarikan) {
             if ($penarikan->id_masyarakat) {
@@ -85,7 +96,7 @@ class PenarikanController extends Controller
         }
 
         // ✅ LANGKAH 5: ➕ Tambah 'tahunList' di compact
-        return view('admin.bank-sampah.penarikan.index', compact('penarikans', 'tahunList', 'kecamatans', 'desas'));
+        return view('admin.bank-sampah.penarikan.index', compact('penarikans', 'tahunList', 'kecamatans', 'desas', 'dinasList'));
     }
 
     /**
@@ -159,12 +170,21 @@ class PenarikanController extends Controller
      */
     public function show($id)
     {
-        $penarikan = Penarikan::with(['masyarakat', 'pns'])->findOrFail($id);
+        $penarikan = Penarikan::with([
+            'masyarakat.desa.kecamatan',
+            'pns.dinas'
+        ])->findOrFail($id);
 
         $userName = $penarikan->masyarakat->nama ?? $penarikan->pns->nama ?? 'Unknown';
 
         return response()->json(
-            array_merge($penarikan->toArray(), ['nama_user' => $userName])
+            array_merge($penarikan->toArray(), [
+                'nama_user' => $userName,
+                'id_masyarakat' => $penarikan->id_masyarakat,
+                'id_pns' => $penarikan->id_pns,
+                'masyarakat' => $penarikan->masyarakat,
+                'pns' => $penarikan->pns
+            ])
         );
     }
 

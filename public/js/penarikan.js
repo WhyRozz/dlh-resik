@@ -24,6 +24,10 @@ function resetFilter() {
     url.searchParams.delete('tahun');
     url.searchParams.delete('status');
     url.searchParams.delete('search');
+    url.searchParams.delete('kecamatan_id');
+    url.searchParams.delete('desa_id');
+    url.searchParams.delete('dinas_id');
+    url.searchParams.delete('tipe_filter');
     window.location.href = url.pathname;
 }
 
@@ -55,7 +59,6 @@ function resetFilter() {
 })();
 
 // ================= MODAL DETAIL =================
-
 function showDetail(id) {
     currentId = id;
 
@@ -65,6 +68,7 @@ function showDetail(id) {
             // Set values
             const elId = document.getElementById('detail-id');
             const elNama = document.getElementById('detail-nama');
+            const elTipe = document.getElementById('detail-tipe');
             const elTanggal = document.getElementById('detail-tanggal');
             const elJumlah = document.getElementById('detail-jumlah');
             const elJenis = document.getElementById('detail-jenis');
@@ -72,8 +76,39 @@ function showDetail(id) {
             const elStatusText = document.getElementById('detail-status-text');
             const elStatus = document.getElementById('detail-status');
 
+            // Wilayah & Dinas elements
+            const wilayahGroup = document.getElementById('detail-wilayah-group');
+            const dinasGroup = document.getElementById('detail-dinas-group');
+            const elKecamatan = document.getElementById('detail-kecamatan');
+            const elDesa = document.getElementById('detail-desa');
+            const elDinas = document.getElementById('detail-dinas');
+
             if (elId) elId.value = '#TRX-' + String(data.id_penarikan).padStart(5, '0');
             if (elNama) elNama.value = data.nama_user || 'Unknown';
+
+            // Set tipe pengguna dan tampilkan field yang sesuai
+            let tipePengguna = '';
+            if (data.id_masyarakat) {
+                tipePengguna = 'Masyarakat';
+                // Tampilkan kecamatan & desa, sembunyikan dinas
+                if (wilayahGroup) wilayahGroup.style.display = 'grid';
+                if (dinasGroup) dinasGroup.style.display = 'none';
+
+                // Set nilai kecamatan & desa
+                if (elKecamatan) elKecamatan.value = data.masyarakat?.desa?.kecamatan?.nama_kecamatan || '-';
+                if (elDesa) elDesa.value = data.masyarakat?.desa?.nama_desa || '-';
+            } else if (data.id_pns) {
+                tipePengguna = 'PNS';
+                // Tampilkan dinas, sembunyikan kecamatan & desa
+                if (wilayahGroup) wilayahGroup.style.display = 'none';
+                if (dinasGroup) dinasGroup.style.display = 'block';
+
+                // Set nilai dinas
+                if (elDinas) elDinas.value = data.pns?.dinas?.nama_dinas || '-';
+            }
+
+            if (elTipe) elTipe.value = tipePengguna;
+
             if (elTanggal) elTanggal.value = new Date(data.tanggal_penarikan).toLocaleString('id-ID');
             if (elJumlah) elJumlah.value = formatRupiah(data.jumlah_uang);
             if (elJenis) elJenis.value = (data.jenis_ewallet || '-').toUpperCase();

@@ -13,7 +13,7 @@
     <div class="mobile-navbar-brand">
         <img src="{{ asset('assets/logo-dlh.png') }}" alt="Logo" class="mobile-logo">
         <div class="mobile-brand-text">
-        <span class="mobile-brand-title">DLH Nganjuk</span>
+            <span class="mobile-brand-title">DLH Nganjuk</span>
         </div>
     </div>
 
@@ -73,7 +73,7 @@
                             <span>Data Setor</span>
                         </a>
                     </li>
-                    
+
                     {{-- ✅ Data Penarikan (dengan badge) --}}
                     <li class="mobile-menu-item" data-menu="penarikan">
                         <a href="{{ route('admin.bank-sampah.penarikan.index') }}" class="mobile-menu-link">
@@ -84,7 +84,7 @@
                             @endif
                         </a>
                     </li>
-                    
+
                     {{-- Jenis & Harga Sampah (tanpa badge) --}}
                     <li class="mobile-menu-item">
                         <a href="{{ route('admin.bank-sampah.jenis-sampah.index') }}" class="mobile-menu-link">
@@ -92,7 +92,7 @@
                             <span>Jenis & Harga Sampah</span>
                         </a>
                     </li>
-                    
+
                     {{-- ✅ Penjemputan (dengan badge) --}}
                     <li class="mobile-menu-item" data-menu="penjemputan">
                         <a href="{{ route('admin.bank-sampah.penjemputan.index') }}" class="mobile-menu-link">
@@ -133,13 +133,33 @@
                 </a>
             </li>
 
-            {{-- Kelola Akun --}}
+            {{-- Kelola Akun (with Submenu) --}}
             <li class="mobile-menu-item">
-                <a href="{{ route('admin.akun.index') }}"
-                    class="mobile-menu-link {{ request()->routeIs('admin.akun.*') ? 'active' : '' }}">
+                <a href="javascript:void(0)" class="mobile-menu-link" data-submenu="kelola-akun">
                     <i class="fas fa-user-cog"></i>
                     <span>Kelola Akun</span>
+                    <i class="fas fa-chevron-right mobile-submenu-toggle"></i>
                 </a>
+                <ul class="mobile-submenu">
+                    {{-- Super Admin & Petugas --}}
+                    <li class="mobile-menu-item">
+                        <a href="{{ route('admin.akun.index') }}" class="mobile-menu-link">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Super Admin & Petugas</span>
+                        </a>
+                    </li>
+
+                    {{-- Sub Admin Desa (Coming Soon) --}}
+                    <li class="mobile-menu-item">
+                        <a href="javascript:void(0)" class="mobile-menu-link coming-soon"
+                            onclick="alert('Fitur ini sedang dalam pengembangan')">
+                            <i class="fas fa-users-cog"></i>
+                            <span>Sub Admin Desa</span>
+                            <span class="badge badge-info"
+                                style="font-size: 10px; padding: 2px 6px; margin-left: auto;">Soon</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
 
             {{-- Logout --}}

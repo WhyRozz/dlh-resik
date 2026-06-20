@@ -4,7 +4,7 @@
     <div class="modal-box">
         
         <div class="modal-header">
-            <h3><i class="fas fa-info-circle"></i> Detail Setor Sampah</h3>
+            <h3> Detail Setor Sampah</h3>
             <button class="modal-close" onclick="closeDetailModal()" title="Tutup">
                 <i class="fas fa-times"></i>
             </button>

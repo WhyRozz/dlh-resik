@@ -14,35 +14,149 @@ if (!window.accountState) {
     };
 }
 
+// ===== LOAD KECAMATAN DATA =====
+async function loadKecamatanData() {
+    try {
+        const response = await fetch('/admin/akun/kecamatan');
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            const kecamatanSelect = document.getElementById('kecamatanSelect');
+            if (kecamatanSelect) {
+                kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+                result.data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.nama;
+                    kecamatanSelect.appendChild(option);
+                });
+                console.log('✅ Loaded', result.data.length, 'kecamatan');
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error loading kecamatan:', error);
+    }
+}
+
+// ===== LOAD DESA BY KECAMATAN =====
+async function loadDesaByKecamatan(kecamatanId) {
+    try {
+        const desaSelect = document.getElementById('desaSelect');
+        if (!desaSelect) return Promise.resolve();
+
+        if (!kecamatanId) {
+            desaSelect.innerHTML = '<option value="">-- Pilih Desa --</option>';
+            return Promise.resolve();
+        }
+
+        const response = await fetch(`/admin/data-pengguna/desa/${kecamatanId}`);
+        const result = await response.json();
+
+        desaSelect.innerHTML = '<option value="">-- Pilih Desa --</option>';
+
+        result.forEach(item => {
+            const option = document.createElement('option');
+            option.value = 'bank_sampah_' + item.id_desa;
+            option.textContent = item.nama_desa;
+            desaSelect.appendChild(option);
+        });
+
+        console.log('✅ Loaded', result.length, 'desa');
+        return Promise.resolve();
+    } catch (error) {
+        console.error('❌ Error loading desa:', error);
+        return Promise.reject(error);
+    }
+}
+
+// ===== SETUP CASCADING DROPDOWNS =====
+function setupCascadingDropdowns() {
+    const tipeWilayah = document.getElementById('tipeWilayah');
+    const kecamatanGroup = document.getElementById('kecamatanGroup');
+    const desaGroup = document.getElementById('desaGroup');
+    const kecamatanSelect = document.getElementById('kecamatanSelect');
+    const desaSelect = document.getElementById('desaSelect');
+    const levelPetugas = document.getElementById('levelPetugas');
+
+    if (!tipeWilayah) {
+        console.error('❌ Element #tipeWilayah not found!');
+        return;
+    }
+
+    // Event: Tipe Wilayah berubah
+    tipeWilayah.addEventListener('change', function () {
+        const value = this.value;
+        console.log('Tipe wilayah changed:', value);
+
+        if (value === 'petugas_dlh') {
+            kecamatanGroup.style.display = 'none';
+            desaGroup.style.display = 'none';
+            levelPetugas.value = 'petugas_dlh';
+            levelPetugas.required = true;
+        } else if (value === 'bank_sampah') {
+            kecamatanGroup.style.display = 'block';
+            desaGroup.style.display = 'none';
+            levelPetugas.value = '';
+            levelPetugas.required = true;
+        } else {
+            kecamatanGroup.style.display = 'none';
+            desaGroup.style.display = 'none';
+            levelPetugas.value = '';
+            levelPetugas.required = false;
+        }
+    });
+
+    // Event: Kecamatan berubah
+    if (kecamatanSelect) {
+        kecamatanSelect.addEventListener('change', function () {
+            const kecamatanId = this.value;
+            if (kecamatanId) {
+                desaGroup.style.display = 'block';
+                loadDesaByKecamatan(kecamatanId);
+            } else {
+                desaGroup.style.display = 'none';
+                desaSelect.innerHTML = '<option value="">-- Pilih Desa --</option>';
+            }
+            levelPetugas.value = '';
+        });
+    }
+
+    // Event: Desa berubah
+    if (desaSelect) {
+        desaSelect.addEventListener('change', function () {
+            levelPetugas.value = this.value;
+        });
+    }
+}
 // ===== SETUP FORM ACTION =====
 function setupAccountForm() {
     const accountForm = document.getElementById('accountForm');
     const idInput = document.getElementById('formIdAdmin');
-    
+
     if (!accountForm) {
         console.error('❌ accountForm tidak ada!');
         return;
     }
-    
+
     console.log('🔧 Setup form action listener...');
-    
+
     // Hapus listener lama (mencegah duplikasi)
     const newForm = accountForm.cloneNode(true);
     accountForm.parentNode.replaceChild(newForm, accountForm);
-    
-    newForm.addEventListener('submit', function(e) {
+
+    newForm.addEventListener('submit', function (e) {
         let idAdmin = idInput?.value?.trim();
-        
+
         if (!idAdmin || idAdmin === '') {
             idAdmin = window.accountState?.currentIdAdmin;
         }
-        
+
         const email = document.getElementById('email')?.value?.trim();
-        
+
         if (idAdmin && email) {
             this.action = "/admin/akun/" + idAdmin;
             this.method = "POST";
-            
+
             let methodInput = this.querySelector('input[name="_method"]');
             if (!methodInput) {
                 methodInput = document.createElement('input');
@@ -51,7 +165,7 @@ function setupAccountForm() {
                 this.appendChild(methodInput);
             }
             methodInput.value = 'PUT';
-            
+
             let csrfInput = this.querySelector('input[name="_token"]');
             if (!csrfInput) {
                 csrfInput = document.createElement('input');
@@ -60,7 +174,7 @@ function setupAccountForm() {
                 csrfInput.value = window.AccountConfig?.csrfToken || document.querySelector('meta[name="csrf-token"]')?.content;
                 this.appendChild(csrfInput);
             }
-            
+
             console.log('✅ Form ready: PUT /admin/akun/' + idAdmin);
         } else {
             e.preventDefault();
@@ -74,7 +188,7 @@ function setupAccountForm() {
 // ===== FETCH PASSWORD PLACEHOLDER =====
 async function fetchPasswordPlaceholder(idAdmin) {
     if (!idAdmin) return;
-    
+
     try {
         const response = await fetch('/admin/akun/ajax/get-password', {
             method: 'POST',
@@ -84,7 +198,7 @@ async function fetchPasswordPlaceholder(idAdmin) {
             },
             body: `id_admin=${encodeURIComponent(idAdmin)}`
         });
-        
+
         const data = await response.json();
         if (data.status === 'success') {
             const passwordInput = document.getElementById('password');
@@ -151,29 +265,29 @@ function resetForm() {
 
 function requestOTPForAction(action, idAdmin, email) {
     console.log('🔍 requestOTPForAction:', { action, idAdmin, email });
-    
+
     if (!idAdmin || !email) {
         alert('Error: Data tidak valid!');
         return;
     }
-    
+
     window.accountState.currentAction = action;
     window.accountState.currentIdAdmin = idAdmin;
     window.accountState.currentEmail = email;
-    
+
     const targetDisplay = document.getElementById('targetEmailDisplay');
     const otpTarget = document.getElementById('otpTargetEmail');
     if (targetDisplay) targetDisplay.textContent = email;
     if (otpTarget) otpTarget.textContent = email;
-    
+
     const modalTitle = document.getElementById('otpModalTitle');
     if (modalTitle) {
         modalTitle.textContent = action === 'edit' ? 'Verifikasi Edit Akun' : '🗑️ Verifikasi Hapus Akun';
     }
-    
+
     const statusDiv = document.getElementById('otpRequestStatus');
     if (statusDiv) statusDiv.innerHTML = '';
-    
+
     showModal('otpRequestModal');
 }
 
@@ -215,7 +329,7 @@ async function sendOTPToTarget() {
             if (data.status === 'success_dev' && data.otp) {
                 msg = `OTP: <strong>${data.otp}</strong><br><small>(Development mode)</small>`;
             }
-            
+
             if (statusDiv) {
                 statusDiv.style.display = 'block';
                 statusDiv.className = 'show alert-success';
@@ -229,7 +343,7 @@ async function sendOTPToTarget() {
                     document.getElementById('otpInput')?.focus();
                 }, 300);
             }, 1500);
-            
+
         } else {
             if (statusDiv) {
                 statusDiv.style.display = 'block';
@@ -250,7 +364,7 @@ async function sendOTPToTarget() {
 // ===== FUNGSI UTAMA: VERIFY OTP =====
 async function verifyOTP() {
     console.log('🔍 verifyOTP() STARTED');
-    
+
     const otpInput = document.getElementById('otpInput');
     const otp = otpInput?.value.trim();
     const statusDiv = document.getElementById('otpVerifyStatus');
@@ -281,21 +395,21 @@ async function verifyOTP() {
 
         // ✅ JIKA OTP BERHASIL
         if (data.status === 'success') {
-            if (statusDiv) { 
-                statusDiv.className = 'show alert-success'; 
-                statusDiv.innerHTML = 'OTP valid! Memproses...'; 
+            if (statusDiv) {
+                statusDiv.className = 'show alert-success';
+                statusDiv.innerHTML = 'OTP valid! Memproses...';
             }
-            
+
             // Reset input & status
             if (otpInput) otpInput.value = '';
             if (statusDiv) {
                 statusDiv.innerHTML = '';
-                statusDiv.className = ''; 
+                statusDiv.className = '';
             }
-            
+
             // Tutup modal OTP
             hideModal('otpVerifyModal');
-            
+
             // ✅ LANGKAH 1: Tampilkan SweetAlert DULU
             Swal.fire({
                 icon: 'success',
@@ -310,67 +424,67 @@ async function verifyOTP() {
                 if (editModal) {
                     editModal.style.display = 'flex';
                     setTimeout(() => { editModal.classList.add('active'); }, 10);
-                    
+
                     // Isi field form
                     if (email) document.getElementById('email').value = email;
                     if (window.accountState?.currentIdAdmin) {
                         document.getElementById('formIdAdmin').value = window.accountState.currentIdAdmin;
                     }
                     document.getElementById('editAdminModalTitle').textContent = 'Edit Akun Admin';
-                    
+
                     // Setup form & fetch password
                     setupAccountForm();
                     fetchPasswordPlaceholder(window.accountState?.currentIdAdmin);
-                    
+
                 } else {
                     console.error('❌ editAdminModal not found!');
                     Swal.fire('Error', 'Modal edit tidak ditemukan!', 'error');
                 }
-                });
-            
-                // ❌ JIKA OTP GAGAL / SALAH
-                } else {
-                    if (statusDiv) { 
-                        statusDiv.className = 'show alert-error'; 
-                        statusDiv.innerHTML = data.message || '❌ OTP tidak valid!'; 
-                    }
-                    
-                    // Reset input biar bisa ketik ulang
-                    if (otpInput) {
-                        otpInput.value = '';
-                        otpInput.focus();
-                    }
-                }
-                
-                // ❌ JIKA ERROR NETWORK / SERVER
-                } catch (error) {
-                    console.error(' Network error:', error);
-                    if (statusDiv) { 
-                        statusDiv.className = 'show alert-error'; 
-                        statusDiv.innerHTML = '❌ Kesalahan koneksi!'; 
-                    }
-                    
-                    // Reset input kalau error
-                    if (otpInput) {
-                        otpInput.value = ''; 
-                    }
-                }
+            });
+
+            // ❌ JIKA OTP GAGAL / SALAH
+        } else {
+            if (statusDiv) {
+                statusDiv.className = 'show alert-error';
+                statusDiv.innerHTML = data.message || '❌ OTP tidak valid!';
             }
+
+            // Reset input biar bisa ketik ulang
+            if (otpInput) {
+                otpInput.value = '';
+                otpInput.focus();
+            }
+        }
+
+        // ❌ JIKA ERROR NETWORK / SERVER
+    } catch (error) {
+        console.error(' Network error:', error);
+        if (statusDiv) {
+            statusDiv.className = 'show alert-error';
+            statusDiv.innerHTML = '❌ Kesalahan koneksi!';
+        }
+
+        // Reset input kalau error
+        if (otpInput) {
+            otpInput.value = '';
+        }
+    }
+}
 
 // ===== EXECUTE ACTION (fallback) =====
 function executeAction() {
     const { currentAction, currentIdAdmin, currentEmail } = window.accountState;
-    
+
     if (currentAction === 'edit') {
         const editModal = document.getElementById('editAdminModal');
         if (editModal) {
             editModal.style.display = 'flex';
             setTimeout(() => { editModal.classList.add('active'); }, 10);
-            
+
             document.getElementById('formIdAdmin').value = currentIdAdmin || '';
             document.getElementById('email').value = currentEmail || '';
             document.getElementById('editAdminModalTitle').textContent = 'Edit Akun Admin';
-            
+
             setupAccountForm();
             fetchPasswordPlaceholder(currentIdAdmin);
         }
@@ -392,9 +506,15 @@ function executeAction() {
 // ===== INIT ON DOM READY =====
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🔧 account.js DOMContentLoaded');
-    
+
     setupAccountForm();
-    
+
+    // Load kecamatan data
+    loadKecamatanData();
+
+    // Setup cascading dropdowns
+    setupCascadingDropdowns();
+
     // Toggle password visibility
     const togglePasswordAdmin = document.getElementById('togglePasswordAdmin');
     const passwordInput = document.getElementById('password');
@@ -411,12 +531,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-    
+
     // Toggle password visibility untuk Petugas
     const togglePasswordPetugas = document.getElementById('togglePasswordPetugas');
     const passwordPetugasInput = document.getElementById('passwordPetugas');
     const eyeIconPetugas = document.getElementById('eyeIconPetugas');
-    
+
     if (togglePasswordPetugas && passwordPetugasInput && eyeIconPetugas) {
         togglePasswordPetugas.addEventListener('click', function () {
             if (passwordPetugasInput.type === 'password') {
@@ -472,187 +592,200 @@ document.addEventListener('DOMContentLoaded', function () {
     btnBatalPetugas?.addEventListener('click', closeModalPetugas);
     modalPetugas?.addEventListener('click', (e) => { if (e.target.id === 'modalPetugas') closeModalPetugas(); });
 
-// Form petugas submit
-const formPetugas = document.getElementById('formPetugas');
-if (formPetugas) {
-    formPetugas.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const petugasId = document.getElementById('petugasId');
-        const isEdit = petugasId && petugasId.value !== '';
-        const btnSimpan = document.getElementById('btnSimpanPetugas');
+    // Form petugas submit
+    const formPetugas = document.getElementById('formPetugas');
+    if (formPetugas) {
+        formPetugas.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const petugasId = document.getElementById('petugasId');
+            const isEdit = petugasId && petugasId.value !== '';
+            const btnSimpan = document.getElementById('btnSimpanPetugas');
 
-        if (btnSimpan) { 
-            btnSimpan.disabled = true; 
-            btnSimpan.textContent = isEdit ? 'Menyimpan...' : 'Menambahkan...'; 
-        }
-
-        const formData = new FormData(formPetugas);
-        let url = window.AccountConfig?.routes?.petugasStore || '/admin/petugas';
-        if (isEdit) { 
-            url = `${url}/${encodeURIComponent(petugasId.value)}`; 
-            formData.append('_method', 'PUT'); 
-        }
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': window.AccountConfig?.csrfToken || document.querySelector('meta[name="csrf-token"]')?.content || '',
-                    'Accept': 'application/json'
-                }
-            });
-
-            const contentType = response.headers.get("content-type");
-            
-            if (contentType && contentType.includes("application/json")) {
-                const result = await response.json();
-                
-                if (result.success || response.ok) {
-                    // ✅ LANGKAH 1: Tutup modal DULU (tanpa animasi) sebelum SweetAlert
-                    const modal = document.getElementById('modalPetugas');
-                    if (modal) {
-                        modal.classList.remove('active');
-                        modal.style.display = 'none';
-                        document.body.style.overflow = ''; // Unlock scroll
-                    }
-                    
-                    // ✅ LANGKAH 2: Baru tampilkan SweetAlert
-                    Swal.fire({ 
-                        title: 'Berhasil!', 
-                        text: isEdit ? 'Data petugas telah diperbarui.' : 'Petugas baru berhasil ditambahkan.', 
-                        icon: 'success', 
-                        confirmButtonColor: '#20A726', 
-                        timer: 2000, 
-                        showConfirmButton: false 
-                    });
-                    
-                    // ✅ LANGKAH 3: Reload setelah SweetAlert selesai
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2100); // Sedikit lebih lama dari timer SweetAlert
-                    
-                } else { 
-                    Swal.fire({ 
-                        title: 'Gagal!', 
-                        text: result.message || 'Terjadi kesalahan', 
-                        icon: 'error', 
-                        confirmButtonColor: '#dc3545' 
-                    }); 
-                }
-            } else {
-                const errorText = await response.text();
-                console.error('Server Error:', errorText);
-                alert('❌ Gagal: Server error.');
+            if (btnSimpan) {
+                btnSimpan.disabled = true;
+                btnSimpan.textContent = isEdit ? 'Menyimpan...' : 'Menambahkan...';
             }
-        } catch (error) { 
-            console.error('Fetch Error:', error); 
-            alert('❌ Network error: ' + error.message); 
-        }
-        finally { 
-            if (btnSimpan) { 
-                btnSimpan.disabled = false; 
-                btnSimpan.textContent = isEdit ? 'Update' : 'Simpan'; 
-            } 
-        }
-    });
-}
+
+            const formData = new FormData(formPetugas);
+            let url = window.AccountConfig?.routes?.petugasStore || '/admin/petugas';
+            if (isEdit) {
+                url = `${url}/${encodeURIComponent(petugasId.value)}`;
+                formData.append('_method', 'PUT');
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': window.AccountConfig?.csrfToken || document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const contentType = response.headers.get("content-type");
+
+                if (contentType && contentType.includes("application/json")) {
+                    const result = await response.json();
+
+                    if (result.success || response.ok) {
+                        // ✅ LANGKAH 1: Tutup modal DULU (tanpa animasi) sebelum SweetAlert
+                        const modal = document.getElementById('modalPetugas');
+                        if (modal) {
+                            modal.classList.remove('active');
+                            modal.style.display = 'none';
+                            document.body.style.overflow = ''; // Unlock scroll
+                        }
+
+                        // ✅ LANGKAH 2: Baru tampilkan SweetAlert
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: isEdit ? 'Data petugas telah diperbarui.' : 'Petugas baru berhasil ditambahkan.',
+                            icon: 'success',
+                            confirmButtonColor: '#20A726',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+
+                        // ✅ LANGKAH 3: Reload setelah SweetAlert selesai
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2100); // Sedikit lebih lama dari timer SweetAlert
+
+                    } else {
+                        Swal.fire({
+                            title: 'Gagal!',
+                            text: result.message || 'Terjadi kesalahan',
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error('Server Error:', errorText);
+                    alert('❌ Gagal: Server error.');
+                }
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                alert('❌ Network error: ' + error.message);
+            }
+            finally {
+                if (btnSimpan) {
+                    btnSimpan.disabled = false;
+                    btnSimpan.textContent = isEdit ? 'Update' : 'Simpan';
+                }
+            }
+        });
+    }
 
     // Search filter
     initAccountSearch();
-    
+
     console.log('✅ account.js ready!');
 });
 
 // ===== PETUGAS FUNCTIONS =====
 function confirmDelete(id) {
-    Swal.fire({ 
-        title: 'Apakah Anda yakin?', 
-        text: "Data petugas akan dihapus permanen!", 
-        icon: 'warning', 
-        showCancelButton: true, 
-        confirmButtonColor: '#dc3545', 
-        cancelButtonColor: '#6c757d', 
-        confirmButtonText: 'Ya, Hapus!', 
-        cancelButtonText: 'Batal', 
-        reverseButtons: true 
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Data petugas akan dihapus permanen!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
     })
-    .then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/admin/petugas/${id}`, { 
-                method: 'DELETE', 
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'X-CSRF-TOKEN': window.AccountConfig?.csrfToken || document.querySelector('meta[name="csrf-token"]')?.content || '', 
-                    'Accept': 'application/json' 
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) { 
-                    // ✅ NOTIFIKASI SUKSES - OTOMATIS TUTUP (TANPA TOMBOL OK)
-                    Swal.fire({ 
-                        title: 'Terhapus!', 
-                        text: data.message || 'Akun petugas berhasil dihapus.', 
-                        icon: 'success', 
-                        confirmButtonColor: '#20A726',
-                        timer: 2000,           // ✅ Otomatis tutup setelah 2 detik
-                        showConfirmButton: false  // ✅ TIDAK ADA TOMBOL OK
+        .then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/petugas/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': window.AccountConfig?.csrfToken || document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // ✅ NOTIFIKASI SUKSES - OTOMATIS TUTUP (TANPA TOMBOL OK)
+                            Swal.fire({
+                                title: 'Terhapus!',
+                                text: data.message || 'Akun petugas berhasil dihapus.',
+                                icon: 'success',
+                                confirmButtonColor: '#20A726',
+                                timer: 2000,           // ✅ Otomatis tutup setelah 2 detik
+                                showConfirmButton: false  // ✅ TIDAK ADA TOMBOL OK
+                            });
+
+                            // ✅ Reload halaman setelah notif hilang
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2100);
+                        }
+                        else {
+                            Swal.fire({
+                                title: 'Gagal!',
+                                text: data.message,
+                                icon: 'error'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error!', 'Terjadi kesalahan sistem', 'error');
                     });
-                    
-                    // ✅ Reload halaman setelah notif hilang
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2100);
-                }
-                else { 
-                    Swal.fire({ 
-                        title: 'Gagal!', 
-                        text: data.message, 
-                        icon: 'error' 
-                    }); 
-                }
-            })
-            .catch(error => { 
-                console.error('Error:', error); 
-                Swal.fire('Error!', 'Terjadi kesalahan sistem', 'error'); 
-            });
-        }
-    });
+            }
+        });
 }
 
 function closeDeleteModal() { const modal = document.getElementById('deleteModal'); if (modal) modal.style.display = 'none'; }
 
-function openPetugasModal(mode, data = null) {
+async function openPetugasModal(mode, data = null) {
     const modal = document.getElementById('modalPetugas');
     const title = document.getElementById('modalPetugasTitle');
     const passHint = document.getElementById('passHint');
     const btnSimpan = document.getElementById('btnSimpanPetugas');
 
-    if (!modal) { 
-        alert('⚠️ Modal tidak ditemukan!'); 
-        return; 
+    if (!modal) {
+        alert('⚠️ Modal tidak ditemukan!');
+        return;
     }
 
-    // ✅ PENTING: RESET FORM DULU SEBELUM MODAL DITAMPILKAN
+    // Reset form dulu
     const formPetugas = document.getElementById('formPetugas');
     if (formPetugas) formPetugas.reset();
-    
-    // Reset field ID dan password secara eksplisit
+
     const petugasId = document.getElementById('petugasId');
     if (petugasId) petugasId.value = '';
-    
+
     const passwordPetugas = document.getElementById('passwordPetugas');
     if (passwordPetugas) {
         passwordPetugas.value = '';
-        passwordPetugas.required = true; // Wajib untuk akun baru
+        passwordPetugas.required = true;
     }
-    
-    // Reset dropdown wilayah
-    const levelSelect = document.getElementById('levelPetugas');
-    if (levelSelect) levelSelect.value = '';
 
-    // Baru tampilkan modal setelah form bersih
+    // ✅ RESET SEMUA DROPDOWN CASCADING
+    const tipeWilayah = document.getElementById('tipeWilayah');
+    const kecamatanGroup = document.getElementById('kecamatanGroup');
+    const desaGroup = document.getElementById('desaGroup');
+    const levelPetugas = document.getElementById('levelPetugas');
+    const kecamatanSelect = document.getElementById('kecamatanSelect');
+    const desaSelect = document.getElementById('desaSelect');
+
+    if (tipeWilayah) tipeWilayah.value = '';
+    if (kecamatanGroup) kecamatanGroup.style.display = 'none';
+    if (desaGroup) desaGroup.style.display = 'none';
+    if (levelPetugas) levelPetugas.value = '';
+    if (kecamatanSelect) kecamatanSelect.value = '';
+    if (desaSelect) {
+        desaSelect.value = '';
+        desaSelect.innerHTML = '<option value="">-- Pilih Desa --</option>';
+    }
+
+    // Tampilkan modal
     showModal('modalPetugas');
     document.body.style.overflow = 'hidden';
 
@@ -660,47 +793,90 @@ function openPetugasModal(mode, data = null) {
         // ===== MODE EDIT =====
         if (title) title.textContent = 'Edit Akun Petugas';
         if (btnSimpan) btnSimpan.textContent = 'Update';
-        
-        // Isi data pakai .value (BUKAN setAttribute)
+
         if (petugasId && data.id) petugasId.value = data.id;
-        
+
         const namaInput = document.getElementById('namaLengkap');
         if (namaInput && data.nama) namaInput.value = data.nama;
-        
+
         const emailInput = document.getElementById('emailPetugas');
         if (emailInput && data.email) emailInput.value = data.email;
-        
+
         const telpInput = document.getElementById('noTelepon');
         if (telpInput && data.telpon) telpInput.value = data.telpon;
-        
-        if (levelSelect && data.level) levelSelect.value = data.level;
-        
-        // Password tidak wajib untuk edit
-        if (passwordPetugas) passwordPetugas.required = false;
-        
+
+        // ✅ HANDLE LEVEL/WILAYAH UNTUK EDIT
+        if (data.level) {
+            if (data.level === 'petugas_dlh') {
+                // Petugas DLH
+                if (tipeWilayah) tipeWilayah.value = 'petugas_dlh';
+                if (levelPetugas) levelPetugas.value = 'petugas_dlh';
+            } else if (data.level.startsWith('bank_sampah_')) {
+                // Bank Sampah - perlu load kecamatan & desa
+                if (tipeWilayah) tipeWilayah.value = 'bank_sampah';
+                if (kecamatanGroup) kecamatanGroup.style.display = 'block';
+
+                // Extract ID desa dari level
+                const idDesa = data.level.replace('bank_sampah_', '');
+
+                try {
+                    // Fetch semua data desa untuk dapatkan kecamatan_id
+                    const response = await fetch('/admin/akun/get-desa');
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        const desaData = result.data.find(d => d.id == idDesa);
+                        
+                        if (desaData && desaData.kecamatan_id) {
+                            // Set kecamatan
+                            if (kecamatanSelect) {
+                                kecamatanSelect.value = desaData.kecamatan_id;
+                                
+                                // Load desa berdasarkan kecamatan
+                                if (desaGroup) desaGroup.style.display = 'block';
+                                await loadDesaByKecamatan(desaData.kecamatan_id);
+                                
+                                // Set desa yang dipilih
+                                if (desaSelect) desaSelect.value = data.level;
+                                if (levelPetugas) levelPetugas.value = data.level;
+                                
+                                console.log('✅ Data edit berhasil dimuat:', {
+                                    desa: desaData.desa,
+                                    kecamatan: desaData.kecamatan
+                                });
+                            }
+                        } else {
+                            console.warn('⚠️ Data desa tidak ditemukan untuk ID:', idDesa);
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading data for edit:', error);
+                }
+            }
+        }
+
         if (passwordPetugas) {
             passwordPetugas.placeholder = 'Kosongkan jika tidak ingin mengubah';
             passwordPetugas.required = false;
         }
-        
+
     } else {
-        // ===== MODE TAMBAH (BARU) =====
+        // ===== MODE TAMBAH =====
         if (title) title.textContent = 'Tambah Akun Petugas';
         if (btnSimpan) btnSimpan.textContent = 'Simpan';
         if (passHint) passHint.textContent = '';
-        
-        // Pastikan semua field benar-benar kosong
+
         if (formPetugas) formPetugas.reset();
         if (petugasId) petugasId.value = '';
-        
+
         const namaInput = document.getElementById('namaLengkap');
         const emailInput = document.getElementById('emailPetugas');
         const telpInput = document.getElementById('noTelepon');
-        
+
         if (namaInput) namaInput.value = '';
         if (emailInput) emailInput.value = '';
         if (telpInput) telpInput.value = '';
-        if (levelSelect) levelSelect.value = '';
+
         if (passwordPetugas) {
             passwordPetugas.value = '';
             passwordPetugas.required = true;
@@ -726,11 +902,11 @@ function initAccountSearch() {
 }
 
 // Event delegation untuk toggle password
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     if (e.target.id === 'togglePasswordAdmin' || e.target.closest('#togglePasswordAdmin')) {
         const passwordInput = document.getElementById('password');
         const eyeIconAdmin = document.getElementById('eyeIconAdmin');
-        
+
         if (passwordInput && eyeIconAdmin) {
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
