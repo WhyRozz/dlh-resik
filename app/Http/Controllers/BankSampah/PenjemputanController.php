@@ -13,46 +13,142 @@ class PenjemputanController extends Controller
 {
     protected $table = 'penjemputans';
 
-    // ========================================
-    // 🔹 WEB ADMIN METHODS (Untuk Halaman Dashboard)
-    // ========================================
-
     public function index(Request $request)
     {
-        $query = DB::table($this->table);
+        // Gunakan Eloquent dengan eager loading relasi petugas
+        $query = Penjemputan::with('petugas');
 
-// ✅ FILTER OTOMATIS UNTUK SUB ADMIN DESA
+    // FILTER OTOMATIS UNTUK SUB ADMIN DESA
         /** @var \App\Models\Admin|null $admin */
         $admin = Auth::guard('admin')->user();
         if ($admin && $admin->isSubAdminDesa() && $admin->id_desa) {
-            // Filter berdasarkan nama_admin yang berisi id_desa
             $query->where('nama_admin', 'LIKE', '%bank_sampah_' . $admin->id_desa . '%');
         }
 
+        // FILTER BULAN
         if ($request->filled('bulan')) {
             $query->whereMonth('waktu', $request->bulan);
         }
+
+        // FILTER TAHUN
         if ($request->filled('tahun')) {
             $query->whereYear('waktu', $request->tahun);
         }
+
+        // FILTER STATUS
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        // ✅ FILTER KECAMATAN - VERSI LEBIH RELIABLE
+        if ($request->filled('kecamatan_id')) {
+            // Ambil semua ID petugas yang berada di kecamatan tersebut
+            $petugasIds = \App\Models\Petugas::where('level', 'LIKE', 'bank_sampah_%')
+                ->get()
+                ->filter(function ($petugas) use ($request) {
+                    // Extract ID desa dari level
+                    if (strpos($petugas->level, 'bank_sampah_') === 0) {
+                        $idDesa = str_replace('bank_sampah_', '', $petugas->level);
+                        $desa = \App\Models\Desa::find($idDesa);
+                        return $desa && $desa->id_kecamatan == $request->kecamatan_id;
+                    }
+                    return false;
+                })
+                ->pluck('id_petugas')
+                ->toArray();
+
+            // Filter penjemputan berdasarkan id_petugas
+            if (!empty($petugasIds)) {
+                $query->whereIn('id_petugas', $petugasIds);
+            } else {
+                // Jika tidak ada petugas di kecamatan ini, return empty result
+                $query->whereRaw('1 = 0');
+            }
+        }
+
+        // ✅ FILTER DESA - VERSI LEBIH RELIABLE
+        if ($request->filled('desa_id')) {
+            // Ambil semua ID petugas yang berada di desa tersebut
+            $petugasIds = \App\Models\Petugas::where('level', 'bank_sampah_' . $request->desa_id)
+                ->pluck('id_petugas')
+                ->toArray();
+
+            // Filter penjemputan berdasarkan id_petugas
+            if (!empty($petugasIds)) {
+                $query->whereIn('id_petugas', $petugasIds);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
 
         $penjemputans = $query->orderBy('waktu', 'desc')->paginate(15);
         $tahunList = collect(range(date('Y') - 5, date('Y') + 5));
 
-        return view('admin.bank-sampah.penjemputan.index', compact('penjemputans', 'tahunList'));
+        // ✅ AMBIL DATA KECAMATAN UNTUK DROPDOWN FILTER
+        $kecamatans = \App\Models\Kecamatan::orderBy('nama_kecamatan')->get();
+
+        // ✅ TAMBAHKAN INI: Ambil data desa jika ada filter kecamatan
+        $desas = collect();
+        if ($request->filled('kecamatan_id')) {
+            $desas = \App\Models\Desa::where('id_kecamatan', $request->kecamatan_id)
+                ->orderBy('nama_desa')
+                ->get();
+        }
+
+        return view('admin.bank-sampah.penjemputan.index', compact(
+            'penjemputans',
+            'tahunList',
+            'kecamatans',
+            'desas'  // ← ✅ TAMBAHKAN INI!
+        ));
     }
+
 
     public function show($id)
     {
-        $item = DB::table($this->table)->where('id', $id)->first();
+        // ✅ HAPUS eager loading 'desa.kecamatan' yang bermasalah
+        $item = Penjemputan::with('petugas')->find($id);
+
         if (!$item) {
             return response()->json(['error' => 'Data tidak ditemukan'], 404);
         }
-        return response()->json($item);
+
+        // ✅ HITUNG WILAYAH KERJA SECARA MANUAL
+        $wilayahKerja = 'Petugas DLH';
+        $idKecamatan = null;
+        $idDesa = null;
+
+        if ($item->petugas) {
+            if ($item->petugas->level === 'petugas_dlh') {
+                $wilayahKerja = 'Petugas DLH';
+            } elseif (strpos($item->petugas->level, 'bank_sampah_') === 0) {
+                $idDesa = str_replace('bank_sampah_', '', $item->petugas->level);
+                $desa = \App\Models\Desa::with('kecamatan')->find($idDesa);
+                if ($desa && $desa->kecamatan) {
+                    $wilayahKerja = 'Bank Sampah ' . strtoupper($desa->nama_desa) .
+                        ' (' . $desa->nama_desa . ', ' . $desa->kecamatan->nama_kecamatan . ')';
+                    $idKecamatan = $desa->id_kecamatan;
+                }
+            }
+        }
+
+        return response()->json([
+            'id' => $item->id,
+            'id_petugas' => $item->id_petugas,
+            'nama_petugas' => $item->petugas->nama_lengkap ?? $item->nama_admin,
+            'nama_admin' => $item->nama_admin,
+            'wilayah_kerja' => $wilayahKerja,
+            'id_kecamatan' => $idKecamatan,
+            'id_desa' => $idDesa,
+            'waktu' => $item->waktu,
+            'berat' => $item->berat,
+            'lokasi' => $item->lokasi,
+            'keterangan' => $item->keterangan,
+            'status' => $item->status,
+            'foto' => $item->foto,
+        ]);
     }
+
 
     public function approve($id)
     {

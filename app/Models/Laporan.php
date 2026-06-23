@@ -18,6 +18,7 @@ class Laporan extends Model
         'keterangan',
         'status',
         'balasan',
+        'foto_balasan',
         'foto',
         'tanggal',
     ];

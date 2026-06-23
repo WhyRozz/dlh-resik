@@ -30,6 +30,10 @@ class LaporanController extends Controller
             'id' => 'required|integer|exists:laporan,id',
             'status' => 'required|in:Diproses,Diterima,Ditolak',
             'balasan' => 'nullable|string|max:500',
+            'foto_balasan' => 'nullable|image|max:10240', // ← MAKSIMAL 10MB (10240 KB)
+        ], [
+            'foto_balasan.image' => 'File harus berupa gambar.',
+            'foto_balasan.max' => 'Ukuran gambar maksimal 10MB.',
         ]);
 
         try {
@@ -40,13 +44,28 @@ class LaporanController extends Controller
                 return response()->json(['success' => false, 'message' => 'Status tidak dapat diubah kembali ke Diproses'], 400);
             }
 
-            $laporan->update([
+            $updateData = [
                 'status' => $validated['status'],
                 'balasan' => $validated['balasan'] ?: null,
-            ]);
+            ];
+
+            // ✅ Handle upload foto balasan
+            if ($request->hasFile('foto_balasan')) {
+                // Hapus foto lama jika ada
+                if ($laporan->foto_balasan && Storage::disk('public')->exists($laporan->foto_balasan)) {
+                    Storage::disk('public')->delete($laporan->foto_balasan);
+                }
+
+                $file = $request->file('foto_balasan');
+                $filename = time() . '_balasan_' . $laporan->id . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('laporan/balasan', $filename, 'public');
+
+                $updateData['foto_balasan'] = $path;
+            }
+
+            $laporan->update($updateData);
 
             return response()->json(['success' => true]);
-
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
