@@ -81,8 +81,39 @@
         <div
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
             <h3>Daftar Akun Petugas Mobile</h3>
+
+            {{-- Filter Kecamatan dan Desa --}}
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: end;">
+                {{-- Filter Kecamatan --}}
+                <div style="flex: 1; min-width: 200px;">
+                    <select id="filterKecamatan">
+                        <option value="">Semua Kecamatan</option>
+                        @foreach (\App\Models\Kecamatan::orderBy('nama_kecamatan')->get() as $kec)
+                            <option value="{{ $kec->id_kecamatan }}">{{ $kec->nama_kecamatan }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Filter Desa --}}
+                <div style="flex: 1; min-width: 200px;">
+                    <select id="filterDesa" disabled>
+                        <option value="">Semua Desa</option>
+                    </select>
+                </div>
+
+                {{-- Tombol Filter --}}
+                <button onclick="applyFilter()" id="btnFilter">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+
+                {{-- Tombol Reset --}}
+                <button onclick="resetFilter()" id="btnReset" style="display: none;">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+
             <button type="button" class="btn-tambah-akun" onclick="openPetugasModal('add')">
-                + Tambah Akun
+                + Tambah Petugas
             </button>
         </div>
 
@@ -94,10 +125,10 @@
                         <thead>
                             <tr>
                                 <th style="width: 5%;">No</th>
-                                <th style="width: 18%;">Nama Petugas</th>
-                                <th style="width: 22%;">Email</th>
-                                <th style="width: 12%;">No Telpon</th>
-                                <th style="width: 25%; text-align: center;">Wilayah Kerja</th>
+                                <th style="width: 15%;">Nama Petugas</th>
+                                <th style="width: 18%;">Email</th>
+                                <th style="width: 15%;">No Telpon</th>
+                                <th style="width: 20%; text-align: center;">Wilayah Kerja</th>
                                 <th style="width: 10%; text-align: center;">Kata Sandi</th>
                                 <th style="width: 8%; text-align: center;">Aksi</th>
                             </tr>

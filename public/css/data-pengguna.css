@@ -808,3 +808,8 @@ td:nth-child(7) strong {
         justify-content: center;
     }
 }
+
+.search-wrapper {
+    margin-right: 20px;
+    /* atau sesuaikan nilainya */
+}

@@ -1,7 +1,8 @@
 @php
     // Get current user info
-    $user = auth()->user();
-    $userInitial = $user ? strtoupper(substr($user->name ?? 'A', 0, 1)) : 'A';
+    $admin = auth()->guard('admin')->user();
+    $userInitial = $admin ? strtoupper(substr($admin->email ?? 'A', 0, 1)) : 'A';
+    $isSubAdmin = $admin && method_exists($admin, 'isSubAdminDesa') && $admin->isSubAdminDesa();
 
     // Get notification counts (hanya 3 menu yang butuh badge)
     $laporanCount = \App\Models\Laporan::where('status', 'diproses')->count() ?? 0;
@@ -29,36 +30,43 @@
             <div class="mobile-menu-user">
                 <div class="mobile-menu-avatar">{{ $userInitial }}</div>
                 <div class="mobile-menu-user-info">
-                    <h4>{{ $user->name ?? 'Admin' }}</h4>
-                    <p>{{ $user->email ?? 'admin@resik.com' }}</p>
+                    <h4>{{ $isSubAdmin ? 'Sub Admin Desa' : 'Admin' }}</h4>
+                    <p>{{ $admin->email ?? 'admin@resik.com' }}</p>
+                    @if($isSubAdmin && $admin->desa)
+                        <small style="color: #4ade80;">📍 {{ $admin->desa->nama_desa }}</small>
+                    @endif
                 </div>
             </div>
         </div>
 
         {{-- Menu Items --}}
         <ul class="mobile-menu-list">
-            {{-- Beranda --}}
+            
+            {{-- ✅ BERANDA - UNTUK SEMUA ROLE --}}
             <li class="mobile-menu-item">
-                <a href="{{ route('admin.dashboard') }}"
-                    class="mobile-menu-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                <a href="{{ $isSubAdmin ? route('admin.sub-admin.dashboard') : route('admin.dashboard') }}"
+                    class="mobile-menu-link {{ request()->routeIs('admin.dashboard') || request()->routeIs('admin.sub-admin.dashboard') ? 'active' : '' }}">
                     <i class="fas fa-home"></i>
-                    <span>Beranda</span>
+                    <span>{{ $isSubAdmin ? 'Dashboard Bank Sampah' : 'Beranda' }}</span>
                 </a>
             </li>
 
-            {{-- ✅ Laporan Sampah Ilegal (dengan badge) --}}
-            <li class="mobile-menu-item" data-menu="laporan">
-                <a href="{{ route('admin.laporan.index') }}"
-                    class="mobile-menu-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Laporan Sampah Ilegal</span>
-                    @if (isset($laporanCount) && $laporanCount > 0)
-                        <span class="mobile-menu-badge">{{ $laporanCount }}</span>
-                    @endif
-                </a>
-            </li>
+            {{-- ✅ MENU HANYA UNTUK SUPER ADMIN --}}
+            @if(!$isSubAdmin)
+                {{-- ✅ Laporan Sampah Ilegal (dengan badge) --}}
+                <li class="mobile-menu-item" data-menu="laporan">
+                    <a href="{{ route('admin.laporan.index') }}"
+                        class="mobile-menu-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Laporan Sampah Ilegal</span>
+                        @if (isset($laporanCount) && $laporanCount > 0)
+                            <span class="mobile-menu-badge">{{ $laporanCount }}</span>
+                        @endif
+                    </a>
+                </li>
+            @endif
 
-            {{-- Bank Sampah (with Submenu) --}}
+            {{-- ✅ BANK SAMPAH - UNTUK SEMUA ROLE --}}
             <li class="mobile-menu-item">
                 <a href="javascript:void(0)" class="mobile-menu-link" data-submenu="bank-sampah">
                     <i class="fas fa-recycle"></i>
@@ -106,63 +114,63 @@
                 </ul>
             </li>
 
-            {{-- Artikel Edukasi --}}
-            <li class="mobile-menu-item">
-                <a href="{{ route('admin.artikel.index') }}"
-                    class="mobile-menu-link {{ request()->routeIs('admin.artikel.*') ? 'active' : '' }}">
-                    <i class="fas fa-newspaper"></i>
-                    <span>Artikel Edukasi</span>
-                </a>
-            </li>
+            {{-- ✅ MENU HANYA UNTUK SUPER ADMIN --}}
+            @if(!$isSubAdmin)
+                {{-- Artikel Edukasi --}}
+                <li class="mobile-menu-item">
+                    <a href="{{ route('admin.artikel.index') }}"
+                        class="mobile-menu-link {{ request()->routeIs('admin.artikel.*') ? 'active' : '' }}">
+                        <i class="fas fa-newspaper"></i>
+                        <span>Artikel Edukasi</span>
+                    </a>
+                </li>
 
-            {{-- Informasi TPS --}}
-            <li class="mobile-menu-item">
-                <a href="{{ route('admin.tps.index') }}"
-                    class="mobile-menu-link {{ request()->routeIs('admin.tps.*') ? 'active' : '' }}">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span>Informasi TPS</span>
-                </a>
-            </li>
+                {{-- Informasi TPS --}}
+                <li class="mobile-menu-item">
+                    <a href="{{ route('admin.tps.index') }}"
+                        class="mobile-menu-link {{ request()->routeIs('admin.tps.*') ? 'active' : '' }}">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Informasi TPS</span>
+                    </a>
+                </li>
 
-            {{-- Data Pengguna --}}
-            <li class="mobile-menu-item">
-                <a href="{{ route('admin.data-pengguna.index') }}"
-                    class="mobile-menu-link {{ request()->routeIs('admin.data-pengguna.*') ? 'active' : '' }}">
-                    <i class="fas fa-users"></i>
-                    <span>Data Pengguna</span>
-                </a>
-            </li>
+                {{-- Data Pengguna --}}
+                <li class="mobile-menu-item">
+                    <a href="{{ route('admin.data-pengguna.index') }}"
+                        class="mobile-menu-link {{ request()->routeIs('admin.data-pengguna.*') ? 'active' : '' }}">
+                        <i class="fas fa-users"></i>
+                        <span>Data Pengguna</span>
+                    </a>
+                </li>
 
-            {{-- Kelola Akun (with Submenu) --}}
-            <li class="mobile-menu-item">
-                <a href="javascript:void(0)" class="mobile-menu-link" data-submenu="kelola-akun">
-                    <i class="fas fa-user-cog"></i>
-                    <span>Kelola Akun</span>
-                    <i class="fas fa-chevron-right mobile-submenu-toggle"></i>
-                </a>
-                <ul class="mobile-submenu">
-                    {{-- Super Admin & Petugas --}}
-                    <li class="mobile-menu-item">
-                        <a href="{{ route('admin.akun.index') }}" class="mobile-menu-link">
-                            <i class="fas fa-user-shield"></i>
-                            <span>Super Admin & Petugas</span>
-                        </a>
-                    </li>
+                {{-- Kelola Akun (with Submenu) --}}
+                <li class="mobile-menu-item">
+                    <a href="javascript:void(0)" class="mobile-menu-link" data-submenu="kelola-akun">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Kelola Akun</span>
+                        <i class="fas fa-chevron-right mobile-submenu-toggle"></i>
+                    </a>
+                    <ul class="mobile-submenu">
+                        {{-- Super Admin & Petugas --}}
+                        <li class="mobile-menu-item">
+                            <a href="{{ route('admin.akun.index') }}" class="mobile-menu-link">
+                                <i class="fas fa-user-shield"></i>
+                                <span>Super Admin & Petugas</span>
+                            </a>
+                        </li>
 
-                    {{-- Sub Admin Desa (Coming Soon) --}}
-                    <li class="mobile-menu-item">
-                        <a href="javascript:void(0)" class="mobile-menu-link coming-soon"
-                            onclick="alert('Fitur ini sedang dalam pengembangan')">
-                            <i class="fas fa-users-cog"></i>
-                            <span>Sub Admin Desa</span>
-                            <span class="badge badge-info"
-                                style="font-size: 10px; padding: 2px 6px; margin-left: auto;">Soon</span>
-                        </a>
-                    </li>
-                </ul>
-            </li>
+                        {{-- ✅ Sub Admin Desa - Link aktif (bukan coming soon) --}}
+                        <li class="mobile-menu-item">
+                            <a href="{{ route('admin.sub-admin.index') }}" class="mobile-menu-link">
+                                <i class="fas fa-users-cog"></i>
+                                <span>Sub Admin Desa</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endif
 
-            {{-- Logout --}}
+            {{-- Logout - Untuk semua role --}}
             <li class="mobile-menu-item mobile-menu-logout">
                 <a href="{{ route('admin.logout') }}" class="mobile-menu-link"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

@@ -13,6 +13,7 @@ use App\Models\Dinas;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class SetorController extends Controller
 {
@@ -20,6 +21,20 @@ class SetorController extends Controller
     {
         $query = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns.dinas', 'jenisSampah', 'petugas'])
             ->orderBy('tanggal_transaksi', 'desc');
+
+        // ✅ FILTER OTOMATIS UNTUK SUB ADMIN DESA
+        /** @var \App\Models\Admin|null $admin */
+        $admin = Auth::guard('admin')->user();
+        if ($admin && $admin->isSubAdminDesa() && $admin->id_desa) {
+            $query->where(function ($q) use ($admin) {
+                $q->whereHas('masyarakat.desa', function ($sub) use ($admin) {
+                    $sub->where('id_desa', $admin->id_desa);
+                })
+                    ->orWhereHas('pns.desa', function ($sub) use ($admin) {
+                        $sub->where('id_desa', $admin->id_desa);
+                    });
+            });
+        }
 
         // Filter Pencarian
         if ($request->filled('search')) {

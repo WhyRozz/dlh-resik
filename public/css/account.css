@@ -3,26 +3,34 @@
    File: public/css/account.css
    Project: RESIK - DLH Resik
    ======================================== */
-/* ========================================
-   FIX JARAK HALAMAN AKUN (MIRIP TPS)
-   ======================================== */
+
+/* ===== GESER TABEL KE ATAS (KHUSUS HALAMAN AKUN) ===== */
+/* ===== GESER TABEL KE ATAS (KHUSUS HALAMAN AKUN) ===== */
+/* Hanya terapkan jika ada filter kecamatan */
+.petugas-section:has(#filterKecamatan) .petugas-table-container {
+    margin-top: -20px;
+}
 
 /* Membuat batas kiri-kanan agar tidak mepet sidebar dan layar */
 .content-header,
 .accounts-grid,
 .petugas-section {
     width: 100%;
-    max-width: 1400px;  /* Lebar maksimal konten */
+    max-width: 1400px;
+    /* Lebar maksimal konten */
     margin-left: auto;
     margin-right: auto;
-    padding-left: 20px;  /* ✅ JARAK 20px KE KIRI */
-    padding-right: 20px; /* ✅ JARAK 20px KE KANAN */
+    padding-left: 20px;
+    /* ✅ JARAK 20px KE KIRI */
+    padding-right: 20px;
+    /* ✅ JARAK 20px KE KANAN */
 }
 
 /* Supaya kartu akun & tabel mengikuti batas ini */
-.account-card, 
+.account-card,
 .petugas-section {
-    box-sizing: border-box; /* Agar padding tidak melebarkan elemen */
+    box-sizing: border-box;
+    /* Agar padding tidak melebarkan elemen */
     width: 100%;
 }
 
@@ -55,7 +63,8 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     overflow-x: hidden;
     width: 100%;
     min-height: 100vh;
@@ -69,8 +78,10 @@ html, body {
 /* ===== MAIN CONTENT - FIX SPACING ===== */
 .main-content {
     flex: 1;
-    margin-left: 250px;  /* Sidebar width */
-    padding: 30px 30px 20px;  /* ✅ FIX: Lebih lega, tidak mepet */
+    margin-left: 250px;
+    /* Sidebar width */
+    padding: 30px 30px 20px;
+    /* ✅ FIX: Lebih lega, tidak mepet */
     background: var(--gray-50);
     min-height: 100vh;
 }
@@ -264,11 +275,12 @@ html, body {
 
 .petugas-section h3 {
     color: var(--primary-green);
-    margin: 10 0 25px 0;
+    margin: 0 0 20px 0;
     font-size: 18px;
     font-weight: 700;
 }
 
+/* Tombol Tambah - Style Dasar (untuk semua halaman) */
 .btn-tambah-akun {
     background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
     color: white;
@@ -280,6 +292,13 @@ html, body {
     font-size: 14px;
     transition: var(--transition);
     box-shadow: 0 4px 12px rgba(46, 139, 87, 0.2);
+    /* margin-top dihapus dari sini */
+}
+
+/* KHUSUS Halaman Kelola Akun - Geser tombol ke atas */
+/* Hanya jika ada filter kecamatan */
+.petugas-section:has(#filterKecamatan) .btn-tambah-akun {
+    margin-top: -20px;
 }
 
 .btn-tambah-akun:hover {
@@ -324,8 +343,13 @@ html, body {
     white-space: nowrap;
 }
 
-.data-table th:first-child { border-top-left-radius: 16px; }
-.data-table th:last-child { border-top-right-radius: 16px; }
+.data-table th:first-child {
+    border-top-left-radius: 16px;
+}
+
+.data-table th:last-child {
+    border-top-right-radius: 16px;
+}
 
 .data-table td {
     padding: 16px 20px;
@@ -335,12 +359,14 @@ html, body {
 }
 
 .data-table tbody tr {
-    transition: all 0.3s ease;  /* ✅ ANIMASI LENGKAP DIKEMBALIKAN */
+    transition: all 0.3s ease;
+    /* ✅ ANIMASI LENGKAP DIKEMBALIKAN */
 }
 
 .data-table tbody tr:hover {
     background: var(--gray-50);
-    transform: scale(1.005);  /* ✅ EFEK MEMBESAR DIKEMBALIKAN (lebih halus) */
+    transform: scale(1.005);
+    /* ✅ EFEK MEMBESAR DIKEMBALIKAN (lebih halus) */
 }
 
 .data-table tbody tr:last-child td {
@@ -350,28 +376,40 @@ html, body {
 /* ===== KOLOM NAMA PETUGAS ===== */
 .data-table th:nth-child(2),
 .data-table td:nth-child(2) {
-    min-width: 150px;  /* Lebar minimal */
-    max-width: 200px;  /* atas lebar maksimal */
-    white-space: normal; /* ✅ Izinkan teks turun ke bawah */
-    word-wrap: break-word; /* ✅ Pecah kata jika terlalu panjang */
+    min-width: 150px;
+    /* Lebar minimal */
+    max-width: 200px;
+    /* atas lebar maksimal */
+    white-space: normal;
+    /* ✅ Izinkan teks turun ke bawah */
+    word-wrap: break-word;
+    /* ✅ Pecah kata jika terlalu panjang */
     overflow-wrap: break-word;
-    vertical-align: top; /* Agar teks rapi di atas jika turun */
+    vertical-align: top;
+    /* Agar teks rapi di atas jika turun */
 }
 
 /* ===== BADGE WILAYAH ===== */
 .badge-wilayah {
     display: inline-block;
-    padding: 6px 10px;  /* ← Lebih kecil */
+    padding: 6px 10px;
+    /* ← Lebih kecil */
     background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
     color: #166534;
-    border-radius: 6px;  /* ← Kotak */
-    font-size: 11px;  /* ← Font lebih kecil */
+    border-radius: 6px;
+    /* ← Kotak */
+    font-size: 11px;
+    /* ← Font lebih kecil */
     font-weight: 600;
-    white-space: normal;  /* ← BOLEH WRAP! */
-    word-wrap: break-word;  /* ← PECAH KATA */
+    white-space: normal;
+    /* ← BOLEH WRAP! */
+    word-wrap: break-word;
+    /* ← PECAH KATA */
     overflow-wrap: break-word;
-    max-width: 250px;  /* ← LEBAR CUKUP */
-    line-height: 1.5;  /* ← JARAK BARIS */
+    max-width: 250px;
+    /* ← LEBAR CUKUP */
+    line-height: 1.5;
+    /* ← JARAK BARIS */
     text-align: center;
     vertical-align: middle;
 }
@@ -849,6 +887,7 @@ html, body {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1020,9 +1059,172 @@ html, body {
 
 /* ===== iOS SAFARI FIX ===== */
 @supports (-webkit-touch-callout: none) {
+
     .search-input-akun,
     .modal-body .form-group input,
     .modal-body .form-group select {
         font-size: 16px;
+    }
+}
+
+/* ========================================
+   FIX ZOOM EXTREME - LAYOUT STABIL
+   ======================================== */
+
+/* Prevent layout from floating at extreme zoom */
+.main-content {
+    min-width: 100%;
+    max-width: 100%;
+}
+
+.content-header,
+.accounts-grid,
+.petugas-section {
+    max-width: 100%;
+    width: 100%;
+}
+
+/* Ensure sidebar doesn't shrink too much */
+.sidebar {
+    flex-shrink: 0;
+    min-width: 250px;
+}
+
+/* Wrapper untuk handle overflow */
+.page-wrapper {
+    display: flex;
+    min-width: 100%;
+    overflow-x: auto;
+}
+
+/* Force content to stay aligned */
+@media screen and (max-width: 500px) {
+    .main-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .content-header,
+    .accounts-grid,
+    .petugas-section {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+
+/* Prevent extreme zoom breaking layout */
+@media screen and (max-height: 300px) {
+    .main-content {
+        padding: 10px;
+    }
+}
+
+/* ========================================
+   FILTER KECAMATAN & DESA - MODERN STYLE
+   ======================================== */
+
+/* ===== DROPDOWN FILTER ===== */
+#filterKecamatan,
+#filterDesa {
+    width: 100%;
+    padding: 10px 35px 10px 15px;
+    border: 1px solid var(--gray-200);
+    border-radius: 20px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+    transition: var(--transition);
+    color: var(--gray-700);
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+
+#filterKecamatan:hover,
+#filterDesa:hover:not(:disabled) {
+    border-color: var(--primary-green);
+}
+
+#filterKecamatan:focus,
+#filterDesa:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+}
+
+#filterKecamatan:disabled,
+#filterDesa:disabled {
+    background-color: var(--gray-50);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ===== TOMBOL FILTER ===== */
+#btnFilter {
+    padding: 10px 24px;
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+#btnFilter:hover {
+    background: var(--dark-green);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(46, 139, 87, 0.2);
+}
+
+#btnFilter:active {
+    transform: translateY(0);
+}
+
+/* ===== TOMBOL RESET ===== */
+#btnReset {
+    padding: 10px 24px;
+    background: white;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-200);
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+#btnReset:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+    transform: translateY(-2px);
+}
+
+#btnReset:active {
+    transform: translateY(0);
+}
+
+/* ===== RESPONSIVE FILTER ===== */
+@media (max-width: 768px) {
+
+    #filterKecamatan,
+    #filterDesa,
+    #btnFilter,
+    #btnReset {
+        width: 100%;
     }
 }

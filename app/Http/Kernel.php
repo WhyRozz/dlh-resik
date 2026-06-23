@@ -35,7 +35,7 @@ class Kernel extends HttpKernel
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
-            
+
         ],
 
         'api' => [
@@ -65,5 +65,9 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin.guest' => \App\Http\Middleware\RedirectIfAdmin::class,
         'nocache' => \App\Http\Middleware\NoCache::class,
+
+        // TAMBAH 2 BARIS INI:
+        'role' => \App\Http\Middleware\CheckRole::class,
+        'subadmin' => \App\Http\Middleware\SubAdminAccess::class,
     ];
 }

@@ -28,6 +28,20 @@ class PenarikanController extends Controller
         // ✅ LANGKAH 1: Ubah jadi $query dulu (JANGAN langsung paginate)
         $query = Penarikan::with(['masyarakat.desa.kecamatan', 'pns.dinas']);
 
+        // ✅ FILTER OTOMATIS UNTUK SUB ADMIN DESA
+        /** @var \App\Models\Admin|null $admin */
+        $admin = Auth::guard('admin')->user();
+        if ($admin && $admin->isSubAdminDesa() && $admin->id_desa) {
+            $query->where(function ($q) use ($admin) {
+                $q->whereHas('masyarakat.desa', function ($sub) use ($admin) {
+                    $sub->where('id_desa', $admin->id_desa);
+                })
+                    ->orWhereHas('pns.desa', function ($sub) use ($admin) {
+                        $sub->where('id_desa', $admin->id_desa);
+                    });
+            });
+        }
+
         // ✅ LANGKAH 2: ➕ TAMBAH FILTER DI SINI (setelah $query, sebelum paginate)
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal_penarikan', $request->bulan);

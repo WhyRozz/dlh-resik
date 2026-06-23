@@ -581,6 +581,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 hideModal(this.id);
             }
         });
+
     });
 
     // Modal petugas listeners
@@ -681,8 +682,128 @@ document.addEventListener('DOMContentLoaded', function () {
     // Search filter
     initAccountSearch();
 
+    // ===== FILTER KECAMATAN & DESA - EVENT LISTENER =====
+    document.getElementById('filterKecamatan')?.addEventListener('change', function () {
+        const kecamatanId = this.value;
+        const desaSelect = document.getElementById('filterDesa');
+
+        if (!kecamatanId) {
+            desaSelect.innerHTML = '<option value="">Semua Desa</option>';
+            desaSelect.disabled = true;
+            return;
+        }
+
+        fetch(`/admin/data-pengguna/desa/${kecamatanId}`)
+            .then(response => response.json())
+            .then(data => {
+                desaSelect.innerHTML = '<option value="">Semua Desa</option>';
+                data.forEach(desa => {
+                    const option = document.createElement('option');
+                    option.value = 'bank_sampah_' + desa.id_desa;
+                    option.textContent = desa.nama_desa;
+                    desaSelect.appendChild(option);
+                });
+                desaSelect.disabled = false;
+            })
+            .catch(error => console.error('Error loading desa:', error));
+    });
+
     console.log('✅ account.js ready!');
 });
+
+// ===== FILTER KECAMATAN & DESA - FUNCTIONS =====
+// Apply filter
+function applyFilter() {
+    const kecamatanId = document.getElementById('filterKecamatan')?.value;
+    const desaValue = document.getElementById('filterDesa')?.value;
+
+    const rows = document.querySelectorAll('.data-table tbody tr');
+
+    rows.forEach(row => {
+        const wilayahBadge = row.querySelector('.badge-wilayah');
+        if (!wilayahBadge) return;
+
+        const wilayahText = wilayahBadge.textContent;
+        let showRow = true;
+
+        // Filter by kecamatan if selected
+        if (kecamatanId) {
+            const kecamatanSelect = document.getElementById('filterKecamatan');
+            const kecamatanName = kecamatanSelect.options[kecamatanSelect.selectedIndex].text;
+            if (!wilayahText.includes(kecamatanName)) {
+                showRow = false;
+            }
+        }
+
+        // Filter by desa if selected
+        if (desaValue && showRow) {
+            const desaSelect = document.getElementById('filterDesa');
+            const desaName = desaSelect.options[desaSelect.selectedIndex].text;
+            if (!wilayahText.includes(desaName)) {
+                showRow = false;
+            }
+        }
+
+        row.style.display = showRow ? '' : 'none';
+    });
+
+    // Also filter mobile cards
+    const cards = document.querySelectorAll('.petugas-card');
+    cards.forEach(card => {
+        const badge = card.querySelector('.badge-wilayah-mobile');
+        if (!badge) return;
+
+        const wilayahText = badge.textContent;
+        let showCard = true;
+
+        if (kecamatanId) {
+            const kecamatanSelect = document.getElementById('filterKecamatan');
+            const kecamatanName = kecamatanSelect.options[kecamatanSelect.selectedIndex].text;
+            if (!wilayahText.includes(kecamatanName)) {
+                showCard = false;
+            }
+        }
+
+        if (desaValue && showCard) {
+            const desaSelect = document.getElementById('filterDesa');
+            const desaName = desaSelect.options[desaSelect.selectedIndex].text;
+            if (!wilayahText.includes(desaName)) {
+                showCard = false;
+            }
+        }
+
+        card.style.display = showCard ? '' : 'none';
+    });
+    // ✅ PENTING: Tampilkan tombol Reset setelah Filter diklik
+    const btnReset = document.getElementById('btnReset');
+    if (btnReset) {
+        btnReset.style.display = 'inline-flex';
+    }
+}
+
+// Reset filter
+function resetFilter() {
+    document.getElementById('filterKecamatan').value = '';
+    const desaSelect = document.getElementById('filterDesa');
+    desaSelect.innerHTML = '<option value="">Semua Desa</option>';
+    desaSelect.disabled = true;
+
+    // Show all rows
+    document.querySelectorAll('.data-table tbody tr').forEach(row => {
+        row.style.display = '';
+    });
+
+    // Show all cards
+    document.querySelectorAll('.petugas-card').forEach(card => {
+        card.style.display = '';
+    });
+
+    // ✅ PENTING: Sembunyikan tombol Reset setelah Reset diklik
+    const btnReset = document.getElementById('btnReset');
+    if (btnReset) {
+        btnReset.style.display = 'none';
+    }
+}
 
 // ===== PETUGAS FUNCTIONS =====
 function confirmDelete(id) {
@@ -826,20 +947,20 @@ async function openPetugasModal(mode, data = null) {
 
                     if (result.status === 'success') {
                         const desaData = result.data.find(d => d.id == idDesa);
-                        
+
                         if (desaData && desaData.kecamatan_id) {
                             // Set kecamatan
                             if (kecamatanSelect) {
                                 kecamatanSelect.value = desaData.kecamatan_id;
-                                
+
                                 // Load desa berdasarkan kecamatan
                                 if (desaGroup) desaGroup.style.display = 'block';
                                 await loadDesaByKecamatan(desaData.kecamatan_id);
-                                
+
                                 // Set desa yang dipilih
                                 if (desaSelect) desaSelect.value = data.level;
                                 if (levelPetugas) levelPetugas.value = data.level;
-                                
+
                                 console.log('✅ Data edit berhasil dimuat:', {
                                     desa: desaData.desa,
                                     kecamatan: desaData.kecamatan

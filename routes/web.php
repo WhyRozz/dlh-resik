@@ -18,6 +18,8 @@ use App\Http\Controllers\Admin\PetugasController;
 use App\Http\Controllers\Admin\DataPenggunaController;
 use App\Http\Controllers\Admin\JenisSampahController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\SubAdminController;
+use App\Http\Controllers\Admin\SubAdminDashboardController;
 
 // ✅ BankSampah Controllers
 use App\Http\Controllers\BankSampah\PenarikanController;
@@ -125,6 +127,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/{id}', [PetugasController::class, 'update'])->name('update');
             Route::delete('/{id}', [PetugasController::class, 'destroy'])->name('destroy');
         });
+
+        // ── Kelola Sub Admin Desa (HANYA untuk Super Admin) ──
+        Route::prefix('sub-admin')->name('sub-admin.')->middleware('role:super_admin')->group(function () {
+            Route::get('/', [SubAdminController::class, 'index'])->name('index');
+            Route::get('/create', [SubAdminController::class, 'create'])->name('create');
+            Route::post('/', [SubAdminController::class, 'store'])->name('store');
+
+            // ✅ ROUTE SPESIFIK (WAJIB DI ATAS /{id})
+            Route::get('/desa/{kecamatan_id}', [SubAdminController::class, 'getDesaByKecamatan'])->name('desa-by-kecamatan');
+
+            // ❌ ROUTE DENGAN PARAMETER {id} - WAJIB DI PALING BAWAH
+            Route::get('/{id}/edit', [SubAdminController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [SubAdminController::class, 'update'])->name('update');
+            Route::delete('/{id}', [SubAdminController::class, 'destroy'])->name('destroy');
+        });
+
+        // ── Dashboard Sub Admin Desa (Bisa diakses Sub Admin) ──
+        Route::get('/sub-admin/dashboard', [SubAdminDashboardController::class, 'index'])
+            ->name('sub-admin.dashboard')
+            ->middleware('subadmin');
 
         // ✅ BANK SAMPAH ROUTES - WRAPPER GROUP (WAJIB ADA!)
         Route::prefix('bank-sampah')->name('bank-sampah.')->group(function () {

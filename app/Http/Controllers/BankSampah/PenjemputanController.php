@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Penjemputan;
+use Illuminate\Support\Facades\Auth;
 
 class PenjemputanController extends Controller
 {
@@ -19,6 +20,14 @@ class PenjemputanController extends Controller
     public function index(Request $request)
     {
         $query = DB::table($this->table);
+
+// ✅ FILTER OTOMATIS UNTUK SUB ADMIN DESA
+        /** @var \App\Models\Admin|null $admin */
+        $admin = Auth::guard('admin')->user();
+        if ($admin && $admin->isSubAdminDesa() && $admin->id_desa) {
+            // Filter berdasarkan nama_admin yang berisi id_desa
+            $query->where('nama_admin', 'LIKE', '%bank_sampah_' . $admin->id_desa . '%');
+        }
 
         if ($request->filled('bulan')) {
             $query->whereMonth('waktu', $request->bulan);

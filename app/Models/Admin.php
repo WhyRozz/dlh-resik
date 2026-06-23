@@ -14,11 +14,16 @@ class Admin extends Authenticatable
     public $timestamps = false;
 
     protected $fillable = [
+        'nama',
         'email',
+        'no_telepon',
         'password',
         'password_encrypted',
         'otp',
         'otp_expires',
+        'role',
+        'id_desa',
+        'id_kecamatan',
     ];
 
     protected $hidden = [
@@ -37,5 +42,42 @@ class Admin extends Authenticatable
     public function isDefault(): bool
     {
         return $this->email === 'simpelsi2025@gmail.com';
+    }
+
+    // ✅ Cek role
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    public function isSubAdminDesa(): bool
+    {
+        return $this->role === 'sub_admin_desa';
+    }
+
+    // ✅ Relasi ke Desa
+    public function desa()
+    {
+        return $this->belongsTo(Desa::class, 'id_desa', 'id_desa');
+    }
+
+    // ✅ Relasi ke Kecamatan
+    public function kecamatan()
+    {
+        return $this->belongsTo(Kecamatan::class, 'id_kecamatan', 'id_kecamatan');
+    }
+
+    // ✅ Get nama wilayah lengkap
+    public function getNamaWilayahAttribute()
+    {
+        if ($this->isSuperAdmin()) {
+            return 'Super Admin';
+        }
+
+        if ($this->desa && $this->kecamatan) {
+            return 'Desa ' . $this->desa->nama_desa . ', Kec. ' . $this->kecamatan->nama_kecamatan;
+        }
+
+        return '-';
     }
 }

@@ -60,6 +60,11 @@ class AuthController extends Controller
         // Login berhasil
         Auth::guard('admin')->login($admin);
 
+        // Redirect berdasarkan role
+        if ($admin->isSubAdminDesa()) {
+            return redirect()->route('admin.sub-admin.dashboard');
+        }
+
         return redirect()->route('admin.dashboard');
     }
 
@@ -67,12 +72,12 @@ class AuthController extends Controller
      * Logout
      */
     public function logout(Request $request)
-{
-    Auth::guard('admin')->logout();
+    {
+        Auth::guard('admin')->logout();
 
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-    return redirect()->route('admin.login');
-}
+        return redirect()->route('admin.login');
+    }
 }
