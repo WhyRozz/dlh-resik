@@ -19,7 +19,7 @@
 
             {{-- 2. Filter Bulan, Tahun, Tombol Filter & Reset --}}
             <div class="header-filters">
-                <select name="bulan" class="filter-select" onchange="this.form.submit()" form="filterForm">
+                <select name="bulan" class="filter-select" form="filterForm">
                     <option value="">Semua Bulan</option>
                     @for ($i = 1; $i <= 12; $i++)
                         <option value="{{ $i }}" {{ request('bulan') == $i ? 'selected' : '' }}>
@@ -28,7 +28,7 @@
                     @endfor
                 </select>
 
-                <select name="tahun" class="filter-select" onchange="this.form.submit()" form="filterForm">
+                <select name="tahun" class="filter-select" form="filterForm">
                     <option value="">Semua Tahun</option>
                     @foreach ($tahunList as $tahun)
                         <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>

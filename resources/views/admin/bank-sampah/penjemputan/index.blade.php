@@ -83,7 +83,7 @@
                     </select>
 
                     {{-- Filter Desa (Cascading) --}}
-                    <select name="desa_id" id="filterDesa" class="filter-select" 
+                    <select name="desa_id" id="filterDesa" class="filter-select"
                         {{ !request('kecamatan_id') ? 'disabled' : '' }}>
                         <option value="">Semua Desa</option>
                         @if (request('kecamatan_id'))
@@ -97,14 +97,16 @@
                     </select>
 
                     {{-- Tombol Filter Wilayah --}}
-                    <button type="button" id="btnFilterWilayah" class="btn-filter">
+                    <button type="button" class="btn-filter" onclick="document.getElementById('filterForm').submit()">
                         <i class="fas fa-filter"></i> Filter
                     </button>
 
                     {{-- Tombol Reset Wilayah --}}
-                    <button type="button" id="btnResetWilayah" class="btn-filter reset" style="display: none;">
-                        <i class="fas fa-undo"></i> Reset
-                    </button>
+                    @if (request('kecamatan_id') || request('desa_id'))
+                        <button type="button" class="btn-filter reset" onclick="resetFilterWilayah()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    @endif
                 </div>
             </form>
         </div>
@@ -340,12 +342,12 @@
 
     @push('scripts')
         <script src="{{ asset('js/penjemputan.js?v=' . time()) }}"></script>
-        
-        {{-- Script untuk tombol reset --}}
+
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Show reset button jika ada filter aktif
-                const hasFilter = {{ request('bulan') || request('tahun') || request('status') || request('kecamatan_id') || request('desa_id') ? 'true' : 'false' }};
+                // Show reset button jika ada filter aktif (untuk header)
+                const hasFilter =
+                    {{ request('bulan') || request('tahun') || request('status') || request('kecamatan_id') || request('desa_id') ? 'true' : 'false' }};
                 if (hasFilter) {
                     const resetBtn = document.getElementById('resetButton');
                     if (resetBtn) resetBtn.style.display = 'inline-flex';
@@ -354,7 +356,7 @@
                 // Cascading dropdown kecamatan -> desa
                 const kecamatanSelect = document.getElementById('filterKecamatan');
                 const desaSelect = document.getElementById('filterDesa');
-                
+
                 if (kecamatanSelect) {
                     kecamatanSelect.addEventListener('change', function() {
                         const kecamatanId = this.value;
@@ -363,8 +365,7 @@
                             desaSelect.disabled = true;
                             return;
                         }
-                        
-                        // Fetch desa berdasarkan kecamatan
+
                         fetch(`/admin/data-pengguna/desa/${kecamatanId}`)
                             .then(response => response.json())
                             .then(data => {
@@ -383,17 +384,15 @@
                             });
                     });
                 }
-
-                // Tombol Filter Wilayah
-                document.getElementById('btnFilterWilayah')?.addEventListener('click', function() {
-                    document.getElementById('filterForm').submit();
-                });
-
-                // Tombol Reset Wilayah
-                document.getElementById('btnResetWilayah')?.addEventListener('click', function() {
-                    window.location.href = '{{ route('admin.bank-sampah.penjemputan.index') }}';
-                });
             });
+
+            // ✅ TAMBAHKAN FUNGSI INI:
+            function resetFilterWilayah() {
+                const url = new URL(window.location);
+                url.searchParams.delete('kecamatan_id');
+                url.searchParams.delete('desa_id');
+                window.location.href = url.toString();
+            }
         </script>
     @endpush
 @endsection

@@ -217,9 +217,9 @@ th {
 .modal-container {
     background: white;
     border-radius: 12px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 85vh;
+    width: 100%;
+    max-width: 800px;  /* ← LEBIH LEBAR */
+    max-height: 100vh;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     animation: modalSlideIn 0.3s ease;

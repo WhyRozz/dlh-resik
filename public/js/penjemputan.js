@@ -39,17 +39,17 @@ function initLiveSearch() {
         const rows = table.getElementsByTagName('tr');
         for (let i = 1; i < rows.length; i++) {
             const tdNama = rows[i].getElementsByTagName('td')[2];
-            const tdWilayah = rows[i].getElementsByTagName('td')[3];  
+            const tdWilayah = rows[i].getElementsByTagName('td')[3];
             const tdWaktu = rows[i].getElementsByTagName('td')[4];
             const tdStatus = rows[i].getElementsByTagName('td')[6];
 
             const namaVal = tdNama?.textContent.toLowerCase() || '';
-            const wilayahVal = tdWilayah?.textContent.toLowerCase() || ''; 
+            const wilayahVal = tdWilayah?.textContent.toLowerCase() || '';
             const waktuVal = tdWaktu?.textContent.toLowerCase() || '';
             const statusVal = tdStatus?.textContent.toLowerCase() || '';
 
             const match = namaVal.includes(filter) ||
-                wilayahVal.includes(filter) || 
+                wilayahVal.includes(filter) ||
                 waktuVal.includes(filter) ||
                 statusVal.includes(filter);
             rows[i].style.display = match ? '' : 'none';
@@ -159,6 +159,14 @@ function resetFilter() {
     window.location.href = url.pathname;
 }
 
+// ===== RESET FILTER WILAYAH (Kecamatan & Desa saja) =====
+function resetFilterWilayah() {
+    const url = new URL(window.location);
+    url.searchParams.delete('kecamatan_id');
+    url.searchParams.delete('desa_id');
+    window.location.href = url.toString();
+}
+
 // ===== SUCCESS POPUP =====
 
 /**
@@ -232,7 +240,6 @@ function loadDesaByKecamatan(kecamatanId, selectedDesaId = null) {
             desaSelect.innerHTML = '<option value="">Error loading desa</option>';
         });
 }
-
 
 // ===== GLOBAL EVENT LISTENERS =====
 /**
