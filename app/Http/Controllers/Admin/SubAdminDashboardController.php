@@ -54,7 +54,7 @@ class SubAdminDashboardController extends Controller
 
         for ($week = 1; $week <= 5; $week++) {
             $startDay = ($week - 1) * 7 + 1;
-            
+
             if ($startDay > $daysInMonth) {
                 break;
             }
@@ -94,13 +94,25 @@ class SubAdminDashboardController extends Controller
 
         // ========== OPTIONS FILTER ==========
         $bulanList = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
         ];
 
-        $tahunOptions = range(date('Y') - 2, date('Y') + 1);
+        $tahunOptions = range(2025, 2030);
         rsort($tahunOptions);
+
+        // BUAT VARIABEL ADMIN USER SEBELUM COMPACT
+        $adminUser = Auth::guard('admin')->user();
 
         return view('admin.sub-admin.dashboard', compact(
             'totalSetor',
@@ -114,7 +126,8 @@ class SubAdminDashboardController extends Controller
             'bulanList',
             'selectedBulan',
             'selectedTahun',
-            'tahunOptions'
+            'tahunOptions',
+            'adminUser'
         ));
     }
 }

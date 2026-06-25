@@ -7,6 +7,7 @@ use App\Models\Masyarakat;
 use App\Models\Pns;
 use App\Models\Kecamatan;
 use App\Models\Desa;
+use App\Models\Dinas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,34 +21,43 @@ class DataPenggunaController extends Controller
         $search = $request->query('search', '');
         $kecamatanId = $request->query('kecamatan_id', '');
         $desaId = $request->query('desa_id', '');
-        
-        $query = $this->getUsersQuery($filter, $search, $kecamatanId, $desaId);
-        
+        $dinasId = $request->query('dinas_id', '');
+
+        $query = $this->getUsersQuery($filter, $search, $kecamatanId, $desaId, $dinasId);
+
         $users = $query->paginate(15);
-        
-        // Ambil data kecamatan dan desa untuk dropdown filter
+
+        // Ambil data untuk dropdown filter
         $kecamatans = Kecamatan::orderBy('nama_kecamatan')->get();
         $desas = collect();
-        
         if ($kecamatanId) {
             $desas = Desa::where('id_kecamatan', $kecamatanId)
                 ->orderBy('nama_desa')
                 ->get();
         }
+        $dinasList = Dinas::orderBy('nama_dinas')->get();
 
         return view('admin.data-pengguna.index', compact(
-            'users', 
-            'filter', 
-            'search', 
-            'kecamatans', 
+            'users',
+            'filter',
+            'search',
+            'kecamatans',
             'desas',
+            'dinasList',
             'kecamatanId',
             'desaId'
         ));
     }
 
-    private function getUsersQuery($filter, $search = '', $kecamatanId = '', $desaId = '')
+    private function getUsersQuery($filter, $search = '', $kecamatanId = '', $desaId = '', $dinasId = '')
     {
+        // ✅ AUTO-SWITCH: Jika ada filter wilayah/dinas, override $filter
+        if ($kecamatanId || $desaId) {
+            $filter = 'masyarakat'; // Paksa hanya masyarakat
+        } elseif ($dinasId) {
+            $filter = 'asn'; // Paksa hanya PNS
+        }
+
         if ($filter === 'masyarakat') {
             $query = DB::table('masyarakat')
                 ->leftJoin('desa', 'masyarakat.id_desa', '=', 'desa.id_desa')
@@ -57,11 +67,11 @@ class DataPenggunaController extends Controller
                     'masyarakat.nama',
                     'masyarakat.email',
                     DB::raw("'Masyarakat' as jenis_pengguna"),
-                    'masyarakat.no_telepon',            
-                    'masyarakat.jenis_kelamin',         
-                    'masyarakat.tanggal_lahir',         
-                    'masyarakat.foto',                  
-                    'masyarakat.saldo',                 
+                    'masyarakat.no_telepon',
+                    'masyarakat.jenis_kelamin',
+                    'masyarakat.tanggal_lahir',
+                    'masyarakat.foto',
+                    'masyarakat.saldo',
                     DB::raw('NULL as kode_anggota'),
                     DB::raw('NULL as id_dinas'),
                     DB::raw('NULL as nama_dinas'),
@@ -71,23 +81,19 @@ class DataPenggunaController extends Controller
                     'masyarakat.updated_at'
                 );
 
-            // Filter search
             if ($search) {
                 $query->where('masyarakat.nama', 'LIKE', "%{$search}%");
             }
 
-            // Filter kecamatan
             if ($kecamatanId) {
                 $query->where('desa.id_kecamatan', $kecamatanId);
             }
 
-            // Filter desa
             if ($desaId) {
                 $query->where('masyarakat.id_desa', $desaId);
             }
 
             return $query->orderBy('masyarakat.created_at', 'desc');
-
         } elseif ($filter === 'asn') {
             $query = DB::table('pns')
                 ->leftJoin('dinas', 'pns.id_dinas', '=', 'dinas.id_dinas')
@@ -110,16 +116,18 @@ class DataPenggunaController extends Controller
                     'pns.updated_at'
                 );
 
-            // Filter search
             if ($search) {
                 $query->where('pns.nama', 'LIKE', "%{$search}%");
             }
 
-            return $query->orderBy('pns.created_at', 'desc');
+            if ($dinasId) {
+                $query->where('pns.id_dinas', $dinasId);
+            }
 
+            return $query->orderBy('pns.created_at', 'desc');
         } else {
-            // UNION untuk semua
-            
+            // UNION untuk semua (TANPA filter wilayah/dinas)
+
             // Query Masyarakat
             $masyarakatQuery = DB::table('masyarakat')
                 ->leftJoin('desa', 'masyarakat.id_desa', '=', 'desa.id_desa')
@@ -129,11 +137,11 @@ class DataPenggunaController extends Controller
                     'masyarakat.nama',
                     'masyarakat.email',
                     DB::raw("'Masyarakat' as jenis_pengguna"),
-                    'masyarakat.no_telepon',       
-                    'masyarakat.jenis_kelamin',     
-                    'masyarakat.tanggal_lahir',     
-                    'masyarakat.foto',              
-                    'masyarakat.saldo',             
+                    'masyarakat.no_telepon',
+                    'masyarakat.jenis_kelamin',
+                    'masyarakat.tanggal_lahir',
+                    'masyarakat.foto',
+                    'masyarakat.saldo',
                     DB::raw('NULL as kode_anggota'),
                     DB::raw('NULL as id_dinas'),
                     DB::raw('NULL as nama_dinas'),
@@ -143,19 +151,8 @@ class DataPenggunaController extends Controller
                     'masyarakat.updated_at'
                 );
 
-            // Filter search untuk masyarakat
             if ($search) {
                 $masyarakatQuery->where('masyarakat.nama', 'LIKE', "%{$search}%");
-            }
-
-            // Filter kecamatan untuk masyarakat
-            if ($kecamatanId) {
-                $masyarakatQuery->where('desa.id_kecamatan', $kecamatanId);
-            }
-
-            // Filter desa untuk masyarakat
-            if ($desaId) {
-                $masyarakatQuery->where('masyarakat.id_desa', $desaId);
             }
 
             // Query PNS
@@ -180,7 +177,6 @@ class DataPenggunaController extends Controller
                     'pns.updated_at'
                 );
 
-            // Filter search untuk pns
             if ($search) {
                 $pnsQuery->where('pns.nama', 'LIKE', "%{$search}%");
             }
@@ -194,9 +190,24 @@ class DataPenggunaController extends Controller
     public function export(Request $request)
     {
         $filter = $request->query('filter', 'all');
-        $filename = 'data_pengguna_' . ($filter === 'all' ? 'semua' : $filter) . '_' . now()->format('Ymd') . '.xlsx';
+        $kecamatanId = $request->query('kecamatan_id', '');
+        $desaId = $request->query('desa_id', '');
+        $dinasId = $request->query('dinas_id', '');
+        $search = $request->query('search', '');
 
-        return Excel::download(new DataPenggunaExport($filter), $filename);
+        // Auto-switch filter berdasarkan wilayah/dinas
+        if ($kecamatanId || $desaId) {
+            $filter = 'masyarakat';
+        } elseif ($dinasId) {
+            $filter = 'asn';
+        }
+
+        $filename = 'data_pengguna_' . ($filter === 'all' ? 'semua' : $filter) . '_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(
+            new DataPenggunaExport($filter, $kecamatanId, $desaId, $dinasId, $search),
+            $filename
+        );
     }
 
     // API untuk detail user
@@ -215,16 +226,16 @@ class DataPenggunaController extends Controller
                     'type' => 'masyarakat',
                     'nama' => $user->nama,
                     'email' => $user->email,
-                    'jenis_kelamin' => $user->jenis_kelamin,     
-                    'no_telepon' => $user->no_telepon,           
+                    'jenis_kelamin' => $user->jenis_kelamin,
+                    'no_telepon' => $user->no_telepon,
                     'tanggal_lahir' => $user->tanggal_lahir,
-                    'alamat' => $user->alamat,     
-                    'saldo' => $user->saldo,                     
-                    'nama_dinas' => 'Masyarakat',                
+                    'alamat' => $user->alamat,
+                    'saldo' => $user->saldo,
+                    'nama_dinas' => 'Masyarakat',
                     'kode_anggota' => $user->barcode_id,
                     'nama_desa' => $user->desa ? $user->desa->nama_desa : null,
                     'nama_kecamatan' => $user->desa && $user->desa->kecamatan ? $user->desa->kecamatan->nama_kecamatan : null,
-                    'created_at' => $user->created_at,           
+                    'created_at' => $user->created_at,
                 ]);
             } elseif ($type === 'pns') {
                 $user = \App\Models\Pns::with('dinas')->find($id);
@@ -241,14 +252,14 @@ class DataPenggunaController extends Controller
                     'jenis_kelamin' => $user->jenis_kelamin,
                     'no_telepon' => $user->no_telepon,
                     'tanggal_lahir' => $user->tanggal_lahir,
-                    'alamat' => $user->alamat,     
+                    'alamat' => $user->alamat,
                     'saldo' => $user->saldo,
                     'nama_dinas' => $user->dinas ? $user->dinas->nama_dinas : 'ASN/PNS',
                     'kode_anggota' => $user->kode_anggota,
                     'barcode_id' => $user->barcode_id,
                     'nama_desa' => null,
-                    'nama_kecamatan' => null,        
-                    'created_at' => $user->created_at,            
+                    'nama_kecamatan' => null,
+                    'created_at' => $user->created_at,
                 ]);
             }
 
@@ -257,7 +268,7 @@ class DataPenggunaController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-    
+
     // API untuk mendapatkan daftar desa berdasarkan kecamatan
     public function getDesaByKecamatan($kecamatanId)
     {
@@ -265,7 +276,7 @@ class DataPenggunaController extends Controller
             ->select('id_desa', 'nama_desa')
             ->orderBy('nama_desa')
             ->get();
-            
+
         return response()->json($desas);
     }
 }

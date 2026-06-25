@@ -790,3 +790,35 @@
         width: 100%;
     }
 }
+
+/* ===== BADGE PEKERJAAN (Masyarakat & PNS) ===== */
+.badge-masyarakat {
+    background: #dcfce7;
+    color: #166534;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.badge-pns {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 768px) {
+    .badge-masyarakat,
+    .badge-pns {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+}

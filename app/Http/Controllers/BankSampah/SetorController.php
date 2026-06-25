@@ -115,6 +115,23 @@ class SetorController extends Controller
         // Data untuk filter dinas
         $dinasList = Dinas::orderBy('nama_dinas')->get();
 
+        // ✅ TAMBAHKAN DATA PEKERJAAN (Kecamatan/Desa/Dinas)
+        foreach ($setorData as $row) {
+            if ($row->masyarakat) {
+                $row->nama_pengsetor = $row->masyarakat->nama ?? 'Unknown';
+                $row->tipe_pengsetor = 'Masyarakat';
+                $row->kecamatan = $row->masyarakat->desa->kecamatan->nama_kecamatan ?? '-';
+                $row->desa = $row->masyarakat->desa->nama_desa ?? '-';
+                $row->dinas = null;
+            } else if ($row->pns) {
+                $row->nama_pengsetor = $row->pns->nama ?? 'Unknown';
+                $row->tipe_pengsetor = 'PNS';
+                $row->dinas = $row->pns->dinas->nama_dinas ?? 'ASN/PNS';
+                $row->kecamatan = null;
+                $row->desa = null;
+            }
+        }
+
         // AJAX Response
         if ($request->ajax()) {
             return response()->json([

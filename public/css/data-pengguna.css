@@ -813,3 +813,52 @@ td:nth-child(7) strong {
     margin-right: 20px;
     /* atau sesuaikan nilainya */
 }
+
+/* ===== FILTER WILAYAH CONTAINER ===== */
+.filter-section {
+    margin-bottom: 20px;
+}
+
+.filter-wilayah-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 15px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.filter-wilayah-container #filterWilayah,
+.filter-wilayah-container #filterDinas {
+    display: inline-flex;
+    gap: 10px;
+}
+
+@media (max-width: 768px) {
+    .filter-wilayah-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-wilayah-container #filterWilayah,
+    .filter-wilayah-container #filterDinas {
+        flex-direction: column;
+    }
+    
+    .filter-wilayah-container .filter-select,
+    .filter-wilayah-container .filter-btn-action,
+    .filter-wilayah-container .filter-btn-reset {
+        width: 100%;
+    }
+}
+
+/* ===== FORM FILTER KE POJOK KANAN ===== */
+.filter-group form {
+    margin-left: auto; /* ✅ Dorong form ke kanan */
+}
+
+.filter-group {
+    align-items: center; /* Vertikal sejajar */
+}

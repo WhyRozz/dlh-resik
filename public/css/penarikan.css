@@ -27,6 +27,8 @@
     align-items: center;
     gap: 0.5rem;
     flex-shrink: 0;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .page-title {
@@ -1012,4 +1014,25 @@
         font-size: 16px; /* Mencegah zoom otomatis di iOS */
         padding: 12px;
     }
+}
+
+/* Badge Pekerjaan */
+.badge-masyarakat {
+    background: #dcfce7;
+    color: #166534;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-pns {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
 }

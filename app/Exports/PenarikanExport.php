@@ -4,16 +4,18 @@ namespace App\Exports;
 
 use App\Models\Penarikan;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use Carbon\Carbon;
 
-class PenarikanExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithTitle, ShouldAutoSize
+class PenarikanExport implements WithMultipleSheets
 {
     protected $filter;
 
@@ -22,22 +24,96 @@ class PenarikanExport implements FromCollection, WithHeadings, WithMapping, With
         $this->filter = $filter;
     }
 
-    public function collection()
+    public function sheets(): array
     {
-        $query = Penarikan::with(['masyarakat', 'pns'])
-            ->orderBy('tanggal_penarikan', 'desc');
+        $sheets = [];
+        $tipePengguna = $this->filter['tipe_pengguna'] ?? 'semua';
 
-        // Apply filters if exist
-        if ($this->filter) {
+        // Jika filter = 'semua' atau 'masyarakat', buat sheet Masyarakat
+        if ($tipePengguna === 'semua' || $tipePengguna === 'masyarakat') {
+            $sheets[] = new MasyarakatPenarikanSheet($this->filter);
+        }
+
+        // Jika filter = 'semua' atau 'pns', buat sheet PNS per dinas
+        if ($tipePengguna === 'semua' || $tipePengguna === 'pns') {
+            // Ambil daftar dinas yang memiliki penarikan
+            $dinasQuery = DB::table('penarikan')
+                ->leftJoin('pns', 'penarikan.id_pns', '=', 'pns.id_pns')
+                ->leftJoin('dinas', 'pns.id_dinas', '=', 'dinas.id_dinas')
+                ->whereNotNull('penarikan.id_pns')
+                ->select('dinas.id_dinas', 'dinas.nama_dinas', DB::raw('COUNT(*) as total'))
+                ->groupBy('dinas.id_dinas', 'dinas.nama_dinas');
+
+            // Apply filter
             if (isset($this->filter['bulan'])) {
-                $query->whereMonth('tanggal_penarikan', $this->filter['bulan']);
+                $dinasQuery->whereMonth('penarikan.tanggal_penarikan', $this->filter['bulan']);
             }
             if (isset($this->filter['tahun'])) {
-                $query->whereYear('tanggal_penarikan', $this->filter['tahun']);
+                $dinasQuery->whereYear('penarikan.tanggal_penarikan', $this->filter['tahun']);
             }
             if (isset($this->filter['status'])) {
-                $query->where('status', $this->filter['status']);
+                $dinasQuery->where('penarikan.status', $this->filter['status']);
             }
+            if (isset($this->filter['dinas_id'])) {
+                $dinasQuery->where('pns.id_dinas', $this->filter['dinas_id']);
+            }
+
+            $pnsByDinas = $dinasQuery->get();
+
+            foreach ($pnsByDinas as $dinas) {
+                if ($dinas->nama_dinas) {
+                    $sheets[] = new PnsPenarikanSheet($dinas->nama_dinas, $this->filter);
+                }
+            }
+        }
+
+        // Fallback: kalau tidak ada sheet, buat sheet kosong
+        if (empty($sheets)) {
+            $sheets[] = new MasyarakatPenarikanSheet($this->filter);
+        }
+
+        return $sheets;
+    }
+}
+
+// ========================================
+// Sheet untuk Masyarakat
+// ========================================
+class MasyarakatPenarikanSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, WithTitle
+{
+    protected $filter;
+    protected $no = 0;
+
+    public function __construct($filter)
+    {
+        $this->filter = $filter;
+    }
+
+    public function collection()
+    {
+        $query = Penarikan::with(['masyarakat.desa.kecamatan'])
+            ->whereNotNull('id_masyarakat')
+            ->orderBy('tanggal_penarikan', 'desc');
+
+        // Apply filters
+        if (isset($this->filter['bulan'])) {
+            $query->whereMonth('tanggal_penarikan', $this->filter['bulan']);
+        }
+        if (isset($this->filter['tahun'])) {
+            $query->whereYear('tanggal_penarikan', $this->filter['tahun']);
+        }
+        if (isset($this->filter['status'])) {
+            $query->where('status', $this->filter['status']);
+        }
+        if (isset($this->filter['kecamatan_id'])) {
+            $query->whereHas('masyarakat.desa', function ($q) {
+                $q->where('id_kecamatan', $this->filter['kecamatan_id']);
+            });
+        }
+        if (isset($this->filter['desa_id'])) {
+            $query->whereHas('masyarakat', function ($q) {
+                $q->where('id_desa', $this->filter['desa_id']);
+            });
         }
 
         return $query->get();
@@ -48,6 +124,9 @@ class PenarikanExport implements FromCollection, WithHeadings, WithMapping, With
         return [
             'No',
             'Nama Anggota',
+            'Pekerjaan',
+            'Kecamatan',
+            'Desa/Kelurahan',
             'Tanggal Penarikan',
             'Jumlah Uang',
             'E-Wallet',
@@ -59,12 +138,18 @@ class PenarikanExport implements FromCollection, WithHeadings, WithMapping, With
 
     public function map($penarikan): array
     {
-        // Get user name
-        $namaUser = $penarikan->masyarakat->nama ?? $penarikan->pns->nama ?? 'Unknown';
+        $this->no++;
+
+        $namaUser = $penarikan->masyarakat->nama ?? 'Unknown';
+        $kecamatan = $penarikan->masyarakat->desa->kecamatan->nama_kecamatan ?? '-';
+        $desa = $penarikan->masyarakat->desa->nama_desa ?? '-';
 
         return [
-            $penarikan->id_penarikan,
+            $this->no,
             $namaUser,
+            'Masyarakat',
+            $kecamatan,
+            $desa,
             Carbon::parse($penarikan->tanggal_penarikan)->format('d-m-Y H:i'),
             'Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.'),
             $penarikan->jenis_ewallet ?? '-',
@@ -74,25 +159,29 @@ class PenarikanExport implements FromCollection, WithHeadings, WithMapping, With
         ];
     }
 
-public function styles(Worksheet $sheet)
-{
-    $totalRows = $this->collection()->count();
-    $lastRow = $totalRows + 2;
-    $totalAmount = $this->collection()->sum('jumlah_uang');
+    public function styles(Worksheet $sheet)
+    {
+        $sheet->setSelectedCell('A1');
+        $sheet->freezePane('A2');
 
-    // ✅ SET NILAI SEBELUM MERGE
-    // Total Transaksi
-    $sheet->setCellValue("A{$lastRow}", 'TOTAL TRANSAKSI: ' . $totalRows . ' data');
-    
-    // Total Nominal
-    $sheet->setCellValue("C{$lastRow}", 'TOTAL NOMINAL: Rp ' . number_format($totalAmount, 0, ',', '.'));
+        $totalRows = $this->collection()->count();
+        $lastRow = $totalRows + 2;
+        $totalAmount = $this->collection()->sum('jumlah_uang');
 
-    // ✅ MERGE CELLS
-    $sheet->mergeCells("A{$lastRow}:B{$lastRow}");
-    $sheet->mergeCells("C{$lastRow}:D{$lastRow}");
+        // Set lebar kolom default
+        foreach (range('A', 'K') as $col) {
+            $sheet->getColumnDimension($col)->setWidth(15);
+        }
 
-    return [
-        1 => [
+        // AUTO-SIZE
+        foreach (range('A', 'K') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $sheet->calculateColumnWidths();
+
+        // Style header
+        $sheet->getStyle('A1:K1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 12,
@@ -100,30 +189,228 @@ public function styles(Worksheet $sheet)
             ],
             'fill' => [
                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '10B981']
+                'startColor' => ['rgb' => '2E8B57']
             ],
             'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000']
+                ]
             ]
-        ],
-        $lastRow => [
+        ]);
+
+        // Style total row
+        $sheet->getStyle("A{$lastRow}:K{$lastRow}")->applyFromArray([
             'font' => [
                 'bold' => true,
-                'size' => 11
+                'size' => 12
             ],
             'fill' => [
                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'FEF3C7']
+                'startColor' => ['rgb' => 'FFFF00']
             ],
             'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                'horizontal' => Alignment::HORIZONTAL_CENTER
             ]
-        ]
-    ];
-}
+        ]);
+
+        // Add total row
+        $sheet->mergeCells("A{$lastRow}:B{$lastRow}");
+        $sheet->setCellValue("A{$lastRow}", 'TOTAL TRANSAKSI:');
+        $sheet->setCellValue("C{$lastRow}", $totalRows . ' data');
+        $sheet->mergeCells("D{$lastRow}:E{$lastRow}");
+        $sheet->setCellValue("D{$lastRow}", 'TOTAL NOMINAL:');
+        $sheet->setCellValue("F{$lastRow}", 'Rp ' . number_format($totalAmount, 0, ',', '.'));
+
+        // Style all cells border
+        $sheet->getStyle("A1:K{$lastRow}")->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000']
+                ]
+            ],
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_CENTER
+            ]
+        ]);
+
+        return [];
+    }
 
     public function title(): string
     {
-        return 'Data Penarikan';
+        return 'Masyarakat';
+    }
+}
+
+// ========================================
+// Sheet untuk PNS per Dinas
+// ========================================
+class PnsPenarikanSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, WithTitle
+{
+    protected $dinasName;
+    protected $filter;
+    protected $no = 0;
+
+    public function __construct($dinasName, $filter)
+    {
+        $this->dinasName = $dinasName;
+        $this->filter = $filter;
+    }
+
+    public function collection()
+    {
+        $query = Penarikan::with(['pns.dinas'])
+            ->whereNotNull('id_pns')
+            ->whereHas('pns.dinas', function ($q) {
+                $q->where('nama_dinas', $this->dinasName);
+            })
+            ->orderBy('tanggal_penarikan', 'desc');
+
+        // Apply filters
+        if (isset($this->filter['bulan'])) {
+            $query->whereMonth('tanggal_penarikan', $this->filter['bulan']);
+        }
+        if (isset($this->filter['tahun'])) {
+            $query->whereYear('tanggal_penarikan', $this->filter['tahun']);
+        }
+        if (isset($this->filter['status'])) {
+            $query->where('status', $this->filter['status']);
+        }
+
+        return $query->get();
+    }
+
+    public function headings(): array
+    {
+        return [
+            'No',
+            'Nama Anggota',
+            'Pekerjaan',
+            'Dinas/Instansi',
+            'Tanggal Penarikan',
+            'Jumlah Uang',
+            'E-Wallet',
+            'Nomor E-Wallet',
+            'Status',
+            'Alasan Penolakan'
+        ];
+    }
+
+    public function map($penarikan): array
+    {
+        $this->no++;
+
+        $namaUser = $penarikan->pns->nama ?? 'Unknown';
+        $dinas = $penarikan->pns->dinas->nama_dinas ?? 'ASN/PNS';
+
+        return [
+            $this->no,
+            $namaUser,
+            'ASN/PNS',
+            $dinas,
+            Carbon::parse($penarikan->tanggal_penarikan)->format('d-m-Y H:i'),
+            'Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.'),
+            $penarikan->jenis_ewallet ?? '-',
+            $penarikan->nomor_ewallet ?? '-',
+            ucfirst($penarikan->status),
+            $penarikan->alasan_penolakan ?? '-'
+        ];
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        $sheet->setSelectedCell('A1');
+        $sheet->freezePane('A2');
+
+        $totalRows = $this->collection()->count();
+        $lastRow = $totalRows + 2;
+        $totalAmount = $this->collection()->sum('jumlah_uang');
+
+        // Set lebar kolom default
+        foreach (range('A', 'J') as $col) {
+            $sheet->getColumnDimension($col)->setWidth(15);
+        }
+
+        // AUTO-SIZE
+        foreach (range('A', 'J') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $sheet->calculateColumnWidths();
+
+        // Style header
+        $sheet->getStyle('A1:J1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 12,
+                'color' => ['rgb' => 'FFFFFF']
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '2E8B57']
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000']
+                ]
+            ]
+        ]);
+
+        // Style total row
+        $sheet->getStyle("A{$lastRow}:J{$lastRow}")->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 12
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'FFFF00']
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER
+            ]
+        ]);
+
+        // Add total row
+        $sheet->mergeCells("A{$lastRow}:B{$lastRow}");
+        $sheet->setCellValue("A{$lastRow}", 'TOTAL TRANSAKSI:');
+        $sheet->setCellValue("C{$lastRow}", $totalRows . ' data');
+        $sheet->mergeCells("D{$lastRow}:E{$lastRow}");
+        $sheet->setCellValue("D{$lastRow}", 'TOTAL NOMINAL:');
+        $sheet->setCellValue("F{$lastRow}", 'Rp ' . number_format($totalAmount, 0, ',', '.'));
+
+        // Style all cells border
+        $sheet->getStyle("A1:J{$lastRow}")->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000']
+                ]
+            ],
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_CENTER
+            ]
+        ]);
+
+        return [];
+    }
+
+    public function title(): string
+    {
+        // Sheet title max 31 characters
+        return substr($this->dinasName, 0, 31);
     }
 }

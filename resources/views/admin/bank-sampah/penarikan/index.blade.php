@@ -57,6 +57,11 @@
                     <input type="hidden" name="bulan" value="{{ request('bulan') }}">
                     <input type="hidden" name="tahun" value="{{ request('tahun') }}">
                     <input type="hidden" name="status" value="{{ request('status') }}">
+                    <input type="hidden" name="tipe_filter" value="{{ request('tipe_filter') }}">
+                    <input type="hidden" name="kecamatan_id" value="{{ request('kecamatan_id') }}">
+                    <input type="hidden" name="desa_id" value="{{ request('desa_id') }}">
+                    <input type="hidden" name="dinas_id" value="{{ request('dinas_id') }}">
+                    <input type="hidden" name="tipe_pengguna" value="semua">
                     <button type="submit" class="btn-cetak">
                         <img src="{{ asset('assets/icons/excel.png') }}" alt="Excel" class="icon-excel">
                         Export Excel
@@ -151,12 +156,13 @@
             <thead>
                 <tr>
                     <th width="5%">No</th>
-                    <th width="20%">Nama Pengguna</th>
-                    <th width="18%">Tanggal Penarikan</th>
-                    <th width="15%">Jumlah Uang</th>
-                    <th width="17%">E-Wallet</th>
-                    <th width="12%">Status</th>
-                    <th width="13%">Aksi</th>
+                    <th width="15%">Nama Pengguna</th>
+                    <th style="width: 15%; text-align: center; padding-right: 70px;">Pekerjaan</th>
+                    <th width="15%">Tanggal Penarikan</th>
+                    <th width="12%">Jumlah Uang</th>
+                    <th style="width: 10%; text-align: center; padding-right:55px;">E-Wallet</th>
+                    <th style="width: 10%; text-align: center; padding-right: 70px;">Status</th>
+                    <th width="10%">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -168,23 +174,37 @@
                         {{-- 2. Nama Anggota --}}
                         <td><span class="member-name">{{ $penarikan->nama_user ?? 'Unknown' }}</span></td>
 
-                        {{-- 3. Tanggal --}}
+                        {{-- 3. Pekerjaan --}}
+                        <td>
+                            @if ($penarikan->id_masyarakat)
+                                {{-- Masyarakat: Tampilkan "Masyarakat (Kecamatan, Desa)" --}}
+                                <span class="badge badge-masyarakat">
+                                    Masyarakat ({{ $penarikan->kecamatan ?? '-' }}, {{ $penarikan->desa ?? '-' }})
+                                </span>
+                            @else
+                                {{-- PNS: Tampilkan nama dinas --}}
+                                <span class="badge badge-pns">
+                                    {{ $penarikan->dinas ?? 'ASN/PNS' }}
+                                </span>
+                            @endif
+                        </td>
+
+                        {{-- 4. Tanggal --}}
                         <td>
                             <span class="date-main">{{ $penarikan->tanggal_penarikan->format('d M Y') }}</span>
                             <span class="date-time">{{ $penarikan->tanggal_penarikan->format('H:i') }}</span>
                         </td>
 
-                        {{-- 4. Jumlah Uang --}}
-                        <td><span class="amount">Rp {{ number_format($penarikan->jumlah_uang, 0, ',', '.') }}</span>
-                        </td>
+                        {{-- 5. Jumlah Uang --}}
+                        <td><span class="amount">Rp {{ number_format($penarikan->jumlah_uang, 0, ',', '.') }}</span></td>
 
-                        {{-- 5. E-Wallet --}}
+                        {{-- 6. E-Wallet --}}
                         <td>
                             <span class="wallet-type">{{ $penarikan->jenis_ewallet ?? '-' }}</span>
                             <span class="wallet-number">{{ $penarikan->nomor_ewallet ?? '' }}</span>
                         </td>
 
-                        {{-- 6. ✅ STATUS (Badge: Diproses/Disetujui/Ditolak) --}}
+                        {{-- 7. Status --}}
                         <td>
                             @php
                                 $statusClass = match ($penarikan->status) {
@@ -197,7 +217,7 @@
                             <span class="status-badge {{ $statusClass }}">{{ $statusText }}</span>
                         </td>
 
-                        {{-- 7. ✅ AKSI (Icon Mata 👁️) --}}
+                        {{-- 8. Aksi --}}
                         <td>
                             <div class="action-buttons">
                                 <button class="btn-action btn-view" onclick="showDetail({{ $penarikan->id_penarikan }})"

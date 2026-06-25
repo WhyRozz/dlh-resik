@@ -345,54 +345,17 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Show reset button jika ada filter aktif (untuk header)
+                // Show reset button hanya untuk filter Bulan/Tahun/Status
                 const hasFilter =
-                    {{ request('bulan') || request('tahun') || request('status') || request('kecamatan_id') || request('desa_id') ? 'true' : 'false' }};
+                    {{ request('bulan') || request('tahun') || request('status') ? 'true' : 'false' }};
+
                 if (hasFilter) {
                     const resetBtn = document.getElementById('resetButton');
-                    if (resetBtn) resetBtn.style.display = 'inline-flex';
-                }
-
-                // Cascading dropdown kecamatan -> desa
-                const kecamatanSelect = document.getElementById('filterKecamatan');
-                const desaSelect = document.getElementById('filterDesa');
-
-                if (kecamatanSelect) {
-                    kecamatanSelect.addEventListener('change', function() {
-                        const kecamatanId = this.value;
-                        if (!kecamatanId) {
-                            desaSelect.innerHTML = '<option value="">Semua Desa</option>';
-                            desaSelect.disabled = true;
-                            return;
-                        }
-
-                        fetch(`/admin/data-pengguna/desa/${kecamatanId}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                desaSelect.innerHTML = '<option value="">Semua Desa</option>';
-                                data.forEach(desa => {
-                                    const option = document.createElement('option');
-                                    option.value = desa.id_desa;
-                                    option.textContent = desa.nama_desa;
-                                    desaSelect.appendChild(option);
-                                });
-                                desaSelect.disabled = false;
-                            })
-                            .catch(error => {
-                                console.error('Error loading desa:', error);
-                                desaSelect.innerHTML = '<option value="">Error loading desa</option>';
-                            });
-                    });
+                    if (resetBtn) {
+                        resetBtn.style.display = 'inline-flex';
+                    }
                 }
             });
-
-            // ✅ TAMBAHKAN FUNGSI INI:
-            function resetFilterWilayah() {
-                const url = new URL(window.location);
-                url.searchParams.delete('kecamatan_id');
-                url.searchParams.delete('desa_id');
-                window.location.href = url.toString();
-            }
         </script>
     @endpush
 @endsection

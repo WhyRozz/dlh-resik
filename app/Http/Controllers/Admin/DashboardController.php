@@ -15,13 +15,22 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-    
-         
+
+
         // ========== 1. FILTER BULAN & TAHUN ==========
         $bulanList = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
         ];
 
         $selectedTahun = (int) ($request->input('tahun') ?? date('Y'));
@@ -37,11 +46,11 @@ class DashboardController extends Controller
                 ->whereYear('tanggal', $selectedTahun)
                 ->whereMonth('tanggal', $selectedBulan);
         })
-        ->orWhere(function ($query) use ($selectedTahun, $selectedBulan) {
-            $query->whereNull('tanggal')
-                ->whereYear('created_at', $selectedTahun)
-                ->whereMonth('created_at', $selectedBulan);
-        })->count();
+            ->orWhere(function ($query) use ($selectedTahun, $selectedBulan) {
+                $query->whereNull('tanggal')
+                    ->whereYear('created_at', $selectedTahun)
+                    ->whereMonth('created_at', $selectedBulan);
+            })->count();
 
         $statusCounts = Laporan::selectRaw('status, COUNT(*) as total')
             ->where(function ($query) use ($selectedTahun, $selectedBulan) {
@@ -74,7 +83,7 @@ class DashboardController extends Controller
         // ========== 4. ✅ CHART DATA (PER MINGGU 1-5) ==========
         // Sumbu X: Minggu 1, 2, 3, 4, [5]
         // Sumbu Y: Jumlah laporan (0, 10, 20, ...)
-        
+
         $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $selectedBulan, $selectedTahun);
         $chartLabels = [];
         $chartData = [];
@@ -82,7 +91,7 @@ class DashboardController extends Controller
         // Loop maksimal 5 minggu
         for ($week = 1; $week <= 5; $week++) {
             $startDay = ($week - 1) * 7 + 1;  // 1, 8, 15, 22, 29
-            
+
             // Jika tanggal mulai sudah melebihi jumlah hari di bulan, berhenti
             if ($startDay > $daysInMonth) {
                 break;
@@ -122,34 +131,40 @@ class DashboardController extends Controller
         rsort($tahunOptions);
 
         // ========== 8. KIRIM SEMUA VARIABLE KE VIEW ==========
+        // ✅ BUAT VARIABEL DULU SEBELUM COMPACT
+        $adminUser = auth()->guard('admin')->user();
+
         return view('admin.dashboard', compact(
             // Filter
             'bulanList',
             'selectedTahun',
             'selectedBulan',
             'tahunOptions',
-            
+
             // Stats Lama
             'total',
             'selesai_diproses',
             'belum_diproses',
             'ditolak',
-            
+
             // Stats Cards Baru
             'totalLaporan',
             'totalTPS',
             'totalPenarikan',
             'totalSetor',
             'totalArtikel',
-            
+
             // Chart Data
             'chartLabels',
             'chartData',
             'counts',
-            
+
             // Tabel Data
             'recentReports',
-            'laporanIllegal'
+            'laporanIllegal',
+
+            // ADMIN USER (tanpa =>, cukup nama variabelnya saja)
+            'adminUser'
         ));
     }
 }

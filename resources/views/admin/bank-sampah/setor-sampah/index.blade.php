@@ -137,14 +137,14 @@
                 <thead>
                     <tr>
                         <th width="5%">No</th>
-                        <th width="22%">Nama Pengguna</th>
-                        <th width="15%">Waktu Setor</th>
-                        <th width="13%">Pekerjaan</th>
-                        <th width="15%">Jenis</th>
-                        <th width="10%">Berat</th>
-                        <th width="15%">Harga</th>
+                        <th width="12%">Nama Pengguna</th>
+                        <th width="9%">Waktu Setor</th>
+                        <th style="width: 12%; text-align: center;">Pekerjaan</th>
+                        <th width="8%">Jenis</th>
+                        <th width="8%">Berat</th>
+                        <th width="8%">Harga</th>
                         <th width="10%">Petugas</th>
-                        <th width="10%">Aksi</th>
+                        <th width="7%">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -157,7 +157,19 @@
                                 </div>
                             </td>
                             <td>{{ $row->tanggal_transaksi->format('d/m/Y H:i') }}</td>
-                            <td><span class="badge badge-info">{{ $row->tipe_pengsetor }}</span></td>
+                            <td>
+                                @if ($row->masyarakat)
+                                    {{-- Masyarakat: Tampilkan "Masyarakat (Kecamatan, Desa)" --}}
+                                    <span class="badge badge-masyarakat">
+                                        Masyarakat ({{ $row->kecamatan ?? '-' }}, {{ $row->desa ?? '-' }})
+                                    </span>
+                                @else
+                                    {{-- PNS: Tampilkan nama dinas --}}
+                                    <span class="badge badge-pns">
+                                        {{ $row->dinas ?? 'ASN/PNS' }}
+                                    </span>
+                                @endif
+                            </td>
                             <td><span class="badge badge-success">{{ $row->jenisSampah->jenis ?? 'N/A' }}</span></td>
                             <td><strong>{{ number_format($row->berat, 2) }} Kg</strong></td>
                             <td>

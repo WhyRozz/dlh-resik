@@ -100,12 +100,20 @@ class PenarikanController extends Controller
         // Data untuk filter dinas
         $dinasList = Dinas::orderBy('nama_dinas')->get();
 
-        // ✅(UNTUK NAMA USER)
+        // ✅(UNTUK NAMA USER DAN PEKERJAAN)
         foreach ($penarikans as $penarikan) {
             if ($penarikan->id_masyarakat) {
                 $penarikan->nama_user = $penarikan->masyarakat->nama ?? 'Unknown';
+                // Ambil kecamatan dan desa
+                $penarikan->kecamatan = $penarikan->masyarakat->desa->kecamatan->nama_kecamatan ?? '-';
+                $penarikan->desa = $penarikan->masyarakat->desa->nama_desa ?? '-';
+                $penarikan->dinas = null;
             } else {
                 $penarikan->nama_user = $penarikan->pns->nama ?? 'Unknown';
+                // Ambil dinas
+                $penarikan->dinas = $penarikan->pns->dinas->nama_dinas ?? 'ASN/PNS';
+                $penarikan->kecamatan = null;
+                $penarikan->desa = null;
             }
         }
 
@@ -285,6 +293,21 @@ class PenarikanController extends Controller
         }
         if ($request->filled('status')) {
             $filter['status'] = $request->status;
+        }
+        if ($request->filled('tipe_filter')) {
+            $filter['tipe_filter'] = $request->tipe_filter; // wilayah/dinas
+        }
+        if ($request->filled('kecamatan_id')) {
+            $filter['kecamatan_id'] = $request->kecamatan_id;
+        }
+        if ($request->filled('desa_id')) {
+            $filter['desa_id'] = $request->desa_id;
+        }
+        if ($request->filled('dinas_id')) {
+            $filter['dinas_id'] = $request->dinas_id;
+        }
+        if ($request->filled('tipe_pengguna')) {
+            $filter['tipe_pengguna'] = $request->tipe_pengguna; // semua/masyarakat/pns
         }
 
         $filename = 'Data_Penarikan_' . date('Y-m-d_His') . '.xlsx';
