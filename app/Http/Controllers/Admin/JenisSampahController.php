@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\JenisSampah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class JenisSampahController extends Controller
 {
@@ -18,11 +19,25 @@ class JenisSampahController extends Controller
 
     public function create()
     {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role !== 'super_admin') {
+            return redirect()->route('admin.bank-sampah.jenis-sampah.index')
+                ->with('error', '❌ Anda tidak memiliki izin untuk menambah jenis sampah!');
+        }
+
         return view('admin.bank-sampah.jenis-sampah.create');
     }
 
     public function store(Request $request)
     {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role !== 'super_admin') {
+            return redirect()->route('admin.bank-sampah.jenis-sampah.index')
+                ->with('error', '❌ Anda tidak memiliki izin untuk menambah jenis sampah!');
+        }
+
         $validated = $request->validate([
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'jenis' => 'required|string|max:100',
@@ -42,12 +57,26 @@ class JenisSampahController extends Controller
 
     public function edit($id)
     {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role !== 'super_admin') {
+            return redirect()->route('admin.bank-sampah.jenis-sampah.index')
+                ->with('error', '❌ Anda tidak memiliki izin untuk mengedit jenis sampah!');
+        }
+
         $jenisSampah = JenisSampah::findOrFail($id);
         return view('admin.bank-sampah.jenis-sampah.edit', compact('jenisSampah'));
     }
 
     public function update(Request $request, $id)
     {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role !== 'super_admin') {
+            return redirect()->route('admin.bank-sampah.jenis-sampah.index')
+                ->with('error', '❌ Anda tidak memiliki izin untuk mengupdate jenis sampah!');
+        }
+
         $jenisSampah = JenisSampah::findOrFail($id);
 
         $validated = $request->validate([
@@ -72,6 +101,13 @@ class JenisSampahController extends Controller
 
     public function destroy($id)
     {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role !== 'super_admin') {
+            return redirect()->route('admin.bank-sampah.jenis-sampah.index')
+                ->with('error', '❌ Anda tidak memiliki izin untuk menghapus jenis sampah!');
+        }
+
         $jenisSampah = JenisSampah::findOrFail($id);
 
         if ($jenisSampah->gambar && Storage::disk('public')->exists($jenisSampah->gambar)) {
