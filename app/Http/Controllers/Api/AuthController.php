@@ -20,16 +20,16 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'tipe' => 'required|in:masyarakat,pns',
             'nama' => 'required|string|max:100',
             'email' => 'required|email|unique:masyarakat,email|unique:pns,email',
-            'password' => 'required|min:6',
+            'password' => 'required|min:8|confirmed',
             'no_telepon' => 'required|string|max:15',
-            'pekerjaan' => 'required|in:Masyarakat Umum,ASN / PNS',
             'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
-            'tanggal_lahir' => 'nullable|date',
+            'tanggal_lahir' => 'nullable|date|before:today',
             'alamat' => 'nullable|string',
-            'id_dinas' => 'required_if:pekerjaan,ASN / PNS|nullable|exists:dinas,id_dinas',
-            'id_desa' => 'required_if:pekerjaan,Masyarakat Umum|nullable|exists:desa,id_desa',
+            'id_desa' => 'required|exists:desa,id_desa',
+            'id_dinas' => 'nullable|exists:dinas,id_dinas',
         ]);
 
         if ($validator->fails()) {
@@ -39,18 +39,12 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Generate barcode ID (15 karakter alphanumeric uppercase)
-        $barcode_id = BarcodeHelper::generate(13, 'RK');
-
-        // Hash password
+        // Generate barcode ID unik
+        $barcode_id = 'RK' . strtoupper(Str::random(13));
         $hashedPassword = Hash::make($request->password);
+        $tipe = $request->tipe;
 
-        if (
-            strpos(strtolower($request->pekerjaan), 'masyarakat') !== false ||
-            strpos(strtolower($request->pekerjaan), 'umum') !== false
-        ) {
-
-            // Register sebagai Masyarakat
+        if ($tipe === 'masyarakat') {
             $user = Masyarakat::create([
                 'nama' => $request->nama,
                 'email' => $request->email,
@@ -74,16 +68,19 @@ class AuthController extends Controller
                 ],
                 'message' => 'Registrasi masyarakat berhasil'
             ], 201);
-        } elseif (
-            strpos(strtolower($request->pekerjaan), 'asn') !== false ||
-            strpos(strtolower($request->pekerjaan), 'pns') !== false
-        ) {
+        } elseif ($tipe === 'pns') {
+            // Validasi id_dinas wajib untuk PNS
+            if (empty($request->id_dinas)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Dinas wajib dipilih untuk PNS'
+                ], 422);
+            }
 
-            // Generate kode anggota PNS
+            // Generate kode anggota otomatis
             $count = Pns::count() + 1;
             $kode_anggota = 'PNS-' . date('Y') . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
 
-            // Register sebagai PNS
             $user = Pns::create([
                 'kode_anggota' => $kode_anggota,
                 'nama' => $request->nama,
@@ -94,6 +91,7 @@ class AuthController extends Controller
                 'tanggal_lahir' => $request->tanggal_lahir,
                 'alamat' => $request->alamat,
                 'id_dinas' => $request->id_dinas,
+                'id_desa' => $request->id_desa,
                 'barcode_id' => $barcode_id,
                 'saldo' => 0.00,
             ]);
@@ -113,7 +111,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'error',
-            'message' => 'Tipe pekerjaan tidak valid'
+            'message' => 'Tipe user tidak valid'
         ], 422);
     }
 

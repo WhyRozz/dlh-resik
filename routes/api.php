@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DesaController;
+use App\Http\Controllers\Api\KecamatanController;
 use App\Http\Controllers\Api\DinasController;
 use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\Api\ArtikelController;
@@ -23,6 +25,9 @@ use App\Http\Controllers\Api\KonfirmasiSetorController;
 // Auth - Register & Login
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/kecamatan', [KecamatanController::class, 'index']);
+Route::get('/desa', [DesaController::class, 'index']); // Support ?kecamatan_id= filter
 
 // Auth - Forgot Password Flow
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
