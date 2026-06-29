@@ -40,9 +40,9 @@ class SubAdminDashboardController extends Controller
 
         $totalJenisSampah = JenisSampah::count(); // Global, tidak difilter
 
-        $totalPenjemputan = DB::table('penjemputans')
-            ->where('nama_admin', 'LIKE', '%bank_sampah_' . $idDesa . '%')
-            ->count();
+        $totalPenjemputan = Penjemputan::whereHas('petugas', function ($q) use ($idDesa) {
+            $q->where('level', 'bank_sampah_' . $idDesa);
+        })->count();
 
         // ========== CHART DATA ==========
         $selectedBulan = (int) ($request->input('bulan') ?? date('n'));
@@ -86,8 +86,10 @@ class SubAdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        $penjemputanTerbaru = DB::table('penjemputans')
-            ->where('nama_admin', 'LIKE', '%bank_sampah_' . $idDesa . '%')
+        $penjemputanTerbaru = Penjemputan::with('petugas')
+            ->whereHas('petugas', function ($q) use ($idDesa) {
+                $q->where('level', 'bank_sampah_' . $idDesa);
+            })
             ->orderBy('waktu', 'desc')
             ->limit(5)
             ->get();

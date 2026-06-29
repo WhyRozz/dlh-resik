@@ -29,6 +29,10 @@ class PenarikanExport implements WithMultipleSheets
         $sheets = [];
         $tipePengguna = $this->filter['tipe_pengguna'] ?? 'semua';
 
+        // ✅ Ambil admin yang login
+        $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+        $isSubAdminDesa = $admin && $admin->role === 'sub_admin_desa' && $admin->id_desa;
+
         // Jika filter = 'semua' atau 'masyarakat', buat sheet Masyarakat
         if ($tipePengguna === 'semua' || $tipePengguna === 'masyarakat') {
             $sheets[] = new MasyarakatPenarikanSheet($this->filter);
@@ -44,7 +48,12 @@ class PenarikanExport implements WithMultipleSheets
                 ->select('dinas.id_dinas', 'dinas.nama_dinas', DB::raw('COUNT(*) as total'))
                 ->groupBy('dinas.id_dinas', 'dinas.nama_dinas');
 
-            // Apply filter
+            // ✅ AUTO-FILTER UNTUK SUB ADMIN DESA
+            if ($isSubAdminDesa) {
+                $dinasQuery->where('pns.id_desa', $admin->id_desa);
+            }
+
+            // Apply filter dari parameter
             if (isset($this->filter['bulan'])) {
                 $dinasQuery->whereMonth('penarikan.tanggal_penarikan', $this->filter['bulan']);
             }
@@ -95,7 +104,15 @@ class MasyarakatPenarikanSheet implements FromCollection, WithHeadings, WithMapp
             ->whereNotNull('id_masyarakat')
             ->orderBy('tanggal_penarikan', 'desc');
 
-        // Apply filters
+        // ✅ AUTO-FILTER UNTUK SUB ADMIN DESA
+        $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+        if ($admin && $admin->role === 'sub_admin_desa' && $admin->id_desa) {
+            $query->whereHas('masyarakat', function ($q) use ($admin) {
+                $q->where('id_desa', $admin->id_desa);
+            });
+        }
+
+        // Apply filters dari parameter
         if (isset($this->filter['bulan'])) {
             $query->whereMonth('tanggal_penarikan', $this->filter['bulan']);
         }
@@ -129,7 +146,7 @@ class MasyarakatPenarikanSheet implements FromCollection, WithHeadings, WithMapp
             'Desa/Kelurahan',
             'Tanggal Penarikan',
             'Jumlah Uang',
-            'E-Wallet',
+            'Jenis Layanan',
             'Nomor E-Wallet',
             'Status',
             'Alasan Penolakan'
@@ -152,7 +169,9 @@ class MasyarakatPenarikanSheet implements FromCollection, WithHeadings, WithMapp
             $desa,
             Carbon::parse($penarikan->tanggal_penarikan)->format('d-m-Y H:i'),
             'Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.'),
-            $penarikan->jenis_ewallet ?? '-',
+            $penarikan->jenis_layanan === 'bank'
+                ? ($penarikan->nama_bank ?? '-')
+                : ($penarikan->jenis_ewallet ?? '-'),
             $penarikan->nomor_ewallet ?? '-',
             ucfirst($penarikan->status),
             $penarikan->alasan_penolakan ?? '-'
@@ -268,12 +287,24 @@ class PnsPenarikanSheet implements FromCollection, WithHeadings, WithMapping, Wi
     {
         $query = Penarikan::with(['pns.dinas'])
             ->whereNotNull('id_pns')
-            ->whereHas('pns.dinas', function ($q) {
-                $q->where('nama_dinas', $this->dinasName);
-            })
             ->orderBy('tanggal_penarikan', 'desc');
 
-        // Apply filters
+        // ✅ AUTO-FILTER UNTUK SUB ADMIN DESA
+        $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+        if ($admin && $admin->role === 'sub_admin_desa' && $admin->id_desa) {
+            $query->whereHas('pns', function ($q) use ($admin) {
+                $q->where('id_desa', $admin->id_desa);
+            });
+        }
+
+        // ✅ Filter by dinas name (jika sheet PNS per dinas)
+        if ($this->dinasName) {
+            $query->whereHas('pns.dinas', function ($q) {
+                $q->where('nama_dinas', $this->dinasName);
+            });
+        }
+
+        // Apply filters dari parameter
         if (isset($this->filter['bulan'])) {
             $query->whereMonth('tanggal_penarikan', $this->filter['bulan']);
         }

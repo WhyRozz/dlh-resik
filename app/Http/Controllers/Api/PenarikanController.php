@@ -20,7 +20,9 @@ class PenarikanController extends Controller
             'id_pns' => 'nullable|integer|exists:pns,id_pns',
             'tipe_user' => 'required|in:masyarakat,pns',
             'nama' => 'required|string|max:100',
-            'jenis_ewallet' => 'required|in:Dana,OVO,GoPay,ShopeePay',
+            'jenis_layanan' => 'required|in:e-wallet,bank',
+            'jenis_ewallet' => 'nullable|required_if:jenis_layanan,e-wallet|in:Dana,OVO,GoPay,ShopeePay',
+            'nama_bank' => 'nullable|required_if:jenis_layanan,bank|in:Bank BCA,Bank BRI,Bank Mandiri,Bank Jatim',
             'nomor_ewallet' => 'required|string|max:20',
             'jumlah_uang' => 'required|numeric|min:50000',
         ]);
@@ -68,7 +70,9 @@ class PenarikanController extends Controller
                 'id_masyarakat' => $request->tipe_user === 'masyarakat' ? $userId : null,
                 'id_pns' => $request->tipe_user === 'pns' ? $userId : null,
                 'nama' => $request->nama,
-                'jenis_ewallet' => $request->jenis_ewallet,
+                'jenis_layanan' => $request->jenis_layanan ?? 'e-wallet',
+                'jenis_ewallet' => $request->jenis_layanan === 'bank' ? null : $request->jenis_ewallet,
+                'nama_bank' => $request->jenis_layanan === 'bank' ? $request->nama_bank : null,
                 'nomor_ewallet' => $request->nomor_ewallet,
                 'jumlah_uang' => $request->jumlah_uang,
                 'status' => 'diproses', // ✅ GANTI 'Pending' jadi 'diproses'
@@ -136,6 +140,8 @@ class PenarikanController extends Controller
                     return [
                         'id' => $p->id_penarikan,
                         'nama' => $p->nama ?? '-',
+                        'jenis_layanan' => $p->jenis_layanan ?? 'e-wallet',  // ✅ TAMBAH INI
+                        'nama_bank' => $p->nama_bank,
                         'jenis_ewallet' => $p->jenis_ewallet,
                         'nomor_ewallet' => $p->nomor_ewallet,
                         'jumlah_uang' => (float) $p->jumlah_uang,

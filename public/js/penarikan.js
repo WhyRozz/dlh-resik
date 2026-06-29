@@ -110,9 +110,26 @@ function showDetail(id) {
             if (elTipe) elTipe.value = tipePengguna;
 
             if (elTanggal) elTanggal.value = new Date(data.tanggal_penarikan).toLocaleString('id-ID');
-            if (elJumlah) elJumlah.value = formatRupiah(data.jumlah_uang);
-            if (elJenis) elJenis.value = (data.jenis_ewallet || '-').toUpperCase();
-            if (elEwallet) elEwallet.value = data.nomor_ewallet || '-';
+            if (elJumlah) {
+                elJumlah.value = formatRupiah(data.jumlah_uang);
+            }
+
+            // Tentukan nama layanan yang akan ditampilkan
+            let layanan = "-";
+
+            if (data.jenis_layanan === "bank") {
+                layanan = data.nama_bank || "-";
+            } else {
+                layanan = data.jenis_ewallet || "-";
+            }
+
+            if (elJenis) {
+                elJenis.value = layanan;
+            }
+
+            if (elEwallet) {
+                elEwallet.value = data.nomor_ewallet || "-";
+            }
             if (elStatusText) elStatusText.value = data.status.toUpperCase();
             if (elStatus) elStatus.value = data.status;
 

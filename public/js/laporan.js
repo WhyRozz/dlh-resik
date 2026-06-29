@@ -141,7 +141,7 @@ function saveStatus() {
             title: 'Oops...',
             text: 'Terjadi kesalahan. Silakan coba lagi.',
             confirmButtonColor: '#2e8b57',
-            zIndex: 10000  // Pastikan di atas modal
+            zIndex: 10000
         });
         return;
     }
@@ -181,7 +181,7 @@ function saveStatus() {
         allowOutsideClick: false,
         allowEscapeKey: false,
         showConfirmButton: false,
-        zIndex: 10001,  // Lebih tinggi dari modal
+        zIndex: 10001,
         didOpen: () => {
             Swal.showLoading();
         }
@@ -215,10 +215,19 @@ function saveStatus() {
             Swal.close();
 
             if (data.success) {
-                // Tutup modal dulu
-                closeDetailModal();
+                // ✅ TUTUP MODAL DENGAN CARA PASTI
+                const modal = document.getElementById('detailModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scroll
+                }
 
-                // Baru tampilkan success alert setelah modal tertutup
+                // Reset form
+                document.getElementById('fotoBalasan').value = '';
+                document.getElementById('modalBalasan').value = '';
+                currentLaporanId = null;
+
+                // ✅ TUNGGU 500MS BARU TAMPILKAN SWEETALERT
                 setTimeout(() => {
                     Swal.fire({
                         icon: 'success',
@@ -227,19 +236,17 @@ function saveStatus() {
                         confirmButtonColor: '#2e8b57',
                         timer: 2000,
                         timerProgressBar: true,
-                        showConfirmButton: false,
-                        zIndex: 10000  // Pastikan di atas semua
+                        showConfirmButton: false
                     }).then(() => {
                         location.reload();
                     });
-                }, 300);  // Delay 300ms untuk memastikan modal sudah tertutup
+                }, 500);
             } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal!',
                     text: data.message || 'Gagal menyimpan data.',
-                    confirmButtonColor: '#2e8b57',
-                    zIndex: 10000
+                    confirmButtonColor: '#2e8b57'
                 });
             }
         })
@@ -250,8 +257,7 @@ function saveStatus() {
                 icon: 'error',
                 title: 'Error!',
                 text: 'Terjadi kesalahan koneksi.',
-                confirmButtonColor: '#2e8b57',
-                zIndex: 10000
+                confirmButtonColor: '#2e8b57'
             });
         });
 }

@@ -120,9 +120,9 @@
                 <thead>
                     <tr>
                         <th style="width: 5%; text-align: center;">No</th>
-                        <th style="width: 12%; text-align: left;">Gambar</th>
+                        <th style="width: 10%; text-align: left;">Gambar</th>
                         <th style="width: 15%; text-align: left;">Nama Petugas</th>
-                        <th style="width: 20%; text-align: center; padding-right: 40px;">Wilayah Kerja</th>
+                        <th style="width: 18%; text-align: center; padding-right: 40px;">Wilayah Kerja</th>
                         <th style="width: 12%; text-align: center; padding-left: 20px;">Waktu</th>
                         <th style="width: 10%; text-align: center;">Berat</th>
                         <th style="width: 10%; text-align: center; padding-right: 20px;">Status</th>
@@ -157,7 +157,12 @@
                             <td>{{ $penjemputans->firstItem() + $index }}</td>
                             <td>
                                 @if ($item->foto)
-                                    <img src="{{ asset('storage/' . $item->foto) }}" alt="Foto Penjemputan">
+                                    @php
+                                        $fotoPath = str_replace(['storage/', 'uploads/'], '', $item->foto);
+                                    @endphp
+
+                                    <img src="{{ asset('uploads/' . $fotoPath) }}" alt="Foto Penjemputan"
+                                        onerror="this.src='{{ asset('images/no-image.png') }}'">
                                 @else
                                     <img src="{{ asset('images/no-image.png') }}" alt="No Image" class="no-img">
                                 @endif

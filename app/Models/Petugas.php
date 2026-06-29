@@ -41,14 +41,8 @@ class Petugas extends Authenticatable
     // Helper untuk generate level value dari desa
     public static function generateLevelValue($desa)
     {
-        $kecamatan = $desa->kecamatan->nama_kecamatan ?? '';
-        $desaName = $desa->nama_desa;
-
-        // Format: bank_sampah_{desa}_{kecamatan}
-        $slugDesa = strtolower(str_replace(' ', '_', $desaName));
-        $slugKecamatan = strtolower(str_replace(' ', '_', $kecamatan));
-
-        return 'bank_sampah_' . $slugDesa . '_' . $slugKecamatan;
+        // ✅ Format BARU: bank_sampah_{id_desa}
+        return 'bank_sampah_' . $desa->id_desa;
     }
 
     // Helper untuk get nama level yang readable
@@ -58,30 +52,38 @@ class Petugas extends Authenticatable
             return 'Petugas DLH';
         }
 
-        // Format: Bank Sampah {DESA} ({KECAMATAN})
-        $parts = explode('_', str_replace('bank_sampah_', '', $this->level));
-        if (count($parts) >= 2) {
-            $kecamatan = ucfirst(str_replace('_', ' ', end($parts)));
-            $desa = ucfirst(str_replace('_', ' ', implode(' ', array_slice($parts, 0, -1))));
-            return 'Bank Sampah ' . strtoupper($desa) . ' (' . $desa . ', ' . $kecamatan . ')';
+        // ✅ Format BARU: bank_sampah_{id_desa}
+        if (strpos($this->level, 'bank_sampah_') === 0) {
+            $idDesa = (int) str_replace('bank_sampah_', '', $this->level);
+            $desa = \App\Models\Desa::with('kecamatan')->find($idDesa);
+
+            if ($desa && $desa->kecamatan) {
+                return 'Bank Sampah ' . strtoupper($desa->nama_desa) .
+                    ' (' . $desa->nama_desa . ', ' . $desa->kecamatan->nama_kecamatan . ')';
+            }
         }
 
         return ucfirst(str_replace('_', ' ', $this->level));
     }
 
-    // Relasi ke desa (extract dari level)
-    public function desa()
+    public function getDesaIdAttribute()
     {
-        // Extract id_desa dari level (format: bank_sampah_{id_desa})
         if (strpos($this->level, 'bank_sampah_') === 0) {
-            $idDesa = str_replace('bank_sampah_', '', $this->level);
-            return $this->belongsTo(Desa::class, 'level', 'id_desa')
-                ->where('level', 'LIKE', 'bank_sampah_%');
+            return (int) str_replace('bank_sampah_', '', $this->level);
         }
         return null;
     }
 
-    // Helper untuk get nama desa dari level
+    public function getDesaAttribute()
+    {
+        $idDesa = $this->desa_id;
+        if ($idDesa) {
+            return \App\Models\Desa::with('kecamatan')->find($idDesa);
+        }
+        return null;
+    }
+
+    // Helper untuk get nama wilayah dari level
     public function getNamaWilayahAttribute()
     {
         if ($this->level === 'petugas_dlh') {
@@ -89,10 +91,10 @@ class Petugas extends Authenticatable
         }
 
         if (strpos($this->level, 'bank_sampah_') === 0) {
-            $idDesa = str_replace('bank_sampah_', '', $this->level);
-            $desa = Desa::with('kecamatan')->find($idDesa);
+            $idDesa = (int) str_replace('bank_sampah_', '', $this->level);
+            $desa = \App\Models\Desa::with('kecamatan')->find($idDesa);
 
-            if ($desa) {
+            if ($desa && $desa->kecamatan) {
                 return 'Bank Sampah ' . strtoupper($desa->nama_desa) .
                     ' (' . $desa->nama_desa . ', ' . $desa->kecamatan->nama_kecamatan . ')';
             }

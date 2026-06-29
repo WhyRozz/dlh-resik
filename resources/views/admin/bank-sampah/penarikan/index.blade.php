@@ -51,24 +51,6 @@
                 @endif
             </form>
 
-            {{-- Export Button --}}
-            <div class="page-header">
-                <form method="GET" action="{{ route('admin.bank-sampah.penarikan.export') }}" id="exportForm">
-                    <input type="hidden" name="bulan" value="{{ request('bulan') }}">
-                    <input type="hidden" name="tahun" value="{{ request('tahun') }}">
-                    <input type="hidden" name="status" value="{{ request('status') }}">
-                    <input type="hidden" name="tipe_filter" value="{{ request('tipe_filter') }}">
-                    <input type="hidden" name="kecamatan_id" value="{{ request('kecamatan_id') }}">
-                    <input type="hidden" name="desa_id" value="{{ request('desa_id') }}">
-                    <input type="hidden" name="dinas_id" value="{{ request('dinas_id') }}">
-                    <input type="hidden" name="tipe_pengguna" value="semua">
-                    <button type="submit" class="btn-cetak">
-                        <img src="{{ asset('assets/icons/excel.png') }}" alt="Excel" class="icon-excel">
-                        Export Excel
-                    </button>
-                </form>
-            </div>
-
             {{-- Search --}}
             <div class="top-search">
                 <div class="search-wrapper">
@@ -144,8 +126,29 @@
                     </button>
                 </div>
             </form>
-        </div>
+        <form method="GET"
+              action="{{ route('admin.bank-sampah.penarikan.export') }}"
+              id="exportForm">
+
+            <input type="hidden" name="bulan" value="{{ request('bulan') }}">
+            <input type="hidden" name="tahun" value="{{ request('tahun') }}">
+            <input type="hidden" name="status" value="{{ request('status') }}">
+            <input type="hidden" name="tipe_filter" value="{{ request('tipe_filter') }}">
+            <input type="hidden" name="kecamatan_id" value="{{ request('kecamatan_id') }}">
+            <input type="hidden" name="desa_id" value="{{ request('desa_id') }}">
+            <input type="hidden" name="dinas_id" value="{{ request('dinas_id') }}">
+            <input type="hidden" name="tipe_pengguna" value="semua">
+
+            <button type="submit" class="btn-cetak">
+                <img src="{{ asset('assets/icons/excel.png') }}" class="icon-excel">
+                Export Excel
+            </button>
+
+        </form>
+
     </div>
+
+</div>
 
     <div class="green-divider"></div>
 
@@ -156,12 +159,12 @@
             <thead>
                 <tr>
                     <th width="5%">No</th>
-                    <th width="15%">Nama Pengguna</th>
-                    <th style="width: 15%; text-align: center; padding-right: 70px;">Pekerjaan</th>
+                    <th width="12%">Nama Pengguna</th>
+                    <th style="width: 15%; text-align: center; padding-right: 20px;">Pekerjaan</th>
                     <th width="15%">Tanggal Penarikan</th>
                     <th width="12%">Jumlah Uang</th>
-                    <th style="width: 10%; text-align: center; padding-right:55px;">E-Wallet</th>
-                    <th style="width: 10%; text-align: center; padding-right: 70px;">Status</th>
+                    <th style="width: 10%;">E-Wallet / Bank</th>
+                    <th style="width: 10%; text-align: center; padding-right: 30px;">Status</th>
                     <th width="10%">Aksi</th>
                 </tr>
             </thead>
@@ -200,7 +203,13 @@
 
                         {{-- 6. E-Wallet --}}
                         <td>
-                            <span class="wallet-type">{{ $penarikan->jenis_ewallet ?? '-' }}</span>
+                            <span class="wallet-type">
+                                @if ($penarikan->jenis_layanan === 'bank')
+                                    {{ $penarikan->nama_bank ?? '-' }}
+                                @else
+                                    {{ $penarikan->jenis_ewallet ?? '-' }}
+                                @endif
+                            </span>
                             <span class="wallet-number">{{ $penarikan->nomor_ewallet ?? '' }}</span>
                         </td>
 
@@ -300,16 +309,18 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Jumlah Penarikan</label>
-                        <input type="text" id="detail-jumlah" class="form-input amount-highlight" readonly>
+                        <label class="form-label">E-Wallet / Bank</label>
+                        <input type="text" id="detail-jenis" class="form-input" readonly>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">E-Wallet</label>
-                        <input type="text" id="detail-jenis" class="form-input" readonly
-                            placeholder="Jenis E-Wallet">
-                        <input type="text" id="detail-ewallet" class="form-input" readonly
-                            placeholder="Nomor E-Wallet" style="margin-top: 8px;">
+                        <label class="form-label">Nomor Rekening / E-Wallet</label>
+                        <input type="text" id="detail-ewallet" class="form-input" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Jumlah Penarikan</label>
+                        <input type="text" id="detail-jumlah" class="form-input amount-highlight" readonly>
                     </div>
 
                     <div class="form-group">

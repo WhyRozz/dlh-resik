@@ -39,15 +39,7 @@
     white-space: nowrap;
 }
 
-/* Filter Section */
-.filter-section {
-    background: transparent;
-    padding: 0;
-    border: none;
-    margin: 0;
-    flex-shrink: 0;
-    justify-content: center;
-}
+
 
 .filter-group {
     display: flex;
@@ -159,13 +151,37 @@
     top: -15px;
 }
 
-/* Page Header (Export Button) */
-.page-header {
-    display: flex;
-    margin-top: 0px; 
-    margin-left: auto;
-    justify-content: flex-end;
+/* ===== FILTER + EXPORT ===== */
 
+.filter-section{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    margin-bottom:15px;
+}
+
+#filterForm{
+    flex:1;
+}
+
+.filter-group{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.page-header{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    margin-left:20px;
+    flex-shrink:0;
+}
+
+#exportForm{
+    margin:0;
 }
 
 .btn-cetak {

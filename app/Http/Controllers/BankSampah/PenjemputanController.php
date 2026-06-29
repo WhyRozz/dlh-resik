@@ -15,14 +15,18 @@ class PenjemputanController extends Controller
 
     public function index(Request $request)
     {
-        // Gunakan Eloquent dengan eager loading relasi petugas
         $query = Penjemputan::with('petugas');
 
-    // FILTER OTOMATIS UNTUK SUB ADMIN DESA
+    // ✅ FILTER OTOMATIS UNTUK SUB ADMIN DESA
         /** @var \App\Models\Admin|null $admin */
         $admin = Auth::guard('admin')->user();
+
         if ($admin && $admin->isSubAdminDesa() && $admin->id_desa) {
-            $query->where('nama_admin', 'LIKE', '%bank_sampah_' . $admin->id_desa . '%');
+            $query->where('id_petugas', function ($q) use ($admin) {
+                $q->select('id_petugas')
+                    ->from('petugas')
+                    ->where('level', 'bank_sampah_' . $admin->id_desa);
+            });
         }
 
         // FILTER BULAN
