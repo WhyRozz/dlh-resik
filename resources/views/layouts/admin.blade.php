@@ -27,7 +27,7 @@
     <div id="notifModal" class="modal-overlay">
         <div class="notif-modal-card">
             <div class="notif-modal-header">
-                <h3 id="modalTitle">Notifikasi</h3>
+                <h3 id="notifModalTitle">Notifikasi</h3>
                 <button class="notif-close-btn" onclick="closeNotifModal()">&times;</button>
             </div>
             <div class="notif-modal-body" id="modalBody">

@@ -2,14 +2,16 @@
 const isPenjemputanPage = window.location.href.includes('/admin/bank-sampah/penjemputan');
 // 1. Ekspos ke global window agar bisa dipanggil dari HTML onclick
 window.openNotifModal = function (type) {
-     if (window.disableNotifications) {
+    console.log("OPEN NOTIF");
+    if (window.disableNotifications) {
         console.log('Notifications disabled on this page');
         return;
     }
     console.log("Opening modal for:", type);
 
     const modal = document.getElementById("notifModal");
-    const title = document.getElementById("modalTitle");
+    const title = document.getElementById("notifModalTitle");
+    console.log(title);
     const body = document.getElementById("modalBody");
     const seeAll = document.getElementById("modalSeeAll");
 
@@ -55,7 +57,7 @@ window.openNotifModal = function (type) {
     } else if (type === 'laporan') {
         title.textContent = '🚨 Laporan Sampah Ilegal';
         seeAll.href = '/admin/laporan';
-        
+
         fetch('/admin/notifications/recent/laporan')
             .then(res => res.json())
             .then(data => {
@@ -77,12 +79,12 @@ window.openNotifModal = function (type) {
                 console.error('Error:', err);
                 body.innerHTML = '<p style="text-align: center; color: red;">Gagal memuat data</p>';
             });
-            
+
     } else if (type === 'penjemputan') {
         // ✅ TAMBAHKAN CASE INI
         title.textContent = '🚚 Penjemputan Baru';
         seeAll.href = '/admin/bank-sampah/penjemputan';
-        
+
         fetch('/admin/notifications/recent/penjemputan')
             .then(res => res.json())
             .then(data => {
@@ -107,10 +109,10 @@ window.openNotifModal = function (type) {
     }
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const badgeWrappers = document.querySelectorAll('.notif-badge-wrapper');
     badgeWrappers.forEach(wrapper => {
-        wrapper.addEventListener('click', function(e) {
+        wrapper.addEventListener('click', function (e) {
             // HANYA stop propagation, JANGAN preventDefault
             e.stopPropagation();
             // Biarkan onclick di HTML yang menangani buka modal
@@ -124,7 +126,7 @@ window.closeNotifModal = function () {
 };
 
 window.updateNotifBadges = function () {
-    
+
     if (window.disableNotifications) {
         console.log('Notifications disabled on this page');
         return;
@@ -167,15 +169,15 @@ window.updateNotifBadges = function () {
 };
 
 /// Init dengan delay untuk memastikan DOM sudah siap
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 DOM Loaded, initializing notifications...');
-    
+
     // Panggil langsung dengan delay kecil
     setTimeout(() => {
         window.updateNotifBadges();
         console.log('✅ Initial badge update done');
     }, 100); // Delay 100ms
-    
+
     // Auto refresh setiap 30 detik
     setInterval(() => {
         window.updateNotifBadges();

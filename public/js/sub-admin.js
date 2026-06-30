@@ -14,7 +14,7 @@ function openSubAdminModal(mode, data = null) {
 
     // ✅ AMBIL ELEMENT DULU
     const modal = document.getElementById('subAdminModal');
-    const modalTitle = document.getElementById('modalTitle');
+    const modalTitle = document.getElementById('subAdminModalTitle');
     const form = document.getElementById('subAdminForm');
     const passwordGroup = document.getElementById('passwordGroup');
     const passwordHint = document.getElementById('passwordHint');
@@ -72,7 +72,7 @@ function openSubAdminModal(mode, data = null) {
         passwordGroup.style.display = 'block';
         passwordHint.textContent = '';
         passwordInput.required = true;
-        btnSubmit.innerHTML = '<i class="fas fa-save"></i> Simpan';
+        btnSubmit.textContent = 'Simpan';
     } else {
         form.action = form.dataset.updateUrl + '/' + data.id_admin;
         document.getElementById('formMethod').value = 'PUT';

@@ -21,7 +21,7 @@
         <div class="search-wrapper-akun" style="position: relative;">
             <i class="fas fa-search search-icon"></i>
             <input type="text" id="searchSubAdmin" class="search-input-akun"
-                placeholder="Cari nama, email, no telepon, wilayah..." onkeyup="filterSubAdmin()">
+                placeholder="Cari sub admin desa..." onkeyup="filterSubAdmin()">
             <button type="button" id="clearSearchSubAdmin"
                 style="display: none; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 14px;"
                 onclick="clearSearchSubAdmin()">
@@ -202,7 +202,7 @@
     <div id="subAdminModal" class="modal-overlay" style="display: none;">
         <div class="modal-container" style="max-width: 600px; max-height: 90vh; display: flex; flex-direction: column;">
             <div class="modal-header" style="flex-shrink: 0;">
-                <h3 id="modalTitle">Tambah Sub Admin Desa</h3>
+                <h3 id="subAdminModalTitle">Tambah Sub Admin Desa</h3>
                 <button type="button" class="modal-close" onclick="closeSubAdminModal()" style="cursor: pointer;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -308,7 +308,7 @@
                 <div class="modal-footer" style="flex-shrink: 0;">
                     <button type="button" class="btn-secondary" onclick="closeSubAdminModal()">Batal</button>
                     <button type="submit" class="btn-primary-modal" id="btnSubmit">
-                        <i class="fas fa-save"></i> Simpan
+                        Simpan
                     </button>
                 </div>
             </form>

@@ -28,8 +28,9 @@ class AuthController extends Controller
             'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
             'tanggal_lahir' => 'nullable|date|before:today',
             'alamat' => 'nullable|string',
-            'id_desa' => 'required|exists:desa,id_desa',
-            'id_dinas' => 'nullable|exists:dinas,id_dinas',
+            'id_desa' => 'required_if:tipe,masyarakat|nullable|exists:desa,id_desa',
+
+            'id_dinas' => 'required_if:tipe,pns|nullable|exists:dinas,id_dinas',
         ]);
 
         if ($validator->fails()) {
@@ -91,7 +92,7 @@ class AuthController extends Controller
                 'tanggal_lahir' => $request->tanggal_lahir,
                 'alamat' => $request->alamat,
                 'id_dinas' => $request->id_dinas,
-                'id_desa' => $request->id_desa,
+                'id_desa' => null,
                 'barcode_id' => $barcode_id,
                 'saldo' => 0.00,
             ]);
@@ -140,9 +141,23 @@ class AuthController extends Controller
                 'status' => 'success',
                 'timestamp' => now()->format('Y-m-d H:i:s'),
                 'data' => [
-                    'tipe' => 'masyarakat',  // ← Role: masyarakat
-                    'user' => $user,
-                    'redirect' => '/home-user'  // ← Redirect ke home user
+                    'tipe' => 'masyarakat',
+                    'user' => [
+                        'id_masyarakat' => $user->id_masyarakat,
+                        'nama' => $user->nama,
+                        'email' => $user->email,
+                        'no_telepon' => $user->no_telepon,
+                        'tanggal_lahir' => $user->tanggal_lahir,
+                        'jenis_kelamin' => $user->jenis_kelamin,
+                        'alamat' => $user->alamat,
+                        'foto' => $user->foto,
+                        'barcode_id' => $user->barcode_id,
+
+                        'id_desa' => $user->id_desa,
+                        'nama_desa' => optional($user->desa)->nama_desa,
+                        'nama_kecamatan' => optional(optional($user->desa)->kecamatan)->nama_kecamatan,
+                    ],
+                    'redirect' => '/home-user'
                 ],
                 'message' => 'Login berhasil'
             ]);
@@ -155,9 +170,22 @@ class AuthController extends Controller
                 'status' => 'success',
                 'timestamp' => now()->format('Y-m-d H:i:s'),
                 'data' => [
-                    'tipe' => 'pns',  // ← Role: pns (ASN)
-                    'user' => $user,
-                    'redirect' => '/home-user'  // ← Redirect ke home user (sama dengan masyarakat)
+                    'tipe' => 'pns',
+                    'user' => [
+                        'id_pns' => $user->id_pns,
+                        'nama' => $user->nama,
+                        'email' => $user->email,
+                        'no_telepon' => $user->no_telepon,
+                        'tanggal_lahir' => $user->tanggal_lahir,
+                        'jenis_kelamin' => $user->jenis_kelamin,
+                        'alamat' => $user->alamat,
+                        'foto' => $user->foto,
+                        'barcode_id' => $user->barcode_id,
+
+                        'id_dinas' => $user->id_dinas,
+                        'nama_dinas' => optional($user->dinas)->nama_dinas,
+                    ],
+                    'redirect' => '/home-user'
                 ],
                 'message' => 'Login berhasil'
             ]);
