@@ -80,4 +80,29 @@ class AuthController extends Controller
 
         return redirect()->route('admin.login');
     }
+
+    public function saveFcmToken(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string',
+        ]);
+
+        /** @var \App\Models\Admin|null $admin */
+        $admin = Auth::guard('admin')->user();
+
+        if (!$admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Admin belum login.'
+            ], 401);
+        }
+
+        $admin->fcm_token = $request->token;
+        $admin->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'FCM Token berhasil disimpan.'
+        ]);
+    }
 }

@@ -30,6 +30,7 @@ class Masyarakat extends Authenticatable
         'foto',
         'barcode_id',
         'saldo',
+        'fcm_token',
         'total_setoran', 
         'otp',
         'otp_expires',

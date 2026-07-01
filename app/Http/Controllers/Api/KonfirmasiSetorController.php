@@ -10,6 +10,7 @@ use App\Models\JenisSampah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Services\NotificationService;
 
 class KonfirmasiSetorController extends Controller
 {
@@ -142,6 +143,22 @@ class KonfirmasiSetorController extends Controller
                 }
             });
 
+            $transaksi->refresh();
+
+            $user = $transaksi->masyarakat ?? $transaksi->pns;
+
+            $notification = new NotificationService();
+
+            $notification->sendToUser(
+                $user?->fcm_token,
+                "Setoran Dikonfirmasi",
+                "Setoran sampah Anda telah dikonfirmasi.",
+                [
+                    "type" => "deposit_confirmed",
+                    "id" => (string)$transaksi->id_transaksi
+                ]
+            );
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Berhasil dikonfirmasi & saldo user ditambahkan'
@@ -184,6 +201,21 @@ class KonfirmasiSetorController extends Controller
                             ->increment('total_setoran', $transaksi->berat);
                     }
                 });
+
+                $user = $transaksi->masyarakat ?? $transaksi->pns;
+
+                $notification = new NotificationService();
+
+                $notification->sendToUser(
+                    $user?->fcm_token,
+                    "Setoran Dikonfirmasi",
+                    "Setoran sampah Anda telah dikonfirmasi otomatis.",
+                    [
+                        "type" => "deposit_confirmed",
+                        "id" => (string)$transaksi->id_transaksi
+                    ]
+                );
+
                 $count++;
             }
 
@@ -210,6 +242,20 @@ class KonfirmasiSetorController extends Controller
 
         $transaksi->status_transaksi = 'dibatalkan'; // ✅ ENUM: dibatalkan
         $transaksi->save();
+
+        $user = $transaksi->masyarakat ?? $transaksi->pns;
+
+        $notification = new NotificationService();
+
+        $notification->sendToUser(
+            $user?->fcm_token,
+            "Setoran Ditolak",
+            "Setoran sampah Anda ditolak oleh petugas.",
+            [
+                "type" => "deposit_rejected",
+                "id" => (string)$transaksi->id_transaksi
+            ]
+        );
 
         return response()->json(['status' => 'success', 'message' => 'Transaksi ditolak'], 200);
     }

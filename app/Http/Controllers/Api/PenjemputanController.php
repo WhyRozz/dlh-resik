@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Penjemputan;
+use App\Models\Petugas;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -29,6 +31,15 @@ class PenjemputanController extends Controller
             ], 422);
         }
 
+        $petugas = Petugas::find($request->id_petugas);
+
+        if (!$petugas) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Petugas tidak ditemukan'
+            ], 404);
+        }
+
         try {
             $data = [
                 'id_petugas' => $request->id_petugas,
@@ -47,12 +58,20 @@ class PenjemputanController extends Controller
 
             $penjemputan = Penjemputan::create($data);
 
+            $notification = new NotificationService();
+
+            $notification->sendPickup(
+                $petugas->nama_lengkap,
+                $petugas->desa?->nama_desa ?? "Tidak diketahui",
+                $petugas->desa_id ?? 0,
+                $penjemputan->id
+            );
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Penjemputan berhasil diajukan',
                 'data' => $penjemputan
             ], 201);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -60,5 +79,4 @@ class PenjemputanController extends Controller
             ], 500);
         }
     }
-    }
-
+}

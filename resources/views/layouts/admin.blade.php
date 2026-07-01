@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="pusher-key" content="{{ config('broadcasting.connections.pusher.key', '') }}">
-    <meta name="pusher-cluster" content="{{ config('broadcasting.connections.pusher.options.cluster', 'ap1') }}"
-
+    <meta name="pusher-cluster" content="{{ config('broadcasting.connections.pusher.options.cluster', 'ap1') }}">
     <title>@yield('title', 'Admin RESIK')</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
@@ -18,7 +18,9 @@
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
     <link rel="stylesheet" href="{{ asset('css/mobile-hamburger.css') }}">
-    
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     @stack('styles')
 </head>
 
@@ -38,15 +40,15 @@
             </div>
         </div>
     </div>
-    @include('admin.partials.sidebar') 
+    @include('admin.partials.sidebar')
 
     @include('admin.partials.mobile-navbar')
-        <div class="admin-wrapper">
+    <div class="admin-wrapper">
         <main>
             @yield('content')
         </main>
     </div>
-    
+
     <!-- Sidebar JS -->
     <script src="{{ asset('js/sidebar.js') }}"></script>
     <script src="{{ asset('js/mobile-hamburger.js') }}"></script>
@@ -55,36 +57,36 @@
 
 
     <script>
-// Pastikan fungsi closeNotifModal tersedia
-function closeNotifModal() {
-    const modal = document.getElementById('notifModal');
-    if (modal) {
-        modal.style.display = 'none';
-        modal.classList.remove('show');
-    }
-}
+        // Pastikan fungsi closeNotifModal tersedia
+        function closeNotifModal() {
+            const modal = document.getElementById('notifModal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+            }
+        }
 
-// Close modal saat klik di luar area modal
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('notifModal');
-    
-    if (modal) {
-        // Close saat klik di overlay (luar modal)
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeNotifModal();
+        // Close modal saat klik di luar area modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('notifModal');
+
+            if (modal) {
+                // Close saat klik di overlay (luar modal)
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeNotifModal();
+                    }
+                });
+
+                // Close dengan tombol ESC
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && modal.style.display !== 'none') {
+                        closeNotifModal();
+                    }
+                });
             }
         });
-        
-        // Close dengan tombol ESC
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modal.style.display !== 'none') {
-                closeNotifModal();
-            }
-        });
-    }
-});
-</script>
+    </script>
 
     @stack('scripts')
 </body>

@@ -26,6 +26,8 @@ use App\Http\Controllers\Api\KonfirmasiSetorController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::post('/save-fcm-token', [AuthController::class, 'saveFcmToken']);
+
 Route::get('/kecamatan', [KecamatanController::class, 'index']);
 Route::get('/desa', [DesaController::class, 'index']); // Support ?kecamatan_id= filter
 

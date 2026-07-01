@@ -164,6 +164,21 @@ class PenjemputanController extends Controller
         if (!$affected) {
             return redirect()->back()->with('error', 'Data sudah diproses atau tidak ditemukan.');
         }
+
+        $penjemputan = Penjemputan::with('petugas')->find($id);
+
+        $notification = new \App\Services\NotificationService();
+
+        $notification->sendToUser(
+            $penjemputan->petugas?->fcm_token,
+            "Penjemputan Disetujui",
+            "Permintaan penjemputan Anda telah disetujui.",
+            [
+                "type" => "pickup_approved",
+                "id" => (string)$penjemputan->id
+            ]
+        );
+
         return redirect()->back()->with('success', 'Penjemputan berhasil disetujui.');
     }
 
@@ -177,6 +192,21 @@ class PenjemputanController extends Controller
         if (!$affected) {
             return redirect()->back()->with('error', 'Gagal menolak data.');
         }
+
+        $penjemputan = Penjemputan::with('petugas')->find($id);
+
+        $notification = new \App\Services\NotificationService();
+
+        $notification->sendToUser(
+            $penjemputan->petugas?->fcm_token,
+            "Penjemputan Ditolak",
+            "Permintaan penjemputan Anda ditolak.",
+            [
+                "type" => "pickup_rejected",
+                "id" => (string)$penjemputan->id
+            ]
+        );
+
         return redirect()->back()->with('success', 'Penjemputan ditolak.');
     }
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\BankSampah;
 
+use App\Services\FirebaseService;
+use App\Models\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Penarikan;
 use App\Models\Masyarakat;
@@ -173,6 +175,28 @@ class PenarikanController extends Controller
 
             DB::commit();
 
+            $firebase = new FirebaseService();
+
+            $admins = Admin::whereNotNull('fcm_token')->get();
+
+            foreach ($admins as $admin) {
+
+                $firebase->sendNotification(
+
+                    $admin->fcm_token,
+
+                    "Pengajuan Penarikan Baru",
+
+                    $user->nama . " mengajukan penarikan saldo.",
+
+                    [
+                        "id" => (string)$penarikan->id_penarikan,
+                        "type" => "withdrawal"
+                    ]
+
+                );
+            }
+
             Log::info('About to broadcast event...');
 
             // 3. ✅ BROADCAST EVENT (setelah commit agar data pasti tersimpan)
@@ -262,7 +286,49 @@ class PenarikanController extends Controller
                 'tanggal_disetujui' => now(),
             ]);
 
+            $notification = new \App\Services\NotificationService();
+
+            $user = $penarikan->masyarakat ?? $penarikan->pns;
+
+            $notification->sendToUser(
+                $user?->fcm_token,
+                "Status Penarikan",
+                "Pengajuan penarikan Anda {$statusBaru}.",
+                [
+                    "type" => "withdrawal_result",
+                    "id" => (string)$penarikan->id_penarikan
+                ]
+            );
+
             DB::commit();
+
+            $user = $penarikan->masyarakat ?? $penarikan->pns;
+
+            $notification = new \App\Services\NotificationService();
+
+            if ($statusBaru == 'berhasil') {
+
+                $notification->sendToUser(
+                    $user?->fcm_token,
+                    "Penarikan Disetujui",
+                    "Pengajuan penarikan Anda telah disetujui.",
+                    [
+                        "type" => "withdrawal_approved",
+                        "id" => (string)$penarikan->id_penarikan
+                    ]
+                );
+            } elseif ($statusBaru == 'ditolak') {
+
+                $notification->sendToUser(
+                    $user?->fcm_token,
+                    "Penarikan Ditolak",
+                    "Pengajuan penarikan Anda ditolak.",
+                    [
+                        "type" => "withdrawal_rejected",
+                        "id" => (string)$penarikan->id_penarikan
+                    ]
+                );
+            }
 
             return response()->json([
                 'success' => true,

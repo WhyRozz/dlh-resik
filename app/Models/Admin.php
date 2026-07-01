@@ -21,6 +21,7 @@ class Admin extends Authenticatable
         'password_encrypted',
         'otp',
         'otp_expires',
+        'fcm_token',
         'role',
         'id_desa',
         'id_kecamatan',

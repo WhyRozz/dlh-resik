@@ -572,4 +572,62 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function saveFcmToken(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'tipe' => 'required|in:masyarakat,pns,petugas',
+            'fcm_token' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        switch ($request->tipe) {
+
+            case 'masyarakat':
+
+                $user = Masyarakat::find($request->user_id);
+
+                break;
+
+            case 'pns':
+
+                $user = Pns::find($request->user_id);
+
+                break;
+
+            case 'petugas':
+
+                $user = Petugas::find($request->user_id);
+
+                break;
+
+            default:
+
+                $user = null;
+        }
+
+        if (!$user) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan'
+            ], 404);
+        }
+
+        $user->fcm_token = $request->fcm_token;
+
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'FCM Token berhasil disimpan'
+        ]);
+    }
 }

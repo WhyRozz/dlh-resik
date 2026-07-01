@@ -31,6 +31,7 @@ class Pns extends Authenticatable
         'id_desa',
         'barcode_id',
         'saldo',
+        'fcm_token',
         'total_setoran',
         'otp',
         'otp_expires',

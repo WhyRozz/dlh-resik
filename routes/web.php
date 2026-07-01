@@ -54,6 +54,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Logout
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
+        //fcm token
+        Route::post('/save-fcm-token', [AdminAuthController::class, 'saveFcmToken'])
+            ->name('save-fcm-token');
+
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

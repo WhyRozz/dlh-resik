@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Laporan;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -41,9 +42,11 @@ class LaporanController extends Controller
 
             // ✅ Validasi user berdasarkan tipe
             if ($tipe === 'masyarakat') {
-                $user = \App\Models\Masyarakat::find($userId);
+
+                $user = \App\Models\Masyarakat::with('desa')->find($userId);
             } else {
-                $user = \App\Models\Pns::find($userId);
+
+                $user = \App\Models\Pns::with('dinas')->find($userId);
             }
 
             if (!$user) {
@@ -75,6 +78,26 @@ class LaporanController extends Controller
                 'status'        => 'Diproses',
                 'balasan'       => null,
             ]);
+
+            $notification = new NotificationService();
+
+            if ($tipe == 'masyarakat') {
+
+                $notification->sendReport(
+                    $user->nama,
+                    optional($user->desa)->nama_desa ?? "Tidak diketahui",
+                    $user->id_desa,
+                    $laporan->id
+                );
+            } else {
+
+                $notification->sendReport(
+                    $user->nama,
+                    optional($user->dinas)->nama_dinas ?? "DLH",
+                    0,
+                    $laporan->id
+                );
+            }
 
             DB::commit();
 

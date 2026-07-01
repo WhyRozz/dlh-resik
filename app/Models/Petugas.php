@@ -21,6 +21,7 @@ class Petugas extends Authenticatable
         'no_telepon',
         'foto',
         'level',
+        'fcm_token',
     ];
 
     protected $hidden = [

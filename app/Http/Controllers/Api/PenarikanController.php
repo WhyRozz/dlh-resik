@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Events\NewWithdrawalRequest;
+use App\Services\NotificationService;
 
 class PenarikanController extends Controller
 {
@@ -42,9 +43,13 @@ class PenarikanController extends Controller
                 : $request->id_pns;
 
             if ($request->tipe_user === 'masyarakat') {
-                $user = \App\Models\Masyarakat::find($request->id_masyarakat);
+
+                $user = \App\Models\Masyarakat::with('desa')
+                    ->find($request->id_masyarakat);
             } else {
-                $user = \App\Models\Pns::find($request->id_pns);
+
+                $user = \App\Models\Pns::with('dinas')
+                    ->find($request->id_pns);
             }
 
             if (!$user) {
@@ -81,6 +86,28 @@ class PenarikanController extends Controller
                 'updated_by' => null,
                 'tanggal_disetujui' => null,
             ]);
+
+            $notification = new NotificationService();
+
+            if ($request->tipe_user == 'masyarakat') {
+
+                $notification->sendWithdrawal(
+                    $user->nama,
+                    optional($user->desa)->nama_desa ?? "Tidak diketahui",
+                    $user->id_desa,
+                    $request->jumlah_uang,
+                    $penarikan->id_penarikan
+                );
+            } else {
+
+                $notification->sendWithdrawal(
+                    $user->nama,
+                    optional($user->dinas)->nama_dinas ?? "DLH",
+                    0,
+                    $request->jumlah_uang,
+                    $penarikan->id_penarikan
+                );
+            }
 
             event(new NewWithdrawalRequest($penarikan));
 

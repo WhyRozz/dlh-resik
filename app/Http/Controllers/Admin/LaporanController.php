@@ -65,6 +65,22 @@ class LaporanController extends Controller
 
             $laporan->update($updateData);
 
+            $laporan->refresh();
+
+            $notification = new \App\Services\NotificationService();
+
+            $user = $laporan->masyarakat ?? $laporan->pns;
+
+            $notification->sendToUser(
+                $user?->fcm_token,
+                "Status Laporan",
+                "Laporan Anda telah {$laporan->status}.",
+                [
+                    "type" => "report_result",
+                    "id" => (string)$laporan->id
+                ]
+            );
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);

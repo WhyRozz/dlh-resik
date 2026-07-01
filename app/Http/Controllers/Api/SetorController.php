@@ -7,6 +7,7 @@ use App\Models\Masyarakat;
 use App\Models\Pns;
 use App\Models\JenisSampah;
 use App\Models\TransaksiSetor;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -111,6 +112,14 @@ class SetorController extends Controller
         try {
             DB::beginTransaction();
 
+            if ($request->id_masyarakat) {
+                $user = Masyarakat::with('desa')
+                    ->find($request->id_masyarakat);
+            } else {
+                $user = Pns::with(['desa', 'dinas'])
+                    ->find($request->id_pns);
+            }
+
             $jenisSampah = JenisSampah::find($request->id_jenis_sampah);
             if (!$jenisSampah) {
                 return response()->json([
@@ -136,9 +145,18 @@ class SetorController extends Controller
                 'tanggal_transaksi' => $request->tanggal_transaksi ?? now(),
                 'status_transaksi' => 'selesai', // ✅ Default ENUM
             ]);
-
             // ❌❌❌ INCREMENT SALDO DIHAPUS DARI SINI ❌❌❌
             // Saldo hanya akan ditambah saat konfirmasi (confirm/autoConfirm)
+
+            $notification = new NotificationService();
+
+            $notification->sendDeposit(
+                $user->nama,
+                optional($user->desa)->nama_desa ?? "Tidak diketahui",
+                $user->id_desa ?? 0,
+                $berat,
+                $transaksi->id_transaksi
+            );
 
             DB::commit();
             Cache::put($cacheKey, true, 30);
