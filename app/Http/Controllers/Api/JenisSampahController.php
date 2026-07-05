@@ -15,13 +15,13 @@ class JenisSampahController extends Controller
     public function index()
     {
         try {
-            $jenisSampah = JenisSampah::orderBy('jenis', 'asc')->get()->map(function($item) {
+            $jenisSampah = JenisSampah::orderBy('jenis', 'asc')->get()->map(function ($item) {
                 return [
                     'id_jenis_sampah' => $item->id_jenis_sampah,
                     'jenis' => $item->jenis,
                     'satuan' => $item->satuan ?? 'kg',
                     'harga' => (float) ($item->harga ?? 0),
-                    'gambar' => $item->gambar ? asset('storage/' . $item->gambar) : null,
+                    'gambar' => $item->gambar ? $this->getUrlGambar($item->gambar) : null,
                 ];
             });
 
@@ -30,7 +30,6 @@ class JenisSampahController extends Controller
                 'data' => $jenisSampah,
                 'total' => $jenisSampah->count()
             ], 200);
-
         } catch (\Exception $e) {
             \Log::error('JenisSampah List Error: ' . $e->getMessage());
             return response()->json([
@@ -38,5 +37,15 @@ class JenisSampahController extends Controller
                 'message' => 'Gagal memuat data jenis sampah'
             ], 500);
         }
+    }
+
+    private function getUrlGambar($path)
+    {
+        if (app()->environment('production')) {
+            // Hosting: pakai folder uploads
+            return asset('uploads/' . $path);
+        }
+        // Local: pakai storage link dengan IP yang bisa diakses emulator
+        return url('storage/' . $path);
     }
 }

@@ -83,8 +83,8 @@ function showDetail(id) {
             document.getElementById('modalLokasi').value = data.lokasi || '-';
             document.getElementById('modalKeterangan').value = data.keterangan || '-';
 
-            // ✅ BUILD URL GAMBAR
-            const imgUrl = data.foto ? `/storage/${data.foto}` : '/images/no-image.png';
+            // ✅ BUILD URL GAMBAR (URL sudah lengkap dari API)
+            const imgUrl = data.foto || '/images/no-image.png';
             document.getElementById('modalFoto').src = imgUrl;
 
             modal.style.display = 'flex';

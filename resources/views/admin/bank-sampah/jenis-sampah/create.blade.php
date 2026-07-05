@@ -31,7 +31,7 @@
                 <div class="image-upload" onclick="document.getElementById('gambar').click()" style="cursor: pointer;">
                     <i class="fas fa-cloud-upload-alt"></i>
                     <p>Klik untuk upload foto</p>
-                    <small>Format: JPG, PNG. Max: 2MB</small>
+                    <small>Format: JPG, PNG. Max: 10MB</small>
                     <div class="image-preview" id="imagePreview"></div>
                 </div>
                 <input type="file" id="gambar" name="gambar" accept="image/*" style="display: none;">

@@ -54,9 +54,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Logout
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
-        //fcm token
+        // FCM Token (Multi-Device)
         Route::post('/save-fcm-token', [AdminAuthController::class, 'saveFcmToken'])
-            ->name('save-fcm-token');
+            ->name('fcm.save-token');
 
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

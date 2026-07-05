@@ -149,14 +149,9 @@ class KonfirmasiSetorController extends Controller
 
             $notification = new NotificationService();
 
-            $notification->sendToUser(
+            $notification->sendDepositResult(
                 $user?->fcm_token,
-                "Setoran Dikonfirmasi",
-                "Setoran sampah Anda telah dikonfirmasi.",
-                [
-                    "type" => "deposit_confirmed",
-                    "id" => (string)$transaksi->id_transaksi
-                ]
+                $transaksi->total_rupiah
             );
 
             return response()->json([
@@ -206,14 +201,9 @@ class KonfirmasiSetorController extends Controller
 
                 $notification = new NotificationService();
 
-                $notification->sendToUser(
+                $notification->sendDepositResult(
                     $user?->fcm_token,
-                    "Setoran Dikonfirmasi",
-                    "Setoran sampah Anda telah dikonfirmasi otomatis.",
-                    [
-                        "type" => "deposit_confirmed",
-                        "id" => (string)$transaksi->id_transaksi
-                    ]
+                    $transaksi->total_rupiah
                 );
 
                 $count++;
@@ -247,14 +237,8 @@ class KonfirmasiSetorController extends Controller
 
         $notification = new NotificationService();
 
-        $notification->sendToUser(
-            $user?->fcm_token,
-            "Setoran Ditolak",
-            "Setoran sampah Anda ditolak oleh petugas.",
-            [
-                "type" => "deposit_rejected",
-                "id" => (string)$transaksi->id_transaksi
-            ]
+        $notification->sendDepositRejected(
+            $user?->fcm_token
         );
 
         return response()->json(['status' => 'success', 'message' => 'Transaksi ditolak'], 200);

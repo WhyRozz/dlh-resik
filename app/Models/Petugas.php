@@ -96,8 +96,10 @@ class Petugas extends Authenticatable
             $desa = \App\Models\Desa::with('kecamatan')->find($idDesa);
 
             if ($desa && $desa->kecamatan) {
-                return 'Bank Sampah ' . strtoupper($desa->nama_desa) .
-                    ' (' . $desa->nama_desa . ', ' . $desa->kecamatan->nama_kecamatan . ')';
+                return 'Bank Sampah Kecamatan ' .
+                    $desa->kecamatan->nama_kecamatan .
+                    ', Desa ' .
+                    $desa->nama_desa;
             }
         }
 

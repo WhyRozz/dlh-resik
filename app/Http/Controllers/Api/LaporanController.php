@@ -58,7 +58,9 @@ class LaporanController extends Controller
 
             // ✅ Upload Foto
             if ($request->hasFile('foto')) {
-                $path = $request->file('foto')->store('laporan', 'public');
+                // Local pakai 'public' (storage), Production pakai 'uploads'
+                $disk = app()->environment('production') ? 'uploads' : 'public';
+                $path = $request->file('foto')->store('laporan', $disk);
             } else {
                 return response()->json([
                     'status' => 'error',
@@ -85,7 +87,7 @@ class LaporanController extends Controller
 
                 $notification->sendReport(
                     $user->nama,
-                    optional($user->desa)->nama_desa ?? "Tidak diketahui",
+                    $laporan->lokasi,
                     $user->id_desa,
                     $laporan->id
                 );
@@ -93,8 +95,8 @@ class LaporanController extends Controller
 
                 $notification->sendReport(
                     $user->nama,
-                    optional($user->dinas)->nama_dinas ?? "DLH",
-                    0,
+                    $laporan->lokasi,
+                    $user->id_desa,
                     $laporan->id
                 );
             }
@@ -143,28 +145,18 @@ class LaporanController extends Controller
             $laporans = $query->orderBy('created_at', 'desc')
                 ->get()
                 ->map(function ($l) {
-                    // ✅ CEK: Apakah URL sudah lengkap (http://)?
-                    $fotoUrl = $l->foto;
-
-                    if ($fotoUrl) {
-                        // Jika sudah http://, return apa adanya
-                        if (str_starts_with($fotoUrl, 'http')) {
-                            $fotoUrl = $fotoUrl;
-                        } else {
-                            // Jika masih path relatif, tambahkan asset()
-                            $fotoUrl = asset('storage/' . $fotoUrl);
-                        }
-                    }
-
                     return [
                         'id' => $l->id,
                         'judul' => strlen($l->keterangan) > 30 ? substr($l->keterangan, 0, 30) . '...' : $l->keterangan,
                         'keterangan' => $l->keterangan,
                         'alamat' => $l->lokasi,
                         'lokasi' => $l->lokasi,
-                        'tanggal' => $l->tanggal ? $l->tanggal->format('l, d F Y') : '-',
+                        'tanggal' => $l->created_at
+                            ? $l->created_at->timezone('Asia/Jakarta')->translatedFormat('l, d F Y • H:i')
+                            : '-',
                         'status' => $l->status,
-                        'foto' => $fotoUrl, // ✅ URL yang sudah di-fix
+                        'foto' => $l->foto ? $this->getUrlFoto($l->foto) : null,
+                        'foto_balasan' => $l->foto_balasan ? $this->getUrlFoto($l->foto_balasan) : null,
                         'nama' => $l->nama,
                         'balasan' => $l->balasan,
                     ];
@@ -174,5 +166,20 @@ class LaporanController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
+    }
+
+    private function getUrlFoto($path)
+    {
+        // Jika sudah URL lengkap (http/https), return langsung
+        if (str_starts_with($path, 'http')) {
+            return $path;
+        }
+
+        if (app()->environment('production')) {
+            // Hosting: pakai folder uploads
+            return asset('uploads/' . $path);
+        }
+        // Local: pakai storage link
+        return asset('storage/' . $path);
     }
 }

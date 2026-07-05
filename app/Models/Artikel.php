@@ -25,10 +25,15 @@ class Artikel extends Model
     ];
 
     /**
-     * Get foto URL attribute
+     * Get foto URL attribute (dinamis berdasarkan environment)
      */
     public function getFotoUrlAttribute()
     {
-        return $this->foto ? asset('storage/' . $this->foto) : null;
+        if (!$this->foto) return null;
+        
+        if (app()->environment('production')) {
+            return asset('uploads/' . $this->foto);
+        }
+        return asset('storage/' . $this->foto);
     }
 }

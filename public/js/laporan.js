@@ -43,7 +43,10 @@ function showDetailModal(rowElement) {
     // ✅ Isi data ke modal
     document.getElementById('modalId').value = id;
     document.getElementById('modalNama').value = nama;
+    // Set lokasi di input dan link Maps
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lokasi)}`;
     document.getElementById('modalLokasi').value = lokasi;
+    document.getElementById('modalLokasiLink').href = mapsUrl;
     document.getElementById('modalTanggal').value = tanggal;
     document.getElementById('modalKeterangan').value = keterangan;
 

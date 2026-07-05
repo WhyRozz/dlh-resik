@@ -51,14 +51,17 @@ class LaporanController extends Controller
 
             // ✅ Handle upload foto balasan
             if ($request->hasFile('foto_balasan')) {
+                // Local pakai 'public' (storage), Production pakai 'uploads'
+                $disk = app()->environment('production') ? 'uploads' : 'public';
+                
                 // Hapus foto lama jika ada
-                if ($laporan->foto_balasan && Storage::disk('public')->exists($laporan->foto_balasan)) {
-                    Storage::disk('public')->delete($laporan->foto_balasan);
+                if ($laporan->foto_balasan && Storage::disk($disk)->exists($laporan->foto_balasan)) {
+                    Storage::disk($disk)->delete($laporan->foto_balasan);
                 }
 
                 $file = $request->file('foto_balasan');
                 $filename = time() . '_balasan_' . $laporan->id . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('laporan/balasan', $filename, 'public');
+                $path = $file->storeAs('laporan/balasan', $filename, $disk);
 
                 $updateData['foto_balasan'] = $path;
             }
@@ -70,15 +73,9 @@ class LaporanController extends Controller
             $notification = new \App\Services\NotificationService();
 
             $user = $laporan->masyarakat ?? $laporan->pns;
-
-            $notification->sendToUser(
+            $notification->sendReportResult(
                 $user?->fcm_token,
-                "Status Laporan",
-                "Laporan Anda telah {$laporan->status}.",
-                [
-                    "type" => "report_result",
-                    "id" => (string)$laporan->id
-                ]
+                $laporan->status
             );
 
             return response()->json(['success' => true]);

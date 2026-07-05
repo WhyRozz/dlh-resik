@@ -10,11 +10,29 @@ class ArtikelController extends Controller
 {
     public function index()
     {
-        $artikels = Artikel::orderBy('tanggal', 'desc')->get();
+        $artikels = Artikel::orderBy('tanggal', 'desc')->get()->map(function ($item) {
+            return [
+                'id_artikel' => $item->id_artikel,
+                'judul' => $item->judul,
+                'deskripsi' => $item->deskripsi,
+                'tanggal' => $item->tanggal ? $item->tanggal->format('d-m-Y') : null,
+                'foto' => $item->foto ? $this->getUrlFoto($item->foto) : null,
+            ];
+        });
 
         return response()->json([
             'status' => 'success',
             'data' => $artikels
         ]);
+    }
+
+    private function getUrlFoto($path)
+    {
+        if (app()->environment('production')) {
+            // Hosting: pakai folder uploads
+            return asset('uploads/' . $path);
+        }
+        // Local: pakai storage link
+        return asset('storage/' . $path);
     }
 }

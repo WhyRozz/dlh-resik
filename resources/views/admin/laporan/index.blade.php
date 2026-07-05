@@ -25,7 +25,7 @@
                         <th>Foto</th>
                         <th>Nama</th>
                         <th style="text-align: center;">Lokasi</th>
-                        <th>Status</th>
+                        <th style="text-align: left; padding-left: 30px;">Status</th>
                         <th>Tanggal</th>
                     </tr>
                 </thead>
@@ -54,32 +54,16 @@
 
                             // Handle foto laporan dari mobile app
                             if ($foto) {
-                                // Cek berbagai kemungkinan lokasi file
-                                if (strpos($foto, 'storage/') === 0) {
-                                    $fotoUrl = asset($foto);
-                                } elseif (strpos($foto, 'uploads/') === 0) {
-                                    $fotoUrl = asset($foto);
-                                } elseif (strpos($foto, 'laporan/') === 0) {
-                                    // Path dari mobile: laporan/xxx.jpg
-                                    $fotoUrl = asset('storage/' . $foto);
-                                } else {
-                                    $fotoUrl = asset('storage/laporan/' . $foto);
-                                }
+                                $disk = app()->environment('production') ? 'uploads' : 'storage';
+                                $fotoUrl = asset($disk . '/' . $foto);
                             } else {
                                 $fotoUrl = 'https://via.placeholder.com/300x200?text=Tidak+Ada+Foto';
                             }
 
                             // Handle foto balasan
                             if ($fotoBalasan) {
-                                if (strpos($fotoBalasan, 'storage/') === 0) {
-                                    $fotoBalasanUrl = asset($fotoBalasan);
-                                } elseif (strpos($fotoBalasan, 'uploads/') === 0) {
-                                    $fotoBalasanUrl = asset($fotoBalasan);
-                                } elseif (strpos($fotoBalasan, 'laporan/balasan/') === 0) {
-                                    $fotoBalasanUrl = asset('storage/' . $fotoBalasan);
-                                } else {
-                                    $fotoBalasanUrl = asset('storage/laporan/balasan/' . $fotoBalasan);
-                                }
+                                $disk = app()->environment('production') ? 'uploads' : 'storage';
+                                $fotoBalasanUrl = asset($disk . '/' . $fotoBalasan);
                             } else {
                                 $fotoBalasanUrl = '';
                             }
@@ -102,10 +86,19 @@
                                 @endif
                             </td>
                             <td data-label="Nama">{{ $nama }}</td>
-                            <td data-label="Lokasi">{{ $lokasi }}</td>
+                            <td data-label="Lokasi">
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($lokasi) }}"
+                                    target="_blank"
+                                    style="color: #2f8cea; text-decoration: none; font-weight: 600; cursor: pointer;"
+                                    title="Klik untuk buka di Google Maps">
+                                    {{ $lokasi }}
+                                </a>
+                            </td>
                             <td data-label="Status"><span
                                     class="status-badge status-{{ $statusClass }}">{{ $status }}</span></td>
-                            <td data-label="Tanggal">{{ $tanggal }}</td>
+                            <td data-label="Tanggal">
+                                {{ \Carbon\Carbon::parse($laporan->tanggal)->format('d-m-Y H:i') }}
+                            </td>
                         </tr>
                     @endforeach
 
@@ -175,15 +168,22 @@
                     <div>
                         <label
                             style="display: block; margin-bottom: 5px; font-weight: 600; color: #555; font-size: 14px;">Lokasi:</label>
-                        <input type="text" id="modalLokasi" class="form-input" readonly
-                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5;">
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="text" id="modalLokasi" readonly
+                                style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5;">
+                            <a href="#" id="modalLokasiLink" target="_blank"
+                                style="color: #2f8cea; text-decoration: none; font-weight: 600; white-space: nowrap; padding: 10px 15px;">
+                                Buka Maps
+                            </a>
+                        </div>
                     </div>
 
                     <div>
                         <label
                             style="display: block; margin-bottom: 5px; font-weight: 600; color: #555; font-size: 14px;">Tanggal:</label>
                         <input type="text" id="modalTanggal" class="form-input" readonly
-                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5;">
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5;"
+                            value="{{ \Carbon\Carbon::parse($laporan->tanggal)->format('d-m-Y H:i') }}">
                     </div>
 
                     <div>
@@ -205,7 +205,8 @@
                                     <span>Diproses</span>
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="radio" name="status" value="Diterima" style="accent-color: #2e8b57;">
+                                    <input type="radio" name="status" value="Diterima"
+                                        style="accent-color: #2e8b57;">
                                     <span>Diterima</span>
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">

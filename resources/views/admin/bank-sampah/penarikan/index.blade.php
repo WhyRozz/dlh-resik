@@ -160,7 +160,7 @@
                 <tr>
                     <th width="5%">No</th>
                     <th width="12%">Nama Pengguna</th>
-                    <th style="width: 15%; text-align: center; padding-right: 20px;">Pekerjaan</th>
+                    <th style="width: 15%; text-align: center; padding-right: 0px;">Pekerjaan</th>
                     <th width="15%">Tanggal Penarikan</th>
                     <th width="12%">Jumlah Uang</th>
                     <th style="width: 10%;">E-Wallet / Bank</th>

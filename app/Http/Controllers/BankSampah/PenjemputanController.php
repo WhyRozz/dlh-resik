@@ -149,8 +149,16 @@ class PenjemputanController extends Controller
             'lokasi' => $item->lokasi,
             'keterangan' => $item->keterangan,
             'status' => $item->status,
-            'foto' => $item->foto,
+            'foto' => $item->foto ? $this->getUrlFoto($item->foto) : null,
         ]);
+    }
+
+    private function getUrlFoto($path)
+    {
+        if (app()->environment('production')) {
+            return asset('uploads/' . $path);
+        }
+        return asset('storage/' . $path);
     }
 
 
@@ -169,14 +177,9 @@ class PenjemputanController extends Controller
 
         $notification = new \App\Services\NotificationService();
 
-        $notification->sendToUser(
+        $notification->sendPickupResult(
             $penjemputan->petugas?->fcm_token,
-            "Penjemputan Disetujui",
-            "Permintaan penjemputan Anda telah disetujui.",
-            [
-                "type" => "pickup_approved",
-                "id" => (string)$penjemputan->id
-            ]
+            "disetujui"
         );
 
         return redirect()->back()->with('success', 'Penjemputan berhasil disetujui.');
@@ -197,14 +200,9 @@ class PenjemputanController extends Controller
 
         $notification = new \App\Services\NotificationService();
 
-        $notification->sendToUser(
+        $notification->sendPickupResult(
             $penjemputan->petugas?->fcm_token,
-            "Penjemputan Ditolak",
-            "Permintaan penjemputan Anda ditolak.",
-            [
-                "type" => "pickup_rejected",
-                "id" => (string)$penjemputan->id
-            ]
+            "ditolak"
         );
 
         return redirect()->back()->with('success', 'Penjemputan ditolak.');
@@ -237,7 +235,9 @@ class PenjemputanController extends Controller
         $data = $request->except('foto');
 
         if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('penjemputan', 'public');
+            // Local pakai 'public' (storage), Production pakai 'uploads'
+            $disk = app()->environment('production') ? 'uploads' : 'public';
+            $data['foto'] = $request->file('foto')->store('penjemputan', $disk);
         }
 
         $penjemputan = Penjemputan::create($data);

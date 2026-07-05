@@ -286,7 +286,9 @@
                         <div class="form-group">
                             <label>Lokasi</label>
                             <input type="text" id="modalLokasi" readonly
-                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f9f9f9;">
+                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f9f9f9; color: #2f8cea; font-weight: 600; cursor: pointer; text-decoration: underline; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                onclick="if(this.value && this.value !== '-') window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(this.value), '_blank')"
+                                title="Klik untuk buka di Google Maps">
                         </div>
                         <div class="form-group">
                             <label>Keterangan</label>

@@ -193,14 +193,27 @@ class AuthController extends Controller
 
         // 3. Cek tabel Petugas (Admin)
         $user = Petugas::where('email', $request->email)->first();
+
         if ($user && Hash::check($password, $user->password)) {
+
             return response()->json([
                 'status' => 'success',
                 'timestamp' => now()->format('Y-m-d H:i:s'),
                 'data' => [
-                    'tipe' => 'petugas',  // ← Role: petugas (admin)
-                    'user' => $user,
-                    'redirect' => '/home-admin'  // ← Redirect ke home admin
+                    'tipe' => 'petugas',
+                    'user' => [
+                        'id_petugas'   => $user->id_petugas,
+                        'nama_lengkap' => $user->nama_lengkap,
+                        'email'        => $user->email,
+                        'no_telepon'   => $user->no_telepon,
+                        'foto'         => $user->foto,
+                        'level'        => $user->level,
+
+                        // tambahan
+                        'desa_id'      => $user->desa_id,
+                        'nama_wilayah' => $user->nama_wilayah,
+                    ],
+                    'redirect' => '/home-admin'
                 ],
                 'message' => 'Login berhasil'
             ]);

@@ -18,7 +18,7 @@ class RiwayatPenjemputanController extends Controller
                 ->where('id_petugas', $idPetugas)
                 ->orderBy('waktu', 'desc')
                 ->get()
-                ->map(function($item) {
+                ->map(function ($item) {
                     return [
                         'id' => $item->id,
                         'id_petugas' => $item->id_petugas,
@@ -28,7 +28,7 @@ class RiwayatPenjemputanController extends Controller
                         'berat' => (float) ($item->berat ?? 0),
                         'keterangan' => $item->keterangan ?? '',
                         'status' => $item->status ?? 'diproses',
-                        'foto' => $item->foto ? asset('storage/' . $item->foto) : null,
+                        'foto' => $item->foto ? $this->getUrlFoto($item->foto) : null,
                     ];
                 });
 
@@ -37,7 +37,6 @@ class RiwayatPenjemputanController extends Controller
                 'data' => $riwayat,
                 'total' => $riwayat->count()
             ], 200);
-
         } catch (\Exception $e) {
             \Log::error('Riwayat Penjemputan Error: ' . $e->getMessage());
             return response()->json([
@@ -45,5 +44,15 @@ class RiwayatPenjemputanController extends Controller
                 'message' => 'Gagal memuat riwayat penjemputan: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    private function getUrlFoto($path)
+    {
+        if (app()->environment('production')) {
+            // Hosting: pakai folder uploads
+            return asset('uploads/' . $path);
+        }
+        // Local: pakai storage link
+        return asset('storage/' . $path);
     }
 }

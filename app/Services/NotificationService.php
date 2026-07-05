@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Admin;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
@@ -15,28 +17,34 @@ class NotificationService
     }
 
     /**
-     * Ambil semua admin yang akan menerima notifikasi
-     * - Super Admin (id_desa = null)
-     * - Sub Admin Desa sesuai wilayah
+     * ✅ MULTI-DEVICE: Ambil semua FCM token admin
+     * - Super Admin (id_desa = null) SELALU dapat
+     * - Sub Admin Desa hanya dapat jika id_desa sesuai
      */
     private function getAdminTokens(?int $idDesa = null): Collection
     {
-        $query = Admin::whereNotNull('fcm_token');
+        $query = DB::table('admin_fcm_tokens')
+            ->join('admin', 'admin_fcm_tokens.id_admin', '=', 'admin.id_admin')
+            ->select('admin_fcm_tokens.*');
 
         if ($idDesa !== null) {
-
+            // ✅ Filter: Super Admin + Sub Admin desa yang sesuai
             $query->where(function ($q) use ($idDesa) {
-
-                $q->whereNull('id_desa')
-                    ->orWhere('id_desa', $idDesa);
+                $q->whereNull('admin.id_desa')        // Super Admin
+                    ->orWhere('admin.id_desa', $idDesa); // Sub Admin desa ini
             });
         }
+        // ✅ Jika $idDesa = null, TIDAK ADA FILTER → semua admin dapat
+        // (Super Admin + semua Sub Admin)
 
         return $query->get();
     }
 
     /**
      * Function umum untuk mengirim notifikasi ke semua admin
+     */
+    /**
+     * ✅ MULTI-DEVICE: Kirim notifikasi ke semua device admin
      */
     private function sendToAdmins(
         string $title,
@@ -45,21 +53,28 @@ class NotificationService
         ?int $idDesa = null
     ): void {
 
-        $admins = $this->getAdminTokens($idDesa);
+        $tokens = $this->getAdminTokens($idDesa);
 
-        foreach ($admins as $admin) {
-
-            $this->firebase->sendNotification(
-
-                $admin->fcm_token,
-
-                $title,
-
-                $body,
-
-                $data
-
-            );
+        foreach ($tokens as $tokenRow) {
+            try {
+                $this->firebase->sendNotification(
+                    $tokenRow->fcm_token,
+                    $title,
+                    $body,
+                    $data
+                );
+            } catch (\Exception $e) {
+                // ✅ Hapus token yang invalid/expired
+                if (
+                    strpos($e->getMessage(), 'NOT_REGISTERED') !== false ||
+                    strpos($e->getMessage(), 'InvalidRegistration') !== false
+                ) {
+                    DB::table('admin_fcm_tokens')
+                        ->where('id', $tokenRow->id)
+                        ->delete();
+                }
+                Log::error('FCM Multi-Device Error: ' . $e->getMessage());
+            }
         }
     }
 
@@ -70,14 +85,14 @@ class NotificationService
      */
     public function sendReport(
         string $nama,
-        string $desa,
-        int $idDesa,
+        string $lokasi,
+        ?int $idDesa = null,
         int $idLaporan
     ): void {
 
-        $title = "📢 Laporan Sampah Baru";
+        $title = "📢 Laporan Sampah Ilegal";
 
-        $body = "{$nama} mengirim laporan sampah dari {$desa}.";
+        $body = "{$nama} melaporkan adanya lokasi sampah ilegal di {$lokasi}.";
 
         $this->sendToAdmins(
 
@@ -104,12 +119,12 @@ class NotificationService
     public function sendWithdrawal(
         string $nama,
         string $desa,
-        int $idDesa,
+        ?int $idDesa = null,
         int $nominal,
         int $idPenarikan
     ): void {
 
-        $title = "💰 Pengajuan Penarikan Baru";
+        $title = "💸 Pengajuan Penarikan Baru";
 
         $body = "{$nama} mengajukan penarikan saldo sebesar Rp " .
             number_format($nominal, 0, ',', '.') . ".";
@@ -134,13 +149,14 @@ class NotificationService
     public function sendPickup(
         string $nama,
         string $desa,
-        int $idDesa,
+        string $kecamatan,
+        ?int $idDesa = null,
         int $idPenjemputan
     ): void {
 
-        $title = "🚛 Permintaan Penjemputan";
+        $title = "🚛 Pengajuan Penjemputan";
 
-        $body = "{$nama} meminta penjemputan sampah.";
+        $body = "{$nama} dari Bank Sampah Kecamatan {$kecamatan}, Desa {$desa} mengajukan penjemputan sampah.";
 
         $this->sendToAdmins(
 
@@ -161,15 +177,16 @@ class NotificationService
 
     public function sendDeposit(
         string $nama,
-        string $desa,
-        int $idDesa,
+        ?int $idDesa = null,
         float $berat,
+        float $berat_asli,
+        float $total_rupiah,
         int $idTransaksi
     ): void {
 
         $title = "♻️ Setoran Sampah Baru";
 
-        $body = "{$nama} melakukan setor sampah {$berat} Kg.";
+        $body = "Setoran {$berat} {$berat_asli} Kg dari {$nama} berhasil. Saldo bertambah Rp {$total_rupiah}!";
 
         $this->sendToAdmins(
 
@@ -214,43 +231,88 @@ class NotificationService
         string $status
     ): void {
 
-        $title = "Status Laporan";
+        $title = "📢 Status Laporan";
 
-        $body = $status == "selesai"
-            ? "Laporan Anda telah selesai diproses."
-            : "Laporan Anda sedang diproses.";
+        if ($status == "Diterima") {
 
-        $this->sendToUser($token, $title, $body, [
-            "type" => "report_result"
-        ]);
+            $body = "Laporan sampah Anda telah selesai diproses. Silakan buka aplikasi untuk melihat hasil penanganan laporan. Terima kasih atas partisipasi Anda dalam menjaga kebersihan lingkungan di Kota Nganjuk.";
+        } elseif ($status == "Diproses") {
+
+            $body = "Laporan sampah Anda sedang ditangani oleh petugas. Kami akan memberikan informasi setelah penanganan selesai.";
+        } else {
+
+            $body = "Maaf, laporan sampah Anda ditolak. Admin telah memberikan keterangan terkait laporan Anda. Silakan buka aplikasi untuk melihat detail balasan.";
+        }
+
+        $this->sendToUser(
+            $token,
+            $title,
+            $body,
+            [
+                "type" => "report_result"
+            ]
+        );
     }
+
 
     public function sendWithdrawalResult(
         ?string $token,
-        string $status
+        string $status,
+        float $jumlah_uang
     ): void {
 
-        $title = "Status Penarikan";
+        $title = "💸 Status Penarikan";
 
-        $body = $status == "disetujui"
-            ? "Penarikan Anda telah disetujui."
-            : "Penarikan Anda ditolak.";
+        if ($status == "berhasil") {
 
-        $this->sendToUser($token, $title, $body, [
-            "type" => "withdrawal_result"
-        ]);
+            $body = "Pengajuan penarikan saldo Anda telah disetujui. Pencairan dana sebesar Rp "
+                . number_format($jumlah_uang, 0, ',', '.')
+                . " akan segera dilakukan.";
+        } elseif ($status == "ditolak") {
+
+            $body = "Maaf, pengajuan penarikan saldo Anda ditolak. Silakan hubungi admin untuk informasi lebih lanjut.";
+        } else {
+
+            return;
+        }
+
+        $this->sendToUser(
+            $token,
+            $title,
+            $body,
+            [
+                "type" => "withdrawal_result"
+            ]
+        );
     }
 
     public function sendDepositResult(
+        ?string $token,
+        float $total_rupiah
+    ): void {
+
+        $this->sendToUser(
+            $token,
+            "♻️ Status Setoran",
+            "Setoran sampah Anda telah disetujui. Saldo sebesar Rp "
+                . number_format($total_rupiah, 0, ',', '.')
+                . " berhasil ditambahkan ke akun Anda.",
+            [
+                "type" => "deposit_result"
+            ]
+        );
+    }
+
+    public function sendDepositRejected(
         ?string $token
     ): void {
 
         $this->sendToUser(
             $token,
-            "Setoran Dikonfirmasi",
-            "Setoran sampah Anda telah dikonfirmasi.",
+            "♻️ Status Setoran",
+            "Maaf, setoran sampah Anda ditolak. Silakan hubungi petugas untuk informasi lebih lanjut.",
             [
-                "type" => "deposit_result"
+                "type" => "deposit_rejected"
             ]
         );
     }
@@ -260,14 +322,26 @@ class NotificationService
         string $status
     ): void {
 
-        $title = "Status Penjemputan";
+        $title = "🚛 Status Penjemputan";
 
-        $body = $status == "disetujui"
-            ? "Permintaan penjemputan disetujui."
-            : "Permintaan penjemputan ditolak.";
+        if ($status == "disetujui") {
 
-        $this->sendToUser($token, $title, $body, [
-            "type" => "pickup_result"
-        ]);
+            $body = "Pengajuan penjemputan sampah Anda telah disetujui oleh admin. Penjemputan akan segera dilakukan.";
+        } elseif ($status == "ditolak") {
+
+            $body = "Maaf, pengajuan penjemputan sampah Anda ditolak. Silakan hubungi admin untuk informasi lebih lanjut.";
+        } else {
+
+            return;
+        }
+
+        $this->sendToUser(
+            $token,
+            $title,
+            $body,
+            [
+                "type" => "pickup_result"
+            ]
+        );
     }
 }

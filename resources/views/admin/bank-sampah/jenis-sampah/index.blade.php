@@ -54,10 +54,9 @@
                             <td>
                                 @if ($item->gambar)
                                     @php
-                                        // ✅ Bersihkan prefix lama agar tidak dobel path
-                                        $gambarPath = str_replace(['storage/', 'uploads/'], '', $item->gambar);
+                                        $disk = app()->environment('production') ? 'uploads' : 'storage';
                                     @endphp
-                                    <img src="{{ asset('uploads/' . $gambarPath) }}" alt="{{ $item->jenis }}"
+                                    <img src="{{ asset($disk . '/' . $item->gambar) }}" alt="{{ $item->jenis }}"
                                         class="table-img" onerror="this.src='{{ asset('images/default-sampah.jpg') }}'">
                                 @else
                                     <span class="text-muted">-</span>

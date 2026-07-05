@@ -34,6 +34,10 @@ async function initFirebaseNotification() {
 
         console.log("FCM TOKEN:", token);
 
+        // ✅ DETEKSI DEVICE NAME
+        const deviceName = getDeviceName();
+        console.log("📱 Device Name:", deviceName);
+
         await fetch("/admin/save-fcm-token", {
             method: "POST",
             headers: {
@@ -45,6 +49,7 @@ async function initFirebaseNotification() {
             },
             body: JSON.stringify({
                 token: token,
+                device_name: deviceName, // ✅ KIRIM DEVICE NAME
             }),
         });
 
@@ -66,3 +71,26 @@ async function initFirebaseNotification() {
 }
 
 initFirebaseNotification();
+
+
+// ✅ HELPER: DETEKSI NAMA DEVICE
+function getDeviceName() {
+    const ua = navigator.userAgent;
+    let device = 'Unknown Device';
+
+    // Deteksi OS
+    if (/Windows/i.test(ua)) device = 'Windows PC';
+    else if (/Macintosh/i.test(ua)) device = 'Mac';
+    else if (/Android/i.test(ua)) device = 'Android';
+    else if (/iPhone|iPad|iPod/i.test(ua)) device = 'iOS Device';
+    else if (/Linux/i.test(ua)) device = 'Linux';
+
+    // Deteksi Browser
+    if (/Edg/i.test(ua)) device += ' (Edge)';
+    else if (/Chrome/i.test(ua) && !/Chromium/i.test(ua)) device += ' (Chrome)';
+    else if (/Firefox/i.test(ua)) device += ' (Firefox)';
+    else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) device += ' (Safari)';
+    else if (/Opera|OPR/i.test(ua)) device += ' (Opera)';
+
+    return device;
+}

@@ -49,12 +49,12 @@
                 @forelse($artikelList as $index => $artikel)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>
+                                      <td>
                         @if($artikel->foto)
                         @php
-                            $fotoPath = str_replace(['storage/', 'uploads/'], '', $artikel->foto);
+                            $disk = app()->environment('production') ? 'uploads' : 'storage';
                         @endphp
-                        <img src="{{ asset('uploads/' . $fotoPath) }}" 
+                        <img src="{{ asset($disk . '/' . $artikel->foto) }}" 
                             alt="{{ $artikel->judul }}" 
                             class="table-img"
                             onerror="this.src='{{ asset('images/default-artikel.jpg') }}'">

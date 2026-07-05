@@ -286,49 +286,17 @@ class PenarikanController extends Controller
                 'tanggal_disetujui' => now(),
             ]);
 
-            $notification = new \App\Services\NotificationService();
-
-            $user = $penarikan->masyarakat ?? $penarikan->pns;
-
-            $notification->sendToUser(
-                $user?->fcm_token,
-                "Status Penarikan",
-                "Pengajuan penarikan Anda {$statusBaru}.",
-                [
-                    "type" => "withdrawal_result",
-                    "id" => (string)$penarikan->id_penarikan
-                ]
-            );
-
             DB::commit();
 
             $user = $penarikan->masyarakat ?? $penarikan->pns;
 
             $notification = new \App\Services\NotificationService();
 
-            if ($statusBaru == 'berhasil') {
-
-                $notification->sendToUser(
-                    $user?->fcm_token,
-                    "Penarikan Disetujui",
-                    "Pengajuan penarikan Anda telah disetujui.",
-                    [
-                        "type" => "withdrawal_approved",
-                        "id" => (string)$penarikan->id_penarikan
-                    ]
-                );
-            } elseif ($statusBaru == 'ditolak') {
-
-                $notification->sendToUser(
-                    $user?->fcm_token,
-                    "Penarikan Ditolak",
-                    "Pengajuan penarikan Anda ditolak.",
-                    [
-                        "type" => "withdrawal_rejected",
-                        "id" => (string)$penarikan->id_penarikan
-                    ]
-                );
-            }
+            $notification->sendWithdrawalResult(
+                $user?->fcm_token,
+                $statusBaru,
+                $penarikan->jumlah_uang
+            );
 
             return response()->json([
                 'success' => true,

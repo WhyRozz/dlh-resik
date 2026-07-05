@@ -7,6 +7,7 @@ use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -85,6 +86,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'token' => 'required|string',
+            'device_name' => 'nullable|string|max:255',
         ]);
 
         /** @var \App\Models\Admin|null $admin */
@@ -97,12 +99,37 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $admin->fcm_token = $request->token;
-        $admin->save();
+        $token = $request->token;
+        $deviceName = $request->device_name ?? 'Unknown Device';
+
+        // ✅ CEK APAKAH TOKEN SUDAH ADA
+        $existingToken = DB::table('admin_fcm_tokens')
+            ->where('id_admin', $admin->id_admin)
+            ->where('fcm_token', $token)
+            ->first();
+
+        if ($existingToken) {
+            // ✅ UPDATE last_active jika token sudah ada
+            DB::table('admin_fcm_tokens')
+                ->where('id', $existingToken->id)
+                ->update([
+                    'last_active' => now(),
+                    'device_name' => $deviceName
+                ]);
+        } else {
+            // ✅ INSERT TOKEN BARU (MULTI-DEVICE)
+            DB::table('admin_fcm_tokens')->insert([
+                'id_admin' => $admin->id_admin,
+                'fcm_token' => $token,
+                'device_name' => $deviceName,
+                'last_active' => now(),
+                'created_at' => now()
+            ]);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'FCM Token berhasil disimpan.'
+            'message' => 'FCM Token berhasil disimpan (multi-device).'
         ]);
     }
 }

@@ -7,7 +7,6 @@ use App\Models\Masyarakat;
 use App\Models\Pns;
 use App\Models\JenisSampah;
 use App\Models\TransaksiSetor;
-use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -147,16 +146,6 @@ class SetorController extends Controller
             ]);
             // ❌❌❌ INCREMENT SALDO DIHAPUS DARI SINI ❌❌❌
             // Saldo hanya akan ditambah saat konfirmasi (confirm/autoConfirm)
-
-            $notification = new NotificationService();
-
-            $notification->sendDeposit(
-                $user->nama,
-                optional($user->desa)->nama_desa ?? "Tidak diketahui",
-                $user->id_desa ?? 0,
-                $berat,
-                $transaksi->id_transaksi
-            );
 
             DB::commit();
             Cache::put($cacheKey, true, 30);

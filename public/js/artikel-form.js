@@ -111,9 +111,9 @@ if (fotoInput) {
         const file = e.target.files[0];
         if (!file) return;
         
-        // FUNGSI: Validasi ukuran file maksimal 2MB (2 * 1024 * 1024 bytes)
-        if (file.size > 2 * 1024 * 1024) {
-            showError('Ukuran gambar maksimal 2MB');
+        // FUNGSI: Validasi ukuran file maksimal 10MB (10 * 1024 * 1024 bytes)
+        if (file.size > 10 * 1024 * 1024) {
+            showError('Ukuran gambar maksimal 10MB');
             fotoInput.value = '';
             return;
         }

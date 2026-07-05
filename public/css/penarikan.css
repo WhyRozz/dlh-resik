@@ -1052,3 +1052,11 @@
     font-weight: 600;
     display: inline-block;
 }
+
+/* Center teks di badge Pekerjaan */
+.badge-masyarakat,
+.badge-pns {
+    text-align: center;
+    display: inline-block;
+    min-width: 100%; /* Agar badge memenuhi lebar td */
+}

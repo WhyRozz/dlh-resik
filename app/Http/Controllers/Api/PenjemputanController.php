@@ -52,7 +52,9 @@ class PenjemputanController extends Controller
             ];
 
             if ($request->hasFile('foto')) {
-                $fotoPath = $request->file('foto')->store('penjemputan', 'public');
+                // Local pakai 'public' (storage), Production pakai 'uploads'
+                $disk = app()->environment('production') ? 'uploads' : 'public';
+                $fotoPath = $request->file('foto')->store('penjemputan', $disk);
                 $data['foto'] = $fotoPath;
             }
 
@@ -63,6 +65,7 @@ class PenjemputanController extends Controller
             $notification->sendPickup(
                 $petugas->nama_lengkap,
                 $petugas->desa?->nama_desa ?? "Tidak diketahui",
+                $petugas->desa?->kecamatan?->nama_kecamatan ?? "Tidak diketahui",
                 $petugas->desa_id ?? 0,
                 $penjemputan->id
             );

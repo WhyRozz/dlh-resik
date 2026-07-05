@@ -39,14 +39,16 @@ class JenisSampahController extends Controller
         }
 
         $validated = $request->validate([
-            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:10240', 
             'jenis' => 'required|string|max:100',
             'satuan' => 'required|in:Kg,Lt,Pcs,Pack,Lusin',
             'harga' => 'required|numeric|min:0',
         ]);
 
         if ($request->hasFile('gambar')) {
-            $validated['gambar'] = $request->file('gambar')->store('jenis-sampah', 'public');
+            // Local pakai 'public' (storage), Production pakai 'uploads'
+            $disk = app()->environment('production') ? 'uploads' : 'public';
+            $validated['gambar'] = $request->file('gambar')->store('jenis-sampah', $disk);
         }
 
         JenisSampah::create($validated);
@@ -80,17 +82,30 @@ class JenisSampahController extends Controller
         $jenisSampah = JenisSampah::findOrFail($id);
 
         $validated = $request->validate([
-            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:10240', 
             'jenis' => 'required|string|max:100',
             'satuan' => 'required|in:Kg,Lt,Pcs,Pack,Lusin',
             'harga' => 'required|numeric|min:0',
         ]);
 
-        if ($request->hasFile('gambar')) {
-            if ($jenisSampah->gambar && Storage::disk('public')->exists($jenisSampah->gambar)) {
-                Storage::disk('public')->delete($jenisSampah->gambar);
+        // ✅ HANDLE HAPUS GAMBAR LAMA
+        if ($request->input('remove_current_image') == '1') {
+            $disk = app()->environment('production') ? 'uploads' : 'public';
+
+            if ($jenisSampah->gambar && Storage::disk($disk)->exists($jenisSampah->gambar)) {
+                Storage::disk($disk)->delete($jenisSampah->gambar);
             }
-            $validated['gambar'] = $request->file('gambar')->store('jenis-sampah', 'public');
+            $validated['gambar'] = null;
+        }
+
+        if ($request->hasFile('gambar')) {
+            // Local pakai 'public' (storage), Production pakai 'uploads'
+            $disk = app()->environment('production') ? 'uploads' : 'public';
+
+            if ($jenisSampah->gambar && Storage::disk($disk)->exists($jenisSampah->gambar)) {
+                Storage::disk($disk)->delete($jenisSampah->gambar);
+            }
+            $validated['gambar'] = $request->file('gambar')->store('jenis-sampah', $disk);
         }
 
         $jenisSampah->update($validated);
@@ -110,8 +125,10 @@ class JenisSampahController extends Controller
 
         $jenisSampah = JenisSampah::findOrFail($id);
 
-        if ($jenisSampah->gambar && Storage::disk('public')->exists($jenisSampah->gambar)) {
-            Storage::disk('public')->delete($jenisSampah->gambar);
+        $disk = app()->environment('production') ? 'uploads' : 'public';
+
+        if ($jenisSampah->gambar && Storage::disk($disk)->exists($jenisSampah->gambar)) {
+            Storage::disk($disk)->delete($jenisSampah->gambar);
         }
 
         $jenisSampah->delete();
