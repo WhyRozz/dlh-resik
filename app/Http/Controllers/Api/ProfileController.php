@@ -7,7 +7,6 @@ use App\Models\Masyarakat;
 use App\Models\Pns;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -20,11 +19,13 @@ class ProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
             'tipe' => 'required|in:masyarakat,pns',
-            'nama' => 'required|string|max:100',
+            'nama' => 'nullable|string|max:100',
             'no_telepon' => 'nullable|string|max:15',
             'tanggal_lahir' => 'nullable|date',
             'alamat' => 'nullable|string|max:255',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB
+            'jenis_kelamin' => 'nullable|string|max:20',
+            // maksimal 10MB
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
         ]);
 
         if ($validator->fails()) {
@@ -41,9 +42,15 @@ class ProfileController extends Controller
 
             // ✅ Cari user berdasarkan tipe
             if ($tipe === 'masyarakat') {
-                $user = Masyarakat::where('id_masyarakat', $userId)->first();
+
+                $user = Masyarakat::with('desa.kecamatan')
+                    ->where('id_masyarakat', $userId)
+                    ->first();
             } else {
-                $user = Pns::where('id_pns', $userId)->first();
+
+                $user = Pns::with('dinas')
+                    ->where('id_pns', $userId)
+                    ->first();
             }
 
             if (!$user) {
@@ -53,39 +60,67 @@ class ProfileController extends Controller
                 ], 404);
             }
 
-            // ✅ Handle upload foto jika ada
-            // ✅ LOGIC URL FOTO YANG AMAN (tidak akan dobel)
-            $fotoUrl = null;
-
             if ($request->hasFile('foto')) {
-                // Hapus foto lama jika ada
-                if ($user->foto && !str_starts_with($user->foto, 'http')) {
-                    if (Storage::disk('public')->exists($user->foto)) {
-                        Storage::disk('public')->delete($user->foto);
+
+                // hapus foto lama
+                if ($user->foto) {
+
+                    $oldFile = base_path('../public_html/uploads/profile/' . basename($user->foto));
+
+                    if (file_exists($oldFile) && is_file($oldFile)) {
+                        unlink($oldFile);
                     }
                 }
 
-                // Upload foto baru → simpan path relatif saja
-                $path = $request->file('foto')->store('profile', 'public');
-                $fotoUrl = asset('storage/' . $path); // ✅ Jadikan URL lengkap DI SINI
+                $file = $request->file('foto');
+
+                $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                $destination = base_path('../public_html/uploads/profile');
+
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+
+                $file->move($destination, $fileName);
+
+                $fotoPath = 'profile/' . $fileName;
             }
 
-            // Update data user
-            $updateData = [
-                'nama' => $request->nama,
-                'no_telepon' => $request->no_telepon,
-                'tanggal_lahir' => $request->tanggal_lahir ?: null,
-                'alamat' => $request->alamat ?: null,
-            ];
+            $updateData = [];
 
-            // Tambahkan foto jika ada upload baru
-            if ($fotoUrl) {
-                $updateData['foto'] = $fotoUrl; // ✅ Simpan URL lengkap ke DB
+            if ($request->filled('nama')) {
+                $updateData['nama'] = $request->nama;
             }
+
+            if ($request->filled('no_telepon')) {
+                $updateData['no_telepon'] = $request->no_telepon;
+            }
+
+            if ($request->filled('tanggal_lahir')) {
+                $updateData['tanggal_lahir'] = $request->tanggal_lahir;
+            }
+
+            if ($request->filled('alamat')) {
+                $updateData['alamat'] = $request->alamat;
+            }
+
+            if ($request->filled('jenis_kelamin')) {
+                $updateData['jenis_kelamin'] = $request->jenis_kelamin;
+            }
+
+            if (isset($fotoPath)) {
+                $updateData['foto'] = $fotoPath;
+            }
+
+            \Log::info('DATA UPDATE : ', $updateData);
 
             $user->update($updateData);
 
-            // ✅ RESPONSE: Kirim URL yang sudah jadi (jangan di-asset() lagi!)
+            // ✅ REFRESH DATA USER DARI DATABASE
+            $user = $user->fresh();
+
+            // ✅ RESPONSE: Kirim URL yang sudah jadi
             return response()->json([
                 'status' => 'success',
                 'message' => 'Profil berhasil diupdate',
@@ -96,10 +131,26 @@ class ProfileController extends Controller
                     'email' => $user->email ?? '',
                     'no_telepon' => $user->no_telepon,
                     'tanggal_lahir' => $user->tanggal_lahir,
+                    'jenis_kelamin' => $user->jenis_kelamin,
                     'alamat' => $user->alamat,
 
+                    'id_desa' => $user->id_desa ?? null,
+                    'id_dinas' => $user->id_dinas ?? null,
+
+                    'nama_desa' => $tipe == 'masyarakat'
+                        ? optional($user->desa)->nama_desa
+                        : null,
+
+                    'nama_kecamatan' => $tipe == 'masyarakat'
+                        ? optional(optional($user->desa)->kecamatan)->nama_kecamatan
+                        : null,
+
+                    'nama_dinas' => $tipe == 'pns'
+                        ? optional($user->dinas)->nama_dinas
+                        : null,
+
                     // ✅ PASTIKAN TIDAK DOBEL:
-                    'foto' => $fotoUrl ?? $user->foto, // ← Jangan pakai asset() lagi di sini!
+                    'foto' => $user->foto ? asset('uploads/' . $user->foto) : null,
 
                     'tipe' => $tipe,
                 ]

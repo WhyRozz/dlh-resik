@@ -8,7 +8,6 @@ use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Config;
 
 class LaporanController extends Controller
 {
@@ -58,22 +57,48 @@ class LaporanController extends Controller
 
             // ✅ Upload Foto
             if ($request->hasFile('foto')) {
-                // Local pakai 'public' (storage), Production pakai 'uploads'
-                $disk = app()->environment('production') ? 'uploads' : 'public';
-                $path = $request->file('foto')->store('laporan', $disk);
+
+                $file = $request->file('foto');
+
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                if (app()->environment('production')) {
+
+                    // Folder public_html/uploads/laporan
+                    $destination = dirname(base_path()) . '/public_html/uploads/laporan';
+                } else {
+
+                    // Local XAMPP
+                    $destination = storage_path('app/public/laporan');
+                }
+
+                // Buat folder jika belum ada
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+
+                // Simpan file
+                $file->move($destination, $filename);
+
+                // Path yang disimpan ke database
+                $path = 'laporan/' . $filename;
             } else {
+
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Foto wajib diupload'
                 ], 422);
             }
 
+            // ✅ Parse tanggal dari format dd-MM-yyyy HH:mm dengan timezone Asia/Jakarta
+            $tanggalCarbon = \Carbon\Carbon::createFromFormat('d-m-Y H:i', $request->tanggal, 'Asia/Jakarta');
+
             // ✅ Simpan ke Database dengan kolom yang benar
             $laporan = Laporan::create([
                 'id_masyarakat' => $tipe === 'masyarakat' ? $userId : null,
                 'id_pns'        => $tipe === 'pns' ? $userId : null,
                 'nama'          => $request->nama,
-                'tanggal'       => $request->tanggal,
+                'tanggal'       => $tanggalCarbon,  // ← GANTI dengan Carbon object
                 'lokasi'        => $request->lokasi,
                 'keterangan'    => $request->keterangan,
                 'foto'          => $path,
@@ -151,8 +176,8 @@ class LaporanController extends Controller
                         'keterangan' => $l->keterangan,
                         'alamat' => $l->lokasi,
                         'lokasi' => $l->lokasi,
-                        'tanggal' => $l->created_at
-                            ? $l->created_at->timezone('Asia/Jakarta')->translatedFormat('l, d F Y • H:i')
+                        'tanggal' => $l->tanggal
+                            ? $l->tanggal->timezone('Asia/Jakarta')->translatedFormat('l, d F Y • H:i')
                             : '-',
                         'status' => $l->status,
                         'foto' => $l->foto ? $this->getUrlFoto($l->foto) : null,
@@ -170,16 +195,18 @@ class LaporanController extends Controller
 
     private function getUrlFoto($path)
     {
-        // Jika sudah URL lengkap (http/https), return langsung
+        if (!$path) {
+            return null;
+        }
+
         if (str_starts_with($path, 'http')) {
             return $path;
         }
 
         if (app()->environment('production')) {
-            // Hosting: pakai folder uploads
             return asset('uploads/' . $path);
         }
-        // Local: pakai storage link
+
         return asset('storage/' . $path);
     }
 }

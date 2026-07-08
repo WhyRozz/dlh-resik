@@ -236,8 +236,30 @@ class PenjemputanController extends Controller
 
         if ($request->hasFile('foto')) {
             // Local pakai 'public' (storage), Production pakai 'uploads'
-            $disk = app()->environment('production') ? 'uploads' : 'public';
-            $data['foto'] = $request->file('foto')->store('penjemputan', $disk);
+            $file = $request->file('foto');
+            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+            if (app()->environment('production')) {
+
+                $destination = public_path('../uploads/penjemputan');
+
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+
+                $file->move($destination, $fileName);
+            } else {
+
+                $destination = storage_path('app/public/penjemputan');
+
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+
+                $file->move($destination, $fileName);
+            }
+
+            $data['foto'] = 'penjemputan/' . $fileName;
         }
 
         $penjemputan = Penjemputan::create($data);

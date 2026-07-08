@@ -216,11 +216,17 @@ class NotificationService
             return;
         }
 
+        // ✅ TAMBAHKAN ICON BESAR
+        $notificationData = array_merge($data, [
+            'image' => asset('assets/logo-apk.png'),  // ✅ BENAR  // ← Icon besar (URL)
+            'icon' => 'ic_stat_logo_r_removebg_preview',  // ✅ BENAR      // ✅ BENAR - Sesuai file yang ada
+        ]);
+
         $this->firebase->sendNotification(
             $token,
             $title,
             $body,
-            $data
+            $notificationData
         );
     }
 
@@ -230,28 +236,34 @@ class NotificationService
         ?string $token,
         string $status
     ): void {
+        // ✅ LOGGING LENGKAP
+        \Log::info('=== SEND REPORT RESULT CALLED ===');
+        \Log::info('Token: ' . ($token ?? 'NULL'));
+        \Log::info('Status: ' . $status);
+
+        if (!$token) {
+            \Log::warning('⚠️ FCM Token NULL! Notifikasi tidak dikirim.');
+            return;
+        }
 
         $title = "📢 Status Laporan";
 
         if ($status == "Diterima") {
-
             $body = "Laporan sampah Anda telah selesai diproses. Silakan buka aplikasi untuk melihat hasil penanganan laporan. Terima kasih atas partisipasi Anda dalam menjaga kebersihan lingkungan di Kota Nganjuk.";
         } elseif ($status == "Diproses") {
-
             $body = "Laporan sampah Anda sedang ditangani oleh petugas. Kami akan memberikan informasi setelah penanganan selesai.";
         } else {
-
             $body = "Maaf, laporan sampah Anda ditolak. Admin telah memberikan keterangan terkait laporan Anda. Silakan buka aplikasi untuk melihat detail balasan.";
         }
 
-        $this->sendToUser(
-            $token,
-            $title,
-            $body,
-            [
-                "type" => "report_result"
-            ]
-        );
+        try {
+            \Log::info(' Mengirim notifikasi ke Firebase...');
+            $this->sendToUser($token, $title, $body, ["type" => "report_result"]);
+            \Log::info('✅ Notifikasi BERHASIL dikirim ke FCM!');
+        } catch (\Exception $e) {
+            \Log::error('❌ Error kirim notifikasi: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
     }
 
 

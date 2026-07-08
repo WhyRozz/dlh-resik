@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Laporan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class LaporanController extends Controller
 {
@@ -30,14 +29,15 @@ class LaporanController extends Controller
             'id' => 'required|integer|exists:laporan,id',
             'status' => 'required|in:Diproses,Diterima,Ditolak',
             'balasan' => 'nullable|string|max:500',
-            'foto_balasan' => 'nullable|image|max:10240', // ← MAKSIMAL 10MB (10240 KB)
+            'foto_balasan' => 'nullable|image|max:10240',
         ], [
             'foto_balasan.image' => 'File harus berupa gambar.',
             'foto_balasan.max' => 'Ukuran gambar maksimal 10MB.',
         ]);
 
         try {
-            $laporan = Laporan::findOrFail($validated['id']);
+            // ✅ FIX #1: LOAD RELASI masyarakat DAN pns
+            $laporan = Laporan::with(['masyarakat', 'pns'])->findOrFail($validated['id']);
 
             // Validasi: hanya bisa update jika status masih Diproses
             if ($laporan->status !== 'Diproses' && $validated['status'] === 'Diproses') {
@@ -51,35 +51,62 @@ class LaporanController extends Controller
 
             // ✅ Handle upload foto balasan
             if ($request->hasFile('foto_balasan')) {
-                // Local pakai 'public' (storage), Production pakai 'uploads'
-                $disk = app()->environment('production') ? 'uploads' : 'public';
-                
-                // Hapus foto lama jika ada
-                if ($laporan->foto_balasan && Storage::disk($disk)->exists($laporan->foto_balasan)) {
-                    Storage::disk($disk)->delete($laporan->foto_balasan);
-                }
-
                 $file = $request->file('foto_balasan');
                 $filename = time() . '_balasan_' . $laporan->id . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('laporan/balasan', $filename, $disk);
 
-                $updateData['foto_balasan'] = $path;
+                if (app()->environment('production')) {
+                    $destination = dirname(base_path()) . '/public_html/uploads/laporan/balasan';
+                } else {
+                    $destination = storage_path('app/public/laporan/balasan');
+                }
+
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+
+                // Hapus foto lama jika ada
+                if ($laporan->foto_balasan) {
+                    $oldFile = $destination . '/' . basename($laporan->foto_balasan);
+                    if (file_exists($oldFile)) {
+                        unlink($oldFile);
+                    }
+                }
+
+                $file->move($destination, $filename);
+                $updateData['foto_balasan'] = 'laporan/balasan/' . $filename;
             }
 
             $laporan->update($updateData);
-
             $laporan->refresh();
 
-            $notification = new \App\Services\NotificationService();
+            // ✅ FIX #2: AMBIL USER PELAPOR (masyarakat atau pns)
+            $user = $laporan->masyarakat ?: $laporan->pns;
 
-            $user = $laporan->masyarakat ?? $laporan->pns;
+            if (!$user) {
+                \Log::error(' User pelapor tidak ditemukan untuk laporan #' . $laporan->id);
+                return response()->json(['success' => false, 'message' => 'User pelapor tidak ditemukan'], 404);
+            }
+
+            // ✅ FIX #3: LOGGING UNTUK DEBUG
+            \Log::info('=== KIRIM NOTIFIKASI LAPORAN ===');
+            \Log::info('Laporan ID: ' . $laporan->id);
+            \Log::info('User Type: ' . ($laporan->masyarakat ? 'masyarakat' : 'pns'));
+            \Log::info('User ID: ' . ($user->id_masyarakat ?? $user->id_pns));
+            \Log::info('User Name: ' . $user->nama);
+            \Log::info('FCM Token: ' . ($user->fcm_token ?? 'NULL'));
+            \Log::info('Status: ' . $laporan->status);
+
+            // ✅ FIX #4: KIRIM NOTIFIKASI
+            $notification = new \App\Services\NotificationService();
             $notification->sendReportResult(
-                $user?->fcm_token,
+                $user->fcm_token,
                 $laporan->status
             );
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
+            \Log::error('❌ Error update status laporan: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }

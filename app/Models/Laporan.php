@@ -24,7 +24,7 @@ class Laporan extends Model
     ];
 
     protected $casts = [
-        'tanggal' => 'date',
+        'tanggal' => 'datetime',  
         'created_at' => 'datetime',
     ];
 

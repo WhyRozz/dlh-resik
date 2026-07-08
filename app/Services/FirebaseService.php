@@ -36,20 +36,43 @@ class FirebaseService
     public function sendNotification($deviceToken, $title, $body, array $data = [])
     {
         $accessToken = $this->getAccessToken();
-
         $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
 
+        // 1. Siapkan payload notification
+        $notificationPayload = [
+            "title" => $title,
+            "body"  => $body,
+        ];
+
+        // Pindahkan 'image' dari data ke notification
+        if (!empty($data['image'])) {
+            $notificationPayload['image'] = $data['image'];
+        }
+
+        // 2. Konfigurasi khusus Android (WAJIB untuk pop-up/heads-up)
+        $androidNotification = [
+            "notification_priority" => "PRIORITY_MAX", // Agar notifikasi pop-up
+            "sound"                 => "default",
+            "default_vibrate_timings" => true,
+            "visibility"            => "PUBLIC",
+            "channel_id"            => "high_importance_channel", // ID Channel
+        ];
+
+        // Pindahkan 'icon' dari data ke android.notification
+        if (!empty($data['icon'])) {
+            $androidNotification['icon'] = $data['icon'];
+        }
+
+        // 3. Susun Payload FCM v1
         $payload = [
             "message" => [
-
-                "token" => $deviceToken,
-
-                "notification" => [
-                    "title" => $title,
-                    "body" => $body,
+                "token"        => $deviceToken,
+                "notification" => $notificationPayload,
+                "android"      => [
+                    "priority"     => "high", // WAJIB
+                    "notification" => $androidNotification,
                 ],
-
-                "data" => $data
+                "data"         => $data
             ]
         ];
 

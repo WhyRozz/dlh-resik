@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\JenisSampah;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class JenisSampahController extends Controller
@@ -39,16 +38,38 @@ class JenisSampahController extends Controller
         }
 
         $validated = $request->validate([
-            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:10240', 
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
             'jenis' => 'required|string|max:100',
             'satuan' => 'required|in:Kg,Lt,Pcs,Pack,Lusin',
             'harga' => 'required|numeric|min:0',
         ]);
 
         if ($request->hasFile('gambar')) {
-            // Local pakai 'public' (storage), Production pakai 'uploads'
-            $disk = app()->environment('production') ? 'uploads' : 'public';
-            $validated['gambar'] = $request->file('gambar')->store('jenis-sampah', $disk);
+
+            $file = $request->file('gambar');
+            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+            if (app()->environment('production')) {
+
+                $destination = base_path('../public_html/uploads/jenis-sampah');
+
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+
+                $file->move($destination, $fileName);
+            } else {
+
+                $destination = base_path('../public_html/uploads/jenis-sampah');
+
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+
+                $file->move($destination, $fileName);
+            }
+
+            $validated['gambar'] = 'jenis-sampah/' . $fileName;
         }
 
         JenisSampah::create($validated);
@@ -82,30 +103,73 @@ class JenisSampahController extends Controller
         $jenisSampah = JenisSampah::findOrFail($id);
 
         $validated = $request->validate([
-            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:10240', 
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
             'jenis' => 'required|string|max:100',
             'satuan' => 'required|in:Kg,Lt,Pcs,Pack,Lusin',
             'harga' => 'required|numeric|min:0',
         ]);
 
-        // ✅ HANDLE HAPUS GAMBAR LAMA
         if ($request->input('remove_current_image') == '1') {
-            $disk = app()->environment('production') ? 'uploads' : 'public';
 
-            if ($jenisSampah->gambar && Storage::disk($disk)->exists($jenisSampah->gambar)) {
-                Storage::disk($disk)->delete($jenisSampah->gambar);
+            if ($jenisSampah->gambar) {
+
+                if (app()->environment('production')) {
+
+                    $oldFile = base_path('../public_html/uploads/' . $jenisSampah->gambar);
+                } else {
+
+                    $oldFile = storage_path('app/public/' . $jenisSampah->gambar);
+                }
+
+                if (file_exists($oldFile)) {
+                    unlink($oldFile);
+                }
             }
+
             $validated['gambar'] = null;
         }
 
         if ($request->hasFile('gambar')) {
-            // Local pakai 'public' (storage), Production pakai 'uploads'
-            $disk = app()->environment('production') ? 'uploads' : 'public';
 
-            if ($jenisSampah->gambar && Storage::disk($disk)->exists($jenisSampah->gambar)) {
-                Storage::disk($disk)->delete($jenisSampah->gambar);
+            if ($jenisSampah->gambar) {
+
+                if (app()->environment('production')) {
+
+                    $oldFile = base_path('../public_html/uploads/' . $jenisSampah->gambar);
+                } else {
+
+                    $oldFile = storage_path('app/public/' . $jenisSampah->gambar);
+                }
+
+                if (file_exists($oldFile)) {
+                    unlink($oldFile);
+                }
             }
-            $validated['gambar'] = $request->file('gambar')->store('jenis-sampah', $disk);
+
+            $file = $request->file('gambar');
+            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+            if (app()->environment('production')) {
+
+                $destination = base_path('../public_html/uploads/jenis-sampah');
+
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+
+                $file->move($destination, $fileName);
+            } else {
+
+                $destination = storage_path('app/public/jenis-sampah');
+
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+
+                $file->move($destination, $fileName);
+            }
+
+            $validated['gambar'] = 'jenis-sampah/' . $fileName;
         }
 
         $jenisSampah->update($validated);
@@ -125,10 +189,19 @@ class JenisSampahController extends Controller
 
         $jenisSampah = JenisSampah::findOrFail($id);
 
-        $disk = app()->environment('production') ? 'uploads' : 'public';
+        if ($jenisSampah->gambar) {
 
-        if ($jenisSampah->gambar && Storage::disk($disk)->exists($jenisSampah->gambar)) {
-            Storage::disk($disk)->delete($jenisSampah->gambar);
+            if (app()->environment('production')) {
+
+                $file = base_path('../public_html/uploads/' . $jenisSampah->gambar);
+            } else {
+
+                $file = storage_path('app/public/' . $jenisSampah->gambar);
+            }
+
+            if (file_exists($file)) {
+                unlink($file);
+            }
         }
 
         $jenisSampah->delete();

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Artikel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ArtikelController extends Controller
@@ -66,12 +65,28 @@ class ArtikelController extends Controller
 
         // Handle upload foto
         $fotoPath = null;
+
         if ($request->hasFile('foto')) {
-            // Local pakai 'public' (storage), Production pakai 'uploads'
-            $disk = app()->environment('production') ? 'uploads' : 'public';
+
             $file = $request->file('foto');
+
             $fileName = 'artikel_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $fotoPath = $file->storeAs('artikel', $fileName, $disk);
+
+            if (app()->environment('production')) {
+
+                $destination = $_SERVER['DOCUMENT_ROOT'] . '/uploads/artikel';
+            } else {
+
+                $destination = storage_path('app/public/artikel');
+            }
+
+            if (!file_exists($destination)) {
+                mkdir($destination, 0755, true);
+            }
+
+            $file->move($destination, $fileName);
+
+            $fotoPath = 'artikel/' . $fileName;
         }
 
         Artikel::create([
@@ -108,17 +123,38 @@ class ArtikelController extends Controller
 
         // Handle upload foto baru
         if ($request->hasFile('foto')) {
-            // Local pakai 'public' (storage), Production pakai 'uploads'
-            $disk = app()->environment('production') ? 'uploads' : 'public';
-            
-            // Hapus foto lama jika ada
-            if ($artikel->foto && Storage::disk($disk)->exists($artikel->foto)) {
-                Storage::disk($disk)->delete($artikel->foto);
-            }
-            // Upload foto baru
+
             $file = $request->file('foto');
+
             $fileName = 'artikel_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $artikel->foto = $file->storeAs('artikel', $fileName, $disk);
+
+            if (app()->environment('production')) {
+
+                $destination = $_SERVER['DOCUMENT_ROOT'] . '/uploads/artikel';
+            } else {
+
+                $destination = storage_path('app/public/artikel');
+            }
+
+            if (!file_exists($destination)) {
+                mkdir($destination, 0755, true);
+            }
+
+            // Hapus foto lama
+            if ($artikel->foto) {
+
+                $old = $destination . '/' . basename($artikel->foto);
+
+                if (file_exists($old)) {
+                    unlink($old);
+                }
+            }
+
+            $file->move($destination, $fileName);
+
+            $artikel->foto = 'artikel/' . $fileName;
+
+            $artikel->save();
         }
 
         $artikel->update([
@@ -139,12 +175,21 @@ class ArtikelController extends Controller
         try {
             $artikel = Artikel::findOrFail($id);
 
-            // Local pakai 'public' (storage), Production pakai 'uploads'
-            $disk = app()->environment('production') ? 'uploads' : 'public';
-            
-            // Hapus file foto jika ada
-            if ($artikel->foto && Storage::disk($disk)->exists($artikel->foto)) {
-                Storage::disk($disk)->delete($artikel->foto);
+            if ($artikel->foto) {
+
+                if (app()->environment('production')) {
+
+                    $destination = $_SERVER['DOCUMENT_ROOT'] . '/uploads/artikel';
+                } else {
+
+                    $destination = storage_path('app/public/artikel');
+                }
+
+                $old = $destination . '/' . basename($artikel->foto);
+
+                if (file_exists($old)) {
+                    unlink($old);
+                }
             }
 
             $artikel->delete();

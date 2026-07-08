@@ -150,9 +150,8 @@ class AuthController extends Controller
                         'tanggal_lahir' => $user->tanggal_lahir,
                         'jenis_kelamin' => $user->jenis_kelamin,
                         'alamat' => $user->alamat,
-                        'foto' => $user->foto,
+                        'foto' => $user->foto ? asset('uploads/' . $user->foto) : null,
                         'barcode_id' => $user->barcode_id,
-
                         'id_desa' => $user->id_desa,
                         'nama_desa' => optional($user->desa)->nama_desa,
                         'nama_kecamatan' => optional(optional($user->desa)->kecamatan)->nama_kecamatan,
@@ -179,9 +178,8 @@ class AuthController extends Controller
                         'tanggal_lahir' => $user->tanggal_lahir,
                         'jenis_kelamin' => $user->jenis_kelamin,
                         'alamat' => $user->alamat,
-                        'foto' => $user->foto,
+                        'foto' => $user->foto ? asset('uploads/' . $user->foto) : null,
                         'barcode_id' => $user->barcode_id,
-
                         'id_dinas' => $user->id_dinas,
                         'nama_dinas' => optional($user->dinas)->nama_dinas,
                     ],
@@ -206,9 +204,8 @@ class AuthController extends Controller
                         'nama_lengkap' => $user->nama_lengkap,
                         'email'        => $user->email,
                         'no_telepon'   => $user->no_telepon,
-                        'foto'         => $user->foto,
+                        'foto' => $user->foto ? asset('uploads/' . $user->foto) : null,
                         'level'        => $user->level,
-
                         // tambahan
                         'desa_id'      => $user->desa_id,
                         'nama_wilayah' => $user->nama_wilayah,
@@ -381,7 +378,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'token' => 'required|string',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -443,83 +440,7 @@ class AuthController extends Controller
             'message' => 'Password berhasil direset'
         ]);
     }
-    public function updateProfile(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|integer',
-            'tipe' => 'required|in:masyarakat,pns',
-            'nama' => 'required|string|max:100',
-            'no_telepon' => 'required|string|max:15',
-            'tanggal_lahir' => 'nullable|date',
-            'alamat' => 'nullable|string',
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first()
-            ], 422);
-        }
-
-        $userId = $request->user_id;
-        $tipe = $request->tipe;
-
-        try {
-            if ($tipe == 'masyarakat') {
-                $user = Masyarakat::find($userId);
-
-                if (!$user) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'User tidak ditemukan'
-                    ], 404);
-                }
-
-                $user->update([
-                    'nama' => $request->nama,
-                    'no_telepon' => $request->no_telepon,
-                    'tanggal_lahir' => $request->tanggal_lahir,
-                    'alamat' => $request->alamat,
-                ]);
-            } elseif ($tipe == 'pns') {
-                $user = Pns::find($userId);
-
-                if (!$user) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'User tidak ditemukan'
-                    ], 404);
-                }
-
-                $user->update([
-                    'nama' => $request->nama,
-                    'no_telepon' => $request->no_telepon,
-                    'tanggal_lahir' => $request->tanggal_lahir,
-                    'alamat' => $request->alamat,
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Tipe user tidak valid'
-                ], 422);
-            }
-
-            return response()->json([
-                'status' => 'success',
-                'timestamp' => now()->format('Y-m-d H:i:s'),
-                'data' => [
-                    'user' => $user
-                ],
-                'message' => 'Profil berhasil diupdate'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal update profil',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
     public function getSaldo(Request $request)
     {
         \Log::info('=== GET SALDO DIPANGGIL ===');
@@ -635,12 +556,329 @@ class AuthController extends Controller
         }
 
         $user->fcm_token = $request->fcm_token;
-
         $user->save();
 
         return response()->json([
             'status' => 'success',
             'message' => 'FCM Token berhasil disimpan'
+        ]);
+    }
+
+    public function sendEmailOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'tipe' => 'required|in:masyarakat,pns',
+            'email' => 'nullable|email', // ✅ OPSIONAL: ada untuk ubah email, kosong untuk ubah password
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        if ($request->tipe == 'masyarakat') {
+            $user = Masyarakat::find($request->user_id);
+        } else {
+            $user = Pns::find($request->user_id);
+        }
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan'
+            ], 404);
+        }
+
+        // ✅ LOGIC: Tentukan email tujuan OTP
+        if ($request->has('email') && !empty($request->email)) {
+            // CASE 1: UBAH EMAIL - OTP dikirim ke EMAIL BARU
+            $targetEmail = $request->email;
+
+            // Validasi email baru harus berbeda
+            if ($user->email == $targetEmail) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Email baru harus berbeda'
+                ], 422);
+            }
+
+            // Cek email baru sudah dipakai atau belum
+            $cek = Masyarakat::where('email', $targetEmail)->exists()
+                || Pns::where('email', $targetEmail)->exists();
+
+            if ($cek) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Email sudah digunakan'
+                ], 422);
+            }
+
+            $subject = 'OTP Ganti Email RESIK';
+            $pesan = "Kode OTP untuk mengganti email Anda adalah: ";
+        } else {
+            // CASE 2: UBAH PASSWORD - OTP dikirim ke EMAIL LAMA (yang sudah terdaftar)
+            $targetEmail = $user->email;
+            $subject = 'OTP Ubah Password RESIK';
+            $pesan = "Kode OTP untuk mengubah password Anda adalah: ";
+        }
+
+        // Generate & Simpan OTP
+        $otp = random_int(1000, 9999);
+        $user->otp = $otp;
+        $user->otp_expires = now()->addMinutes(10);
+        $user->save();
+
+        // Kirim email
+        try {
+            Mail::raw(
+                $pesan . $otp . "\n\nBerlaku selama 10 menit.\nJangan bagikan kode ini kepada siapa pun.",
+                function ($message) use ($targetEmail, $subject) {
+                    $message->to($targetEmail)
+                        ->subject($subject);
+                }
+            );
+        } catch (\Exception $e) {
+            \Log::error('Gagal kirim email OTP: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'OTP berhasil dikirim ke ' . $targetEmail
+        ]);
+    }
+
+    public function verifyEmailOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'tipe' => 'required|in:masyarakat,pns',
+            'otp' => 'required|string|size:4',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        if ($request->tipe == 'masyarakat') {
+            $user = Masyarakat::find($request->user_id);
+        } else {
+            $user = Pns::find($request->user_id);
+        }
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan'
+            ], 404);
+        }
+
+        if ($user->otp != $request->otp) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'OTP salah'
+            ], 422);
+        }
+
+        if (now()->gt($user->otp_expires)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'OTP sudah kadaluarsa'
+            ], 422);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'OTP valid'
+        ]);
+    }
+
+    public function updateEmail(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'tipe' => 'required|in:masyarakat,pns',
+            'email' => 'required|email',
+            'otp' => 'required|string|size:4',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        // cek email sudah dipakai atau belum
+        $emailExist = Masyarakat::where('email', $request->email)->exists()
+            || Pns::where('email', $request->email)->exists();
+
+        if ($emailExist) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email sudah digunakan.'
+            ], 422);
+        }
+
+        if ($request->tipe == 'masyarakat') {
+
+            $user = Masyarakat::find($request->user_id);
+        } else {
+
+            $user = Pns::find($request->user_id);
+        }
+
+        if (!$user) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan.'
+            ], 404);
+        }
+
+        if ($user->otp != $request->otp) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'OTP salah.'
+            ], 422);
+        }
+
+        if (now()->gt($user->otp_expires)) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'OTP sudah kadaluarsa.'
+            ], 422);
+        }
+
+        $user->email = $request->email;
+
+        // hapus OTP setelah berhasil
+        $user->otp = null;
+        $user->otp_expires = null;
+
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Email berhasil diperbarui.',
+            'data' => [
+                'email' => $user->email
+            ]
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'tipe' => 'required|in:masyarakat,pns',
+            'password_baru' => 'required|min:8|confirmed',
+            'otp' => 'required|string|size:4',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        if ($request->tipe == 'masyarakat') {
+            $user = Masyarakat::find($request->user_id);
+        } else {
+            $user = Pns::find($request->user_id);
+        }
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan.'
+            ], 404);
+        }
+
+        // ✅ VERIFIKASI OTP (bukan password lama)
+        if ($user->otp != $request->otp) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kode OTP salah.'
+            ], 422);
+        }
+
+        if (now()->gt($user->otp_expires)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kode OTP sudah kadaluarsa.'
+            ], 422);
+        }
+
+        // ✅ UPDATE PASSWORD
+        $user->password = Hash::make($request->password_baru);
+
+        // Hapus OTP setelah berhasil
+        $user->otp = null;
+        $user->otp_expires = null;
+
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Password berhasil diperbarui.'
+        ]);
+    }
+
+    // ✅ LOGOUT (untuk Sanctum)
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Logout berhasil'
+        ]);
+    }
+
+    // ✅ TOTAL SETORAN USER
+    public function totalSetoran(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user instanceof \App\Models\Masyarakat) {
+            $tipe = 'masyarakat';
+            $userId = $user->id_masyarakat;
+        } elseif ($user instanceof \App\Models\Pns) {
+            $tipe = 'pns';
+            $userId = $user->id_pns;
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User tidak valid'
+            ], 400);
+        }
+
+        $totalSetoran = \App\Models\TransaksiSetor::where(function ($query) use ($tipe, $userId) {
+            if ($tipe === 'masyarakat') {
+                $query->where('id_masyarakat', $userId);
+            } else {
+                $query->where('id_pns', $userId);
+            }
+        })
+            ->whereNotNull('tanggal_koreksi')
+            ->where('status_transaksi', '!=', 'dibatalkan')
+            ->sum('berat');
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'total_setoran' => (float) ($totalSetoran ?? 0),
+                'saldo' => (float) ($user->saldo ?? 0),
+            ]
         ]);
     }
 }

@@ -37,15 +37,16 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 // Profile routes
-Route::put('/profile', [ProfileController::class, 'update']);        // Untuk update tanpa foto
-Route::post('/profile', [ProfileController::class, 'updateWithPhoto']); // Untuk update dengan foto
+Route::post('/profile', [ProfileController::class, 'update']);
+Route::post('/send-email-otp', [AuthController::class, 'sendEmailOtp']);
+Route::post('/verify-email-otp', [AuthController::class, 'verifyEmailOtp']);
+Route::put('/update-email', [AuthController::class, 'updateEmail']);
+Route::put('/update-password', [AuthController::class, 'updatePassword']);
 
 // Data Publik
 Route::get('/dinas', [DinasController::class, 'index']);
 Route::get('/artikel', [ArtikelController::class, 'index']);
 Route::get('/jenis-sampah', [JenisSampahController::class, 'index']);
-
-Route::post('/profile', [ProfileController::class, 'update']);
 
 Route::post('/cari-pengguna', [SetorController::class, 'cariPengguna']);
 
@@ -63,10 +64,6 @@ Route::delete('/tolak-setor/{id_transaksi}', [KonfirmasiSetorController::class, 
 Route::post('/auto-confirm-setor', [KonfirmasiSetorController::class, 'autoConfirm']);
 Route::get('/setor-statistics/{id_petugas}', [KonfirmasiSetorController::class, 'getStatistics']);
 Route::get('/setor-history/{id_petugas}', [KonfirmasiSetorController::class, 'getHistory']);
-
-
-// ==================== PENJEMPUTAN (Form/Submit) ====================
-Route::post('/penjemputan/store', [PenjemputanController::class, 'store']);
 
 // ==================== RIWAYAT ADMIN (TERPISAH) ====================
 Route::get('/riwayat-setor-admin/{id_petugas}', [RiwayatSetorAdminController::class, 'index']);

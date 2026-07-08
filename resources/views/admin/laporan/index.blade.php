@@ -41,7 +41,7 @@
                             $foto = $laporan->foto ?? '';
                             $fotoBalasan = $laporan->foto_balasan ?? '';
                             $tanggal = $laporan->tanggal
-                                ? \Carbon\Carbon::parse($laporan->tanggal)->format('d-m-Y')
+                                ? \Carbon\Carbon::parse($laporan->tanggal)->format('d-m-Y H:i')
                                 : '—';
 
                             $statusClass = match ($status) {
@@ -54,16 +54,22 @@
 
                             // Handle foto laporan dari mobile app
                             if ($foto) {
-                                $disk = app()->environment('production') ? 'uploads' : 'storage';
-                                $fotoUrl = asset($disk . '/' . $foto);
+                                if (app()->environment('production')) {
+                                    $fotoUrl = asset('uploads/' . $foto);
+                                } else {
+                                    $fotoUrl = asset('storage/' . $foto);
+                                }
                             } else {
                                 $fotoUrl = 'https://via.placeholder.com/300x200?text=Tidak+Ada+Foto';
                             }
 
                             // Handle foto balasan
                             if ($fotoBalasan) {
-                                $disk = app()->environment('production') ? 'uploads' : 'storage';
-                                $fotoBalasanUrl = asset($disk . '/' . $fotoBalasan);
+                                if (app()->environment('production')) {
+                                    $fotoBalasanUrl = asset('uploads/' . $fotoBalasan);
+                                } else {
+                                    $fotoBalasanUrl = asset('storage/' . $fotoBalasan);
+                                }
                             } else {
                                 $fotoBalasanUrl = '';
                             }
@@ -182,8 +188,7 @@
                         <label
                             style="display: block; margin-bottom: 5px; font-weight: 600; color: #555; font-size: 14px;">Tanggal:</label>
                         <input type="text" id="modalTanggal" class="form-input" readonly
-                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5;"
-                            value="{{ \Carbon\Carbon::parse($laporan->tanggal)->format('d-m-Y H:i') }}">
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5;">
                     </div>
 
                     <div>
