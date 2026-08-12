@@ -28,7 +28,8 @@ class AuthController extends Controller
             'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
             'tanggal_lahir' => 'nullable|date|before:today',
             'alamat' => 'nullable|string',
-            'id_desa' => 'required_if:tipe,masyarakat|nullable|exists:desa,id_desa',
+            // WAJIB ADA untuk SEMUA tipe user (Masyarakat & PNS)
+            'id_desa' => 'required|exists:desa,id_desa',
 
             'id_dinas' => 'required_if:tipe,pns|nullable|exists:dinas,id_dinas',
         ]);
@@ -92,7 +93,7 @@ class AuthController extends Controller
                 'tanggal_lahir' => $request->tanggal_lahir,
                 'alamat' => $request->alamat,
                 'id_dinas' => $request->id_dinas,
-                'id_desa' => null,
+                'id_desa' => $request->id_desa,
                 'barcode_id' => $barcode_id,
                 'saldo' => 0.00,
             ]);
@@ -163,7 +164,9 @@ class AuthController extends Controller
         }
 
         // 2. Cek tabel PNS (ASN)
-        $user = Pns::with('dinas')->where('email', $email)->first();
+        // TAMBAHKAN 'desa.kecamatan' DI SINI AGAR DATA BISA DIAMBIL
+        $user = Pns::with(['dinas', 'desa.kecamatan'])->where('email', $email)->first();
+
         if ($user && Hash::check($password, $user->password)) {
             return response()->json([
                 'status' => 'success',
@@ -180,8 +183,15 @@ class AuthController extends Controller
                         'alamat' => $user->alamat,
                         'foto' => $user->foto ? asset('uploads/' . $user->foto) : null,
                         'barcode_id' => $user->barcode_id,
+
+                        // DATA DINAS
                         'id_dinas' => $user->id_dinas,
                         'nama_dinas' => optional($user->dinas)->nama_dinas,
+
+                        // TAMBAHKAN DATA DESA & KECAMATAN DI SINI
+                        'id_desa' => $user->id_desa,
+                        'nama_desa' => optional($user->desa)->nama_desa,
+                        'nama_kecamatan' => optional(optional($user->desa)->kecamatan)->nama_kecamatan,
                     ],
                     'redirect' => '/home-user'
                 ],
@@ -276,24 +286,17 @@ class AuthController extends Controller
 
         // Kirim email via Laravel Mail
         try {
-            Mail::raw("
-        KODE VERIFIKASI RESIK APP
+            $pesan = "Kode OTP Anda: {$otp}\r\n\r\n" .
+                "Gunakan kode ini untuk reset password akun RESIK App Anda.\r\n" .
+                "Kode berlaku 10 menit. Jangan bagikan ke siapa pun.\r\n\r\n" .
+                "--\r\n" .
+                "RESIK App | Peduli Lingkungan";
 
-        Halo,
-
-        Kode OTP Anda adalah: {$otp}
-
-        Berlaku selama 10 menit.
-
-        Jangan bagikan kode ini kepada siapa pun.
-        Jika Anda tidak meminta reset password, abaikan email ini.
-
-        Terima kasih,
-        Tim RESIK App
-        ", function ($message) use ($email) {
+            Mail::raw($pesan, function ($message) use ($email) {
                 $message->to($email)
-                    ->subject('Kode Verifikasi - RESIK App')
-                    ->from('simpelsi2025@gmail.com', 'RESIK App');
+                    ->subject('Kode OTP RESIK App')
+                    ->from('simpelsi2025@gmail.com', 'RESIK App')
+                    ->getHeaders()->addTextHeader('X-Mailer', 'RESIK App');
             });
         } catch (\Exception $e) {
             \Log::error('Gagal kirim email: ' . $e->getMessage());
@@ -306,7 +309,7 @@ class AuthController extends Controller
         ]);
     }
 
-    // ✅ VERIFY OTP
+    // VERIFY OTP
     public function verifyOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -616,13 +619,13 @@ class AuthController extends Controller
                 ], 422);
             }
 
-            $subject = 'OTP Ganti Email RESIK';
-            $pesan = "Kode OTP untuk mengganti email Anda adalah: ";
+            $subject = 'Kode Verifikasi Ubah Email';
+            $tujuan = 'mengganti email akun Anda';
         } else {
             // CASE 2: UBAH PASSWORD - OTP dikirim ke EMAIL LAMA (yang sudah terdaftar)
             $targetEmail = $user->email;
-            $subject = 'OTP Ubah Password RESIK';
-            $pesan = "Kode OTP untuk mengubah password Anda adalah: ";
+            $subject = 'Kode Verifikasi Ubah Password';
+            $tujuan = 'mengubah password akun Anda';
         }
 
         // Generate & Simpan OTP
@@ -631,15 +634,20 @@ class AuthController extends Controller
         $user->otp_expires = now()->addMinutes(10);
         $user->save();
 
-        // Kirim email
+        // KIRIM EMAIL - FORMAT COMPACT
         try {
-            Mail::raw(
-                $pesan . $otp . "\n\nBerlaku selama 10 menit.\nJangan bagikan kode ini kepada siapa pun.",
-                function ($message) use ($targetEmail, $subject) {
-                    $message->to($targetEmail)
-                        ->subject($subject);
-                }
-            );
+            $pesan = "Kode OTP Anda: {$otp}\r\n\r\n" .
+                "Gunakan kode ini untuk {$tujuan}.\r\n" .
+                "Kode berlaku 10 menit. Jangan bagikan ke siapa pun.\r\n\r\n" .
+                "--\r\n" .
+                "RESIK App | Peduli Lingkungan";
+
+            Mail::raw($pesan, function ($message) use ($targetEmail, $subject) {
+                $message->to($targetEmail)
+                    ->subject($subject)
+                    ->from('simpelsi2025@gmail.com', 'RESIK App')
+                    ->getHeaders()->addTextHeader('X-Mailer', 'RESIK App');
+            });
         } catch (\Exception $e) {
             \Log::error('Gagal kirim email OTP: ' . $e->getMessage());
         }

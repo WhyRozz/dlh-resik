@@ -33,6 +33,11 @@ class Petugas extends Authenticatable
         'updated_at' => 'datetime',
     ];
 
+    // Agar nama_wilayah otomatis muncul saat jadi JSON
+    protected $appends = [
+        'nama_wilayah',
+    ];
+
     // Relasi ke transaksi setor
     public function transaksiSetor()
     {
@@ -96,10 +101,10 @@ class Petugas extends Authenticatable
             $desa = \App\Models\Desa::with('kecamatan')->find($idDesa);
 
             if ($desa && $desa->kecamatan) {
-                return 'Bank Sampah Kecamatan ' .
-                    $desa->kecamatan->nama_kecamatan .
-                    ', Desa ' .
-                    $desa->nama_desa;
+                // FORMAT: Bank Sampah [Nama Desa], [Nama Kecamatan]
+                return 'Bank Sampah ' .
+                    $desa->nama_desa . ', ' .
+                    $desa->kecamatan->nama_kecamatan;
             }
         }
 

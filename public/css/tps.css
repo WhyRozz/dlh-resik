@@ -267,7 +267,7 @@ body {
 @media (max-width: 768px) {
     .page-container {
         padding: 20px 15px;
-        margin-top: -20px;
+        margin-top: 50px;
         margin-left: 10px;
         margin-right: 10px;
     }

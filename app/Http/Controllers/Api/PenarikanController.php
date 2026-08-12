@@ -20,7 +20,7 @@ class PenarikanController extends Controller
             'id_masyarakat' => 'nullable|integer|exists:masyarakat,id_masyarakat',
             'id_pns' => 'nullable|integer|exists:pns,id_pns',
             'tipe_user' => 'required|in:masyarakat,pns',
-            'nama' => 'required|string|max:100',
+            'nama_penerima' => 'required|string|max:100',
             'jenis_layanan' => 'required|in:e-wallet,bank',
             'jenis_ewallet' => 'nullable|required_if:jenis_layanan,e-wallet|in:Dana,OVO,GoPay,ShopeePay',
             'nama_bank' => 'nullable|required_if:jenis_layanan,bank|in:Bank BCA,Bank BRI,Bank Mandiri,Bank Jatim',
@@ -74,13 +74,13 @@ class PenarikanController extends Controller
             $penarikan = Penarikan::create([
                 'id_masyarakat' => $request->tipe_user === 'masyarakat' ? $userId : null,
                 'id_pns' => $request->tipe_user === 'pns' ? $userId : null,
-                'nama' => $request->nama,
+                'nama_penerima' => $request->nama_penerima,
                 'jenis_layanan' => $request->jenis_layanan ?? 'e-wallet',
                 'jenis_ewallet' => $request->jenis_layanan === 'bank' ? null : $request->jenis_ewallet,
                 'nama_bank' => $request->jenis_layanan === 'bank' ? $request->nama_bank : null,
                 'nomor_ewallet' => $request->nomor_ewallet,
                 'jumlah_uang' => $request->jumlah_uang,
-                'status' => 'diproses', // ✅ GANTI 'Pending' jadi 'diproses'
+                'status' => 'diproses',
                 'tanggal_penarikan' => now(),
                 'alasan_penolakan' => null,
                 'updated_by' => null,
@@ -166,8 +166,8 @@ class PenarikanController extends Controller
                 ->map(function ($p) {
                     return [
                         'id' => $p->id_penarikan,
-                        'nama' => $p->nama ?? '-',
-                        'jenis_layanan' => $p->jenis_layanan ?? 'e-wallet',  // ✅ TAMBAH INI
+                        'nama_penerima' => $p->nama_penerima ?? '-',
+                        'jenis_layanan' => $p->jenis_layanan ?? 'e-wallet',
                         'nama_bank' => $p->nama_bank,
                         'jenis_ewallet' => $p->jenis_ewallet,
                         'nomor_ewallet' => $p->nomor_ewallet,
@@ -185,6 +185,88 @@ class PenarikanController extends Controller
             ]);
         } catch (\Exception $e) {
             \Log::error('Penarikan Index Error: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * GET /api/penarikan/{id}
+     * ✅ ENDPOINT BARU: Ambil detail penarikan spesifik by ID
+     */
+    public function show($id, Request $request)
+    {
+        $idMasyarakat = $request->query('id_masyarakat');
+        $idPns = $request->query('id_pns');
+        $tipeUser = $request->query('tipe_user');
+
+        // Validasi keamanan: pastikan user hanya bisa akses penarikan miliknya
+        if (!$tipeUser || (!$idMasyarakat && !$idPns)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Parameter tidak lengkap'
+            ], 422);
+        }
+
+        try {
+            $query = Penarikan::where('id_penarikan', $id);
+
+            // Filter berdasarkan kepemilikan
+            if ($tipeUser === 'masyarakat') {
+                $query->where('id_masyarakat', $idMasyarakat);
+            } elseif ($tipeUser === 'pns') {
+                $query->where('id_pns', $idPns);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tipe user tidak valid'
+                ], 422);
+            }
+
+            $penarikan = $query->first();
+
+            if (!$penarikan) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data penarikan tidak ditemukan'
+                ], 404);
+            }
+
+            // Tambahkan nama user dari tabel masyarakat/pns
+            $nama = '-';
+            if ($penarikan->id_masyarakat) {
+                $masyarakat = \App\Models\Masyarakat::find($penarikan->id_masyarakat);
+                $nama = $masyarakat?->nama ?? '-';
+            } elseif ($penarikan->id_pns) {
+                $pns = \App\Models\Pns::find($penarikan->id_pns);
+                $nama = $pns?->nama ?? '-';
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id' => $penarikan->id_penarikan,
+                    'id_penarikan' => $penarikan->id_penarikan,
+                    'nama_penerima' => $penarikan->nama_penerima ?? '-',
+                    'jenis_layanan' => $penarikan->jenis_layanan ?? 'e-wallet',
+                    'nama_bank' => $penarikan->nama_bank,
+                    'jenis_ewallet' => $penarikan->jenis_ewallet,
+                    'nomor_ewallet' => $penarikan->nomor_ewallet,
+                    'jumlah_uang' => (float) $penarikan->jumlah_uang,
+                    'status' => $penarikan->status,
+                    'tanggal_penarikan' => $penarikan->tanggal_penarikan
+                        ? $penarikan->tanggal_penarikan->format('d-m-Y H:i')
+                        : null,
+                    'alasan_penolakan' => $penarikan->alasan_penolakan,
+                    'tanggal_disetujui' => $penarikan->tanggal_disetujui
+                        ? $penarikan->tanggal_disetujui->format('d-m-Y H:i')
+                        : null,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Penarikan Show Error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()

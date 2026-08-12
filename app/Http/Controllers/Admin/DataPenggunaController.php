@@ -97,6 +97,8 @@ class DataPenggunaController extends Controller
         } elseif ($filter === 'asn') {
             $query = DB::table('pns')
                 ->leftJoin('dinas', 'pns.id_dinas', '=', 'dinas.id_dinas')
+                ->leftJoin('desa', 'pns.id_desa', '=', 'desa.id_desa') // ✅ TAMBAH JOIN DESA
+                ->leftJoin('kecamatan', 'desa.id_kecamatan', '=', 'kecamatan.id_kecamatan') // ✅ TAMBAH JOIN KECAMATAN
                 ->select(
                     'pns.id_pns as id',
                     'pns.nama',
@@ -110,8 +112,8 @@ class DataPenggunaController extends Controller
                     'pns.kode_anggota',
                     'pns.id_dinas',
                     'dinas.nama_dinas',
-                    DB::raw('NULL as nama_desa'),
-                    DB::raw('NULL as nama_kecamatan'),
+                    'desa.nama_desa', // ✅ UBAH DARI NULL
+                    'kecamatan.nama_kecamatan', // ✅ UBAH DARI NULL
                     'pns.created_at',
                     'pns.updated_at'
                 );
@@ -158,6 +160,8 @@ class DataPenggunaController extends Controller
             // Query PNS
             $pnsQuery = DB::table('pns')
                 ->leftJoin('dinas', 'pns.id_dinas', '=', 'dinas.id_dinas')
+                ->leftJoin('desa', 'pns.id_desa', '=', 'desa.id_desa') // ✅ TAMBAHKAN INI
+                ->leftJoin('kecamatan', 'desa.id_kecamatan', '=', 'kecamatan.id_kecamatan') // ✅ TAMBAHKAN INI
                 ->select(
                     'pns.id_pns as id',
                     'pns.nama',
@@ -171,8 +175,8 @@ class DataPenggunaController extends Controller
                     'pns.kode_anggota',
                     'pns.id_dinas',
                     'dinas.nama_dinas',
-                    DB::raw('NULL as nama_desa'),
-                    DB::raw('NULL as nama_kecamatan'),
+                    'desa.nama_desa',             // ✅ UBAH DARI NULL
+                    'kecamatan.nama_kecamatan',   // ✅ UBAH DARI NULL
                     'pns.created_at',
                     'pns.updated_at'
                 );
@@ -238,7 +242,8 @@ class DataPenggunaController extends Controller
                     'created_at' => $user->created_at,
                 ]);
             } elseif ($type === 'pns') {
-                $user = \App\Models\Pns::with('dinas')->find($id);
+                // ✅ TAMBAHKAN 'desa.kecamatan' DI SINI
+                $user = \App\Models\Pns::with(['dinas', 'desa.kecamatan'])->find($id);
 
                 if (!$user) {
                     return response()->json(['error' => 'User not found'], 404);
@@ -257,8 +262,9 @@ class DataPenggunaController extends Controller
                     'nama_dinas' => $user->dinas ? $user->dinas->nama_dinas : 'ASN/PNS',
                     'kode_anggota' => $user->kode_anggota,
                     'barcode_id' => $user->barcode_id,
-                    'nama_desa' => null,
-                    'nama_kecamatan' => null,
+                    // ✅ ISI DENGAN DATA SEBENARNYA DARI RELASI
+                    'nama_desa' => $user->desa ? $user->desa->nama_desa : null,
+                    'nama_kecamatan' => $user->desa && $user->desa->kecamatan ? $user->desa->kecamatan->nama_kecamatan : null,
                     'created_at' => $user->created_at,
                 ]);
             }

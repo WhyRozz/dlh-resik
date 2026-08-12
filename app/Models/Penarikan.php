@@ -18,6 +18,7 @@ class Penarikan extends Model
     protected $fillable = [
         'id_masyarakat',
         'id_pns',
+        'nama_penerima', 
         'jumlah_uang',
         'jenis_ewallet',
         'nomor_ewallet',

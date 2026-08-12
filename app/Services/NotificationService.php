@@ -25,19 +25,17 @@ class NotificationService
     {
         $query = DB::table('admin_fcm_tokens')
             ->join('admin', 'admin_fcm_tokens.id_admin', '=', 'admin.id_admin')
-            ->select('admin_fcm_tokens.*');
+            ->select('admin_fcm_tokens.id', 'admin_fcm_tokens.fcm_token');
 
         if ($idDesa !== null) {
-            // ✅ Filter: Super Admin + Sub Admin desa yang sesuai
             $query->where(function ($q) use ($idDesa) {
-                $q->whereNull('admin.id_desa')        // Super Admin
-                    ->orWhere('admin.id_desa', $idDesa); // Sub Admin desa ini
+                $q->whereNull('admin.id_desa')
+                    ->orWhere('admin.id_desa', $idDesa);
             });
         }
-        // ✅ Jika $idDesa = null, TIDAK ADA FILTER → semua admin dapat
-        // (Super Admin + semua Sub Admin)
 
-        return $query->get();
+        // ✅ TAMBAHKAN distinct() DI SINI
+        return $query->distinct()->get();
     }
 
     /**
@@ -175,71 +173,113 @@ class NotificationService
         );
     }
 
-    public function sendDeposit(
-        string $nama,
-        ?int $idDesa = null,
-        float $berat,
-        float $berat_asli,
-        float $total_rupiah,
-        int $idTransaksi
-    ): void {
+  public function sendDeposit(
+    string $nama,
+    ?int $idDesa = null,
+    float $berat,
+    float $berat_asli,
+    float $total_rupiah,
+    int $idTransaksi
+): void {
 
-        $title = "♻️ Setoran Sampah Baru";
+    $title = "♻️ Setoran Sampah Baru";
 
-        $body = "Setoran {$berat} {$berat_asli} Kg dari {$nama} berhasil. Saldo bertambah Rp {$total_rupiah}!";
+    $body = "Setoran {$berat_asli} Kg dari {$nama} berhasil. Saldo bertambah Rp " . 
+            number_format($total_rupiah, 0, ',', '.') . "!";
 
-        $this->sendToAdmins(
+    $this->sendToAdmins(
+        $title,
+        $body,
+        [
+            "type" => "deposit",
+            "url"  => "/admin/bank-sampah/setor-sampah",
+            "id"   => (string)$idTransaksi
+        ],
+        $idDesa
+    );
+}
 
-            $title,
+ public function sendToUser(
+    ?string $token,
+    string $title,
+    string $body,
+    array $data = [],
+    ?int $userId = null,
+    ?string $tipeUser = null
+): void {
 
-            $body,
+    \Log::info('=== SEND TO USER CALLED ===');
+    \Log::info('User ID: ' . ($userId ?? 'NULL'));
+    \Log::info('Tipe User: ' . ($tipeUser ?? 'NULL'));
 
-            [
-                "type" => "deposit",
-                "url"  => "/admin/bank-sampah/setor-sampah",
-                "id"   => (string)$idTransaksi
-            ],
+    $notificationData = array_merge($data, [
+        'icon' => 'ic_stat_logo_r_removebg_preview',
+    ]);
 
-            $idDesa
-
-        );
+    // ✅ SIMPAN KE DATABASE MENGGUNAKAN DB::table() (BYPASS ELOQUENT)
+    if ($userId && $tipeUser) {
+        try {
+            \Log::info('Mencoba menyimpan ke database dengan DB::table()...');
+            
+            $id = \Illuminate\Support\Facades\DB::table('notifications')->insertGetId([
+                'user_id' => $userId,
+                'tipe_user' => $tipeUser,
+                'title' => $title,
+                'body' => $body,
+                'type' => $data['type'] ?? 'general',
+                'data' => json_encode($notificationData),
+                'is_read' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
+            \Log::info('✅ BERHASIL! Notifikasi ID: ' . $id);
+            
+        } catch (\Exception $e) {
+            \Log::error('❌ GAGAL simpan ke database!');
+            \Log::error('Error: ' . $e->getMessage());
+            \Log::error('File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+        }
+    } else {
+        \Log::warning('userId atau tipeUser kosong!');
     }
 
-    public function sendToUser(
-        ?string $token,
-        string $title,
-        string $body,
-        array $data = []
-    ): void {
+    // ✅ KIRIM FCM
+    if (!$token) {
+        \Log::warning('FCM Token kosong, skip FCM');
+        return;
+    }
 
-        if (!$token) {
-            return;
-        }
-
-        // ✅ TAMBAHKAN ICON BESAR
-        $notificationData = array_merge($data, [
-            'image' => asset('assets/logo-apk.png'),  // ✅ BENAR  // ← Icon besar (URL)
-            'icon' => 'ic_stat_logo_r_removebg_preview',  // ✅ BENAR      // ✅ BENAR - Sesuai file yang ada
-        ]);
-
+    try {
+        \Log::info('Mengirim FCM...');
         $this->firebase->sendNotification(
             $token,
             $title,
             $body,
             $notificationData
         );
+        \Log::info('✅ FCM berhasil dikirim');
+    } catch (\Exception $e) {
+        \Log::error('❌ Gagal kirim FCM: ' . $e->getMessage());
     }
+    
+    \Log::info('=== SEND TO USER END ===');
+}
 
 
     // Mobile
     public function sendReportResult(
         ?string $token,
-        string $status
+        string $status,
+        ?int $userId = null,
+        ?string $tipeUser = null,
+        ?int $idLaporan = null
     ): void {
-        // ✅ LOGGING LENGKAP
+        // LOGGING LENGKAP
         \Log::info('=== SEND REPORT RESULT CALLED ===');
         \Log::info('Token: ' . ($token ?? 'NULL'));
         \Log::info('Status: ' . $status);
+        \Log::info('ID Laporan: ' . ($idLaporan ?? 'NULL'));
 
         if (!$token) {
             \Log::warning('⚠️ FCM Token NULL! Notifikasi tidak dikirim.');
@@ -258,7 +298,17 @@ class NotificationService
 
         try {
             \Log::info(' Mengirim notifikasi ke Firebase...');
-            $this->sendToUser($token, $title, $body, ["type" => "report_result"]);
+            $this->sendToUser(
+                $token,
+                $title,
+                $body,
+                [
+                    "type" => "report_result",
+                    "id" => $idLaporan ? (string) $idLaporan : null,  // ✅ KIRIM ID DI SINI!
+                ],
+                $userId,
+                $tipeUser
+            );
             \Log::info('✅ Notifikasi BERHASIL dikirim ke FCM!');
         } catch (\Exception $e) {
             \Log::error('❌ Error kirim notifikasi: ' . $e->getMessage());
@@ -270,7 +320,10 @@ class NotificationService
     public function sendWithdrawalResult(
         ?string $token,
         string $status,
-        float $jumlah_uang
+        float $jumlah_uang,
+        ?int $userId = null,
+        ?string $tipeUser = null,
+        ?int $idPenarikan = null  // ✅ TAMBAH PARAMETER INI!
     ): void {
 
         $title = "💸 Status Penarikan";
@@ -293,14 +346,20 @@ class NotificationService
             $title,
             $body,
             [
-                "type" => "withdrawal_result"
-            ]
+                "type" => "withdrawal_result",
+                "id" => $idPenarikan ? (string) $idPenarikan : null,  // ✅ KIRIM ID DI SINI!
+            ],
+            $userId,
+            $tipeUser
         );
     }
 
     public function sendDepositResult(
         ?string $token,
-        float $total_rupiah
+        float $total_rupiah,
+        ?int $userId = null,
+        ?string $tipeUser = null,
+        ?int $idTransaksi = null
     ): void {
 
         $this->sendToUser(
@@ -310,13 +369,19 @@ class NotificationService
                 . number_format($total_rupiah, 0, ',', '.')
                 . " berhasil ditambahkan ke akun Anda.",
             [
-                "type" => "deposit_result"
-            ]
+                "type" => "deposit_result",
+                "id" => $idTransaksi ? (string) $idTransaksi : null,
+            ],
+            $userId,
+            $tipeUser
         );
     }
 
     public function sendDepositRejected(
-        ?string $token
+        ?string $token,
+        ?int $userId = null,
+        ?string $tipeUser = null,
+        ?int $idTransaksi = null
     ): void {
 
         $this->sendToUser(
@@ -324,26 +389,29 @@ class NotificationService
             "♻️ Status Setoran",
             "Maaf, setoran sampah Anda ditolak. Silakan hubungi petugas untuk informasi lebih lanjut.",
             [
-                "type" => "deposit_rejected"
-            ]
+                "type" => "deposit_rejected",
+                "id" => $idTransaksi ? (string) $idTransaksi : null,
+            ],
+            $userId,
+            $tipeUser
         );
     }
 
     public function sendPickupResult(
         ?string $token,
-        string $status
+        string $status,
+        ?int $userId = null,
+        ?string $tipeUser = null,
+        ?int $idPenjemputan = null
     ): void {
 
         $title = "🚛 Status Penjemputan";
 
         if ($status == "disetujui") {
-
             $body = "Pengajuan penjemputan sampah Anda telah disetujui oleh admin. Penjemputan akan segera dilakukan.";
         } elseif ($status == "ditolak") {
-
             $body = "Maaf, pengajuan penjemputan sampah Anda ditolak. Silakan hubungi admin untuk informasi lebih lanjut.";
         } else {
-
             return;
         }
 
@@ -352,8 +420,11 @@ class NotificationService
             $title,
             $body,
             [
-                "type" => "pickup_result"
-            ]
+                "type" => "pickup_result",
+                "id" => $idPenjemputan ? (string) $idPenjemputan : null
+            ],
+            $userId,
+            $tipeUser
         );
     }
 }

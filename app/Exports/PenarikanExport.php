@@ -144,10 +144,11 @@ class MasyarakatPenarikanSheet implements FromCollection, WithHeadings, WithMapp
             'Pekerjaan',
             'Kecamatan',
             'Desa/Kelurahan',
-            'Tanggal Penarikan',
-            'Jumlah Uang',
+            'Nama Penerima',
             'Jenis Layanan',
-            'Nomor E-Wallet',
+            'Nomor E-Wallet / Bank',
+            'Jumlah Uang',
+            'Tanggal Penarikan',
             'Status',
             'Alasan Penolakan'
         ];
@@ -160,6 +161,10 @@ class MasyarakatPenarikanSheet implements FromCollection, WithHeadings, WithMapp
         $namaUser = $penarikan->masyarakat->nama ?? 'Unknown';
         $kecamatan = $penarikan->masyarakat->desa->kecamatan->nama_kecamatan ?? '-';
         $desa = $penarikan->masyarakat->desa->nama_desa ?? '-';
+        $namaPenerima = $penarikan->nama_penerima ?? '-';
+
+        // ✅ PAKSA JADI TEKS DENGAN TANDA PETIK TUNGGAL DI DEPAN
+        $nomorRekening = "'" . ($penarikan->nomor_ewallet ?? '-');
 
         return [
             $this->no,
@@ -167,12 +172,13 @@ class MasyarakatPenarikanSheet implements FromCollection, WithHeadings, WithMapp
             'Masyarakat',
             $kecamatan,
             $desa,
-            Carbon::parse($penarikan->tanggal_penarikan)->format('d-m-Y H:i'),
-            'Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.'),
+            $namaPenerima,
             $penarikan->jenis_layanan === 'bank'
                 ? ($penarikan->nama_bank ?? '-')
                 : ($penarikan->jenis_ewallet ?? '-'),
-            $penarikan->nomor_ewallet ?? '-',
+            $nomorRekening, // ✅ TANPA ARRAY, HANYA STRING SAJA
+            'Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.'),
+            Carbon::parse($penarikan->tanggal_penarikan)->format('d-m-Y H:i'),
             ucfirst($penarikan->status),
             $penarikan->alasan_penolakan ?? '-'
         ];
@@ -188,19 +194,19 @@ class MasyarakatPenarikanSheet implements FromCollection, WithHeadings, WithMapp
         $totalAmount = $this->collection()->sum('jumlah_uang');
 
         // Set lebar kolom default
-        foreach (range('A', 'K') as $col) {
+        foreach (range('A', 'L') as $col) {
             $sheet->getColumnDimension($col)->setWidth(15);
         }
 
         // AUTO-SIZE
-        foreach (range('A', 'K') as $col) {
+        foreach (range('A', 'L') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         $sheet->calculateColumnWidths();
 
         // Style header
-        $sheet->getStyle('A1:K1')->applyFromArray([
+        $sheet->getStyle('A1:L1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 12,
@@ -224,7 +230,7 @@ class MasyarakatPenarikanSheet implements FromCollection, WithHeadings, WithMapp
         ]);
 
         // Style total row
-        $sheet->getStyle("A{$lastRow}:K{$lastRow}")->applyFromArray([
+        $sheet->getStyle("A{$lastRow}:L{$lastRow}")->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 12
@@ -242,12 +248,17 @@ class MasyarakatPenarikanSheet implements FromCollection, WithHeadings, WithMapp
         $sheet->mergeCells("A{$lastRow}:B{$lastRow}");
         $sheet->setCellValue("A{$lastRow}", 'TOTAL TRANSAKSI:');
         $sheet->setCellValue("C{$lastRow}", $totalRows . ' data');
-        $sheet->mergeCells("D{$lastRow}:E{$lastRow}");
+        $sheet->mergeCells("D{$lastRow}:H{$lastRow}");
         $sheet->setCellValue("D{$lastRow}", 'TOTAL NOMINAL:');
-        $sheet->setCellValue("F{$lastRow}", 'Rp ' . number_format($totalAmount, 0, ',', '.'));
+        $sheet->setCellValue("I{$lastRow}", 'Rp ' . number_format($totalAmount, 0, ',', '.'));
+
+        // ✅ PAKSA KOLM H SEBAGAI TEKS (TANDA PETIK TUNGGAL SUDAH DIHILANGKAN OLEH EXCEL)
+        $sheet->getStyle('H2:H' . $lastRow)
+            ->getNumberFormat()
+            ->setFormatCode('@');
 
         // Style all cells border
-        $sheet->getStyle("A1:K{$lastRow}")->applyFromArray([
+        $sheet->getStyle("A1:L{$lastRow}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
@@ -285,7 +296,8 @@ class PnsPenarikanSheet implements FromCollection, WithHeadings, WithMapping, Wi
 
     public function collection()
     {
-        $query = Penarikan::with(['pns.dinas'])
+        // ✅ TAMBAHKAN 'pns.desa.kecamatan'
+        $query = Penarikan::with(['pns.dinas', 'pns.desa.kecamatan'])
             ->whereNotNull('id_pns')
             ->orderBy('tanggal_penarikan', 'desc');
 
@@ -325,10 +337,13 @@ class PnsPenarikanSheet implements FromCollection, WithHeadings, WithMapping, Wi
             'Nama Anggota',
             'Pekerjaan',
             'Dinas/Instansi',
-            'Tanggal Penarikan',
+            'Kecamatan',
+            'Desa/Kelurahan',
+            'Nama Penerima',
+            'Jenis Layanan',
+            'Nomor E-Wallet / Bank',
             'Jumlah Uang',
-            'E-Wallet',
-            'Nomor E-Wallet',
+            'Tanggal Penarikan',
             'Status',
             'Alasan Penolakan'
         ];
@@ -341,15 +356,28 @@ class PnsPenarikanSheet implements FromCollection, WithHeadings, WithMapping, Wi
         $namaUser = $penarikan->pns->nama ?? 'Unknown';
         $dinas = $penarikan->pns->dinas->nama_dinas ?? 'ASN/PNS';
 
+        // AMBIL DATA KECAMATAN DAN DESA
+        $kecamatan = $penarikan->pns->desa->kecamatan->nama_kecamatan ?? '-';
+        $desa = $penarikan->pns->desa->nama_desa ?? '-';
+        $namaPenerima = $penarikan->nama_penerima ?? '-';
+
+        // ✅ PAKSA JADI TEKS DENGAN TANDA PETIK TUNGGAL DI DEPAN
+        $nomorRekening = "'" . ($penarikan->nomor_ewallet ?? '-');
+
         return [
             $this->no,
             $namaUser,
             'ASN/PNS',
             $dinas,
-            Carbon::parse($penarikan->tanggal_penarikan)->format('d-m-Y H:i'),
+            $kecamatan,
+            $desa,
+            $namaPenerima,
+            $penarikan->jenis_layanan === 'bank'
+                ? ($penarikan->nama_bank ?? '-')
+                : ($penarikan->jenis_ewallet ?? '-'),
+            $nomorRekening, // ✅ TANPA ARRAY, HANYA STRING SAJA
             'Rp ' . number_format($penarikan->jumlah_uang, 0, ',', '.'),
-            $penarikan->jenis_ewallet ?? '-',
-            $penarikan->nomor_ewallet ?? '-',
+            Carbon::parse($penarikan->tanggal_penarikan)->format('d-m-Y H:i'),
             ucfirst($penarikan->status),
             $penarikan->alasan_penolakan ?? '-'
         ];
@@ -364,20 +392,20 @@ class PnsPenarikanSheet implements FromCollection, WithHeadings, WithMapping, Wi
         $lastRow = $totalRows + 2;
         $totalAmount = $this->collection()->sum('jumlah_uang');
 
-        // Set lebar kolom default
-        foreach (range('A', 'J') as $col) {
+        // Set lebar kolom default (A sampai M = 13 kolom)
+        foreach (range('A', 'M') as $col) {
             $sheet->getColumnDimension($col)->setWidth(15);
         }
 
         // AUTO-SIZE
-        foreach (range('A', 'J') as $col) {
+        foreach (range('A', 'M') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         $sheet->calculateColumnWidths();
 
-        // Style header
-        $sheet->getStyle('A1:J1')->applyFromArray([
+        // Style header (A1 sampai M1)
+        $sheet->getStyle('A1:M1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 12,
@@ -400,8 +428,8 @@ class PnsPenarikanSheet implements FromCollection, WithHeadings, WithMapping, Wi
             ]
         ]);
 
-        // Style total row
-        $sheet->getStyle("A{$lastRow}:J{$lastRow}")->applyFromArray([
+        // Style total row (A sampai M)
+        $sheet->getStyle("A{$lastRow}:M{$lastRow}")->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 12
@@ -415,16 +443,24 @@ class PnsPenarikanSheet implements FromCollection, WithHeadings, WithMapping, Wi
             ]
         ]);
 
-        // Add total row
+        // Add total row (Disesuaikan dengan 13 kolom)
         $sheet->mergeCells("A{$lastRow}:B{$lastRow}");
         $sheet->setCellValue("A{$lastRow}", 'TOTAL TRANSAKSI:');
         $sheet->setCellValue("C{$lastRow}", $totalRows . ' data');
-        $sheet->mergeCells("D{$lastRow}:E{$lastRow}");
-        $sheet->setCellValue("D{$lastRow}", 'TOTAL NOMINAL:');
-        $sheet->setCellValue("F{$lastRow}", 'Rp ' . number_format($totalAmount, 0, ',', '.'));
 
-        // Style all cells border
-        $sheet->getStyle("A1:J{$lastRow}")->applyFromArray([
+        // Merge dari Dinas(D) sampai Nomor E-Wallet(I) = 6 kolom
+        $sheet->mergeCells("D{$lastRow}:I{$lastRow}");
+        $sheet->setCellValue("D{$lastRow}", 'TOTAL NOMINAL:');
+        // Nilai total ada di kolom J (Jumlah Uang)
+        $sheet->setCellValue("J{$lastRow}", 'Rp ' . number_format($totalAmount, 0, ',', '.'));
+
+        // ✅ PAKSA KOLM I SEBAGAI TEKS (TANDA PETIK TUNGGAL SUDAH DIHILANGKAN OLEH EXCEL)
+        $sheet->getStyle('I2:I' . $lastRow)
+            ->getNumberFormat()
+            ->setFormatCode('@');
+
+        // Style all cells border (A1 sampai M)
+        $sheet->getStyle("A1:M{$lastRow}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,

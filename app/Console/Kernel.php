@@ -9,23 +9,20 @@ class Kernel extends ConsoleKernel
 {
     /**
      * Define the application's command schedule.
-     *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
-     * @return void
      */
     protected function schedule(Schedule $schedule)
     {
+        // ℹ️ Scheduler "auto-confirm-setor" sudah DIHAPUS
+        //    karena fitur auto-confirm tidak dipakai lagi.
+        //    (Konfirmasi setor sekarang dilakukan MANUAL oleh petugas
+        //     melalui KonfirmasiSetorController.)
+        //
+        // Tambahkan scheduler lain di sini jika suatu saat perlu, contoh:
         // $schedule->command('inspire')->hourly();
-        $schedule->call(function () {
-            $response = Http::post('http://127.0.0.1:8000/api/auto-confirm-setor');
-            \Log::info('Auto-confirm result: ' . $response->body());
-        })->hourly();
     }
 
     /**
      * Register the commands for the application.
-     *
-     * @return void
      */
     protected function commands()
     {

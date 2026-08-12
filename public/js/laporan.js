@@ -2,6 +2,9 @@
  * Script untuk halaman Kelola Laporan Admin
  */
 
+// ✅ 1. TAMBAHKAN VARIABEL INI (Mencegah klik berulang)
+let isProcessing = false;
+
 // Global variable untuk menyimpan ID laporan yang sedang dibuka
 let currentLaporanId = null;
 
@@ -27,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
  * @param {HTMLElement} rowElement - Element row yang diklik
  */
 function showDetailModal(rowElement) {
-    // ✅ Ambil data dari data attributes
+    // Ambil data dari data attributes
     const id = rowElement.dataset.id;
     const nama = rowElement.dataset.nama;
     const lokasi = rowElement.dataset.lokasi;
@@ -40,9 +43,10 @@ function showDetailModal(rowElement) {
 
     currentLaporanId = id;
 
-    // ✅ Isi data ke modal
+    // Isi data ke modal
     document.getElementById('modalId').value = id;
     document.getElementById('modalNama').value = nama;
+    
     // Set lokasi di input dan link Maps
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lokasi)}`;
     document.getElementById('modalLokasi').value = lokasi;
@@ -50,7 +54,7 @@ function showDetailModal(rowElement) {
     document.getElementById('modalTanggal').value = tanggal;
     document.getElementById('modalKeterangan').value = keterangan;
 
-    // ✅ Set foto laporan dengan debug
+    // Set foto laporan dengan debug
     console.log('📷 Foto URL dari database:', foto);
     const imgElement = document.getElementById('modalFoto');
 
@@ -67,13 +71,13 @@ function showDetailModal(rowElement) {
         imgElement.src = 'https://via.placeholder.com/400x300?text=Tidak+Ada+Foto';
     }
 
-    // ✅ Set status radio button
+    // Set status radio button
     const statusRadios = document.querySelectorAll('input[name="status"]');
     statusRadios.forEach(radio => {
         radio.checked = (radio.value === status);
     });
 
-    // ✅ Tentukan apakah bisa edit atau read-only
+    // Tentukan apakah bisa edit atau read-only
     const isEditable = status === 'Diproses';
     const editSection = document.getElementById('editSection');
     const readOnlySection = document.getElementById('readOnlySection');
@@ -92,10 +96,10 @@ function showDetailModal(rowElement) {
         readOnlySection.style.display = 'block';
         btnSimpan.style.display = 'none';
 
-        // ✅ Set data read-only
+        // Set data read-only
         document.getElementById('modalStatusRead').value = status;
 
-        // ✅ Tampilkan balasan jika ada
+        // Tampilkan balasan jika ada
         const balasanReadSection = document.getElementById('balasanReadSection');
         if (balasan && balasan.trim() !== '') {
             document.getElementById('modalBalasanRead').value = balasan;
@@ -104,7 +108,7 @@ function showDetailModal(rowElement) {
             balasanReadSection.style.display = 'none';
         }
 
-        // ✅ Tampilkan foto balasan jika ada
+        // Tampilkan foto balasan jika ada
         const fotoBalasanReadSection = document.getElementById('fotoBalasanReadSection');
         if (fotoBalasan && fotoBalasan.trim() !== '') {
             document.getElementById('modalFotoBalasanRead').src = fotoBalasan;
@@ -114,7 +118,7 @@ function showDetailModal(rowElement) {
         }
     }
 
-    // ✅ Tampilkan modal
+    // Tampilkan modal
     const modal = document.getElementById('detailModal');
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden'; // Prevent background scroll
@@ -135,9 +139,14 @@ function closeDetailModal() {
 }
 
 /**
- * Simpan perubahan status
+ * ✅ 2. SIMPAN PERUBAHAN STATUS (DENGAN PENCEGAHAN KLIK BERULANG)
  */
 function saveStatus() {
+    // ✅ CEK: Jika sedang diproses, HENTIKAN (Mencegah klik 2x atau 3x)
+    if (isProcessing) {
+        return; 
+    }
+
     if (!currentLaporanId) {
         Swal.fire({
             icon: 'error',
@@ -176,6 +185,9 @@ function saveStatus() {
         });
         return;
     }
+
+    // ✅ 3. KUNCI PROSES SEBELUM FETCH DIMULAI
+    isProcessing = true;
 
     // Show loading
     Swal.fire({
@@ -218,7 +230,7 @@ function saveStatus() {
             Swal.close();
 
             if (data.success) {
-                // ✅ TUTUP MODAL DENGAN CARA PASTI
+                // TUTUP MODAL DENGAN CARA PASTI
                 const modal = document.getElementById('detailModal');
                 if (modal) {
                     modal.style.display = 'none';
@@ -230,7 +242,7 @@ function saveStatus() {
                 document.getElementById('modalBalasan').value = '';
                 currentLaporanId = null;
 
-                // ✅ TUNGGU 500MS BARU TAMPILKAN SWEETALERT
+                // TUNGGU 500MS BARU TAMPILKAN SWEETALERT
                 setTimeout(() => {
                     Swal.fire({
                         icon: 'success',
@@ -262,6 +274,10 @@ function saveStatus() {
                 text: 'Terjadi kesalahan koneksi.',
                 confirmButtonColor: '#2e8b57'
             });
+        })
+        .finally(() => {
+            // ✅ 4. BUKA KUNCI SETELAH PROSES SELESAI (BAIK SUKSES MAUPUN GAGAL)
+            isProcessing = false;
         });
 }
 

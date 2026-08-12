@@ -1,5 +1,5 @@
 /* ========================================
-   PENJEMPUTAN - CLEAN CSS (FIXED & MATCHED PENARIKAN)
+   PENJEMPUTAN - CLEAN CSS (FINAL FIXED)
    File: public/css/penjemputan.css
    Project: SIMPELSI - DLH Resik
    ======================================== */
@@ -29,8 +29,8 @@
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    margin-top: 0px;
-    padding: 5px 20px 20px 20px;
+    margin-top: 10px;
+    padding: 15px 20px 20px 20px;
     margin-bottom: 0;
 }
 
@@ -59,13 +59,17 @@
     border: none;
     margin: 0;
     flex-shrink: 0;
+    display: flex;
+    justify-content: center; /* TAMBAHKAN INI - untuk center */
+    width: 100%; /* TAMBAHKAN INI */
 }
 
 .filter-group {
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    flex-wrap: nowrap;
+    flex-wrap: wrap; /* UBAH: nowrap → wrap */
+    justify-content: center; /* TAMBAHKAN INI - untuk center */
 }
 
 .filter-select {
@@ -186,7 +190,7 @@
 }
 
 /* =========================================
-    TABLE CONTAINER (MATCH PENARIKAN STYLE)
+    TABLE CONTAINER
    ========================================= */
 .table-container {
     background: white;
@@ -194,7 +198,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     border: 1px solid #e0e0e0;
-    margin-top: 1rem;
+    margin-top: 15px; /* Jarak napas, bukan minus */
 }
 
 .data-table {
@@ -205,7 +209,6 @@
     background: white;
 }
 
-/* Header Hijau Soft */
 .data-table thead {
     background: #e8f5e9;
 }
@@ -237,7 +240,6 @@
     border-bottom: none;
 }
 
-/* Gambar di tabel (Fixed size) */
 .data-table tbody td img {
     max-width: 80px !important;
     height: 60px !important;
@@ -247,7 +249,6 @@
     display: block;
 }
 
-/* Column Widths */
 .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 5%; text-align: center; }
 .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 12%; }
 .data-table th:nth-child(3), .data-table td:nth-child(3) { width: 15%; }
@@ -394,130 +395,7 @@
 .pagination-info, .text-muted { display: none; }
 
 /* =========================================
-   RESPONSIVE
-   ========================================= */
-@media (max-width: 1024px) {
-    .header-wrapper { flex-wrap: wrap; gap: 1rem; }
-    .filter-section { order: 3; width: 100%; margin-top: 0.5rem; }
-    .filter-group { flex-wrap: wrap; justify-content: center; }
-}
-
-@media (max-width: 768px) {
-    .main-content { padding: 10px; }
-    .page-container { padding-top:-30px; }
-    .header-wrapper { flex-direction: column; align-items: stretch; }
-    .page-title, .filter-section, .top-search { width: 100%; justify-content: center; }
-    .filter-group { flex-direction: column; align-items: stretch; }
-    .filter-select, .btn-filter { width: 100%; justify-content: center; }
-    .search-wrapper { width: 100%; }
-    
-    .data-table { font-size: 12px; }
-    .data-table th, .data-table td { padding: 10px 8px; }
-    .data-table tbody td img { width: 48px; height: 40px; }
-    
-    .detail-content { grid-template-columns: 1fr; gap: 18px; }
-    .detail-image img { max-height: 220px; }
-    .modal-header h3 { font-size: 1.1rem; }
-    .modal-body { padding: 18px; }
-}
-
-@media (max-width: 480px) {
-    
-    /* 1. FIX SCROLL TABEL (Target .table-container, bukan table langsung) */
-    .table-container {
-        overflow-x: auto !important;      /* Aktifkan scroll horizontal */
-        -webkit-overflow-scrolling: touch; /* Smooth scroll di iOS */
-        border-radius: 8px;
-    }
-
-    .data-table {
-        display: table;
-        min-width: 700px;       /* Paksa lebar agar scroll muncul */
-    }
-    
-    /* 2. TOMBOL & INPUT (Ukuran nyaman disentuh) */
-    .filter-select, 
-    .btn-filter, 
-    .search-wrapper, 
-    .btn-tutup, 
-    #confirmYesBtn {
-        min-height: 44px;
-    }
-    
-    .btn-approve, 
-    .btn-reject {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-    }
-
-    /* 3. PAGINATION (Rapi di tengah) */
-    .pagination-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        padding: 15px 10px;
-        text-align: center;
-    }
-    
-    .pagination {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .pagination li a,
-    .pagination li span {
-        padding: 8px 12px;
-        font-size: 0.85rem;
-        min-width: 32px;
-        height: 32px;
-    }
-
-    /* 4. MODAL & DETAIL (Aman di layar kecil) */
-    .modal-container {
-        width: 100%;
-        margin: 10px;
-        max-height: 76vh;
-    }
-    
-    .modal-body {
-        padding: 25px;
-    }
-    
-    .detail-content {
-        gap: 15px;
-    }
-
-    /* 5. FORM INPUT (Sesuaikan selector dengan CSS utama) */
-    /* Menggunakan .form-group input agar sesuai definisi di atas */
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        font-size: 16px;
-        padding: 12px;
-    }
-
-    /* 6. GAMBAR TABEL (Kecilkan agar muat) */
-    .data-table tbody td img {
-        width: 48px;
-        height: 40px;
-    }
-}
-
-/* Geser header "Waktu" (kolom 4) ke kanan */
-.data-table thead th:nth-child(4) {
-    padding-left: 50px;  /* Semakin besar angka, semakin ke kanan */
-    text-align: left;
-}
-
-/* Geser header "Aksi" (kolom 7) ke kiri */
-.data-table thead th:nth-child(7) {
-    padding-right: 90px;  /* Semakin besar angka, semakin ke kiri */
-    text-align: center;
-}
-
-/* =========================================
-   BADGE WILAYAH KERJA (BARU!)
+   BADGE WILAYAH KERJA
    ========================================= */
 .badge-wilayah {
     display: inline-block;
@@ -535,7 +413,7 @@
 }
 
 /* =========================================
-   FILTER DROPDOWN MODERN (BARU!)
+   FILTER DROPDOWN MODERN
    ========================================= */
 #filterKecamatan,
 #filterDesa {
@@ -567,9 +445,82 @@
 }
 
 /* =========================================
-   RESPONSIVE BADGE WILAYAH
+   RESPONSIVE MOBILE (FINAL & CLEAN)
    ========================================= */
+@media (max-width: 1024px) {
+    .header-wrapper { flex-wrap: wrap; gap: 1rem; }
+    .filter-section { order: 3; width: 100%; margin-top: 0.5rem; }
+    .filter-group { flex-wrap: wrap; justify-content: center; }
+}
+
 @media (max-width: 768px) {
+    .main-content { padding: 10px; }
+    
+    .page-container { 
+        padding: 15px; 
+        margin-top: 40px; 
+        overflow-x: hidden; /* Cegah halaman utama scroll */
+    }
+
+    .header-wrapper { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 12px; 
+        width: 100%; 
+    }
+    .page-title { font-size: 1.2rem; margin: 0; width: 100%; }
+    .top-search { width: 100%; justify-content: flex-start; }
+    
+    .search-wrapper { 
+        width: 100%; 
+        max-width: 100%; /* Search panjang di HP */
+        height: 40px; 
+    }
+
+    .filter-section { 
+        width: 100%; 
+        flex-direction: column; 
+        gap: 12px; 
+        margin-top: 5px; 
+    }
+    
+    /* Dropdown Kecamatan & Desa berjejer 2 kolom */
+    #filterWilayah {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    #filterDinas {
+        width: 100%;
+    }
+
+    .filter-group { 
+        display: flex;
+        flex-direction: column;
+        gap: 10px; 
+        width: 100%; 
+    }
+
+    .filter-select, .btn-filter { 
+        width: 100%; 
+        height: 42px; 
+        font-size: 0.9rem;
+        min-width: 0; 
+    }
+    
+    .btn-filter { justify-content: center; }
+
+    .data-table { font-size: 0.85rem; }
+    .data-table th, .data-table td { padding: 10px 8px; }
+    .data-table tbody td img { width: 48px; height: 40px; }
+    
+    .detail-content { grid-template-columns: 1fr; gap: 18px; }
+    .detail-image img { max-height: 220px; }
+    .modal-header h3 { font-size: 1.1rem; }
+    .modal-body { padding: 18px; }
+
     .badge-wilayah {
         font-size: 10px;
         padding: 4px 8px;
@@ -577,29 +528,40 @@
     }
 }
 
-/* Center the filter section */
-.filter-section {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
+@media (max-width: 480px) {
+    .table-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+        margin-top: 15px;
+    }
 
-.filter-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Center the header wrapper on smaller screens */
-@media (max-width: 1200px) {
-    .header-wrapper {
-        flex-direction: column;
-        align-items: center;
+    .data-table {
+        display: table;
+        min-width: 700px; /* Hanya tabel yang scroll */
     }
     
-    .filter-section {
-        width: 100%;
+    .filter-select, .btn-filter, .search-wrapper, .btn-tutup {
+        min-height: 44px;
+    }
+    .btn-approve, .btn-reject {
+        width: 40px; height: 40px; font-size: 16px;
+    }
+
+    .pagination-container {
+        flex-direction: column; align-items: center; gap: 10px; padding: 15px 10px;
+    }
+    .pagination { flex-wrap: wrap; justify-content: center; }
+    .pagination li a, .pagination li span {
+        padding: 8px 12px; font-size: 0.85rem; min-width: 32px; height: 32px;
+    }
+
+    .modal-container { width: 95%; margin: 10px; max-height: 85vh; }
+    .modal-body { padding: 15px; }
+    .detail-content { gap: 15px; }
+    
+    .form-group input, .form-group textarea, .form-group select {
+        font-size: 16px;
+        padding: 12px;
     }
 }

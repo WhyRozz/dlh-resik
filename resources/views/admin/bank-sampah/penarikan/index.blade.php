@@ -126,29 +126,27 @@
                     </button>
                 </div>
             </form>
-        <form method="GET"
-              action="{{ route('admin.bank-sampah.penarikan.export') }}"
-              id="exportForm">
+            <form method="GET" action="{{ route('admin.bank-sampah.penarikan.export') }}" id="exportForm">
 
-            <input type="hidden" name="bulan" value="{{ request('bulan') }}">
-            <input type="hidden" name="tahun" value="{{ request('tahun') }}">
-            <input type="hidden" name="status" value="{{ request('status') }}">
-            <input type="hidden" name="tipe_filter" value="{{ request('tipe_filter') }}">
-            <input type="hidden" name="kecamatan_id" value="{{ request('kecamatan_id') }}">
-            <input type="hidden" name="desa_id" value="{{ request('desa_id') }}">
-            <input type="hidden" name="dinas_id" value="{{ request('dinas_id') }}">
-            <input type="hidden" name="tipe_pengguna" value="semua">
+                <input type="hidden" name="bulan" value="{{ request('bulan') }}">
+                <input type="hidden" name="tahun" value="{{ request('tahun') }}">
+                <input type="hidden" name="status" value="{{ request('status') }}">
+                <input type="hidden" name="tipe_filter" value="{{ request('tipe_filter') }}">
+                <input type="hidden" name="kecamatan_id" value="{{ request('kecamatan_id') }}">
+                <input type="hidden" name="desa_id" value="{{ request('desa_id') }}">
+                <input type="hidden" name="dinas_id" value="{{ request('dinas_id') }}">
+                <input type="hidden" name="tipe_pengguna" value="semua">
 
-            <button type="submit" class="btn-cetak">
-                <img src="{{ asset('assets/icons/excel.png') }}" class="icon-excel">
-                Export Excel
-            </button>
+                <button type="submit" class="btn-cetak">
+                    <img src="{{ asset('assets/icons/excel.png') }}" class="icon-excel">
+                    Export Excel
+                </button>
 
-        </form>
+            </form>
+
+        </div>
 
     </div>
-
-</div>
 
     <div class="green-divider"></div>
 
@@ -161,47 +159,43 @@
                     <th width="5%">No</th>
                     <th width="12%">Nama Pengguna</th>
                     <th style="width: 15%; text-align: center; padding-right: 0px;">Pekerjaan</th>
-                    <th width="15%">Tanggal Penarikan</th>
-                    <th width="12%">Jumlah Uang</th>
-                    <th style="width: 10%;">E-Wallet / Bank</th>
-                    <th style="width: 10%; text-align: center; padding-right: 30px;">Status</th>
-                    <th width="10%">Aksi</th>
+                    <th width="10%">Nama Penerima</th>
+                    <th width="7%">E-Wallet / Bank</th>
+                    <th width="7%">Jumlah Uang</th>
+                    <th width="7%">Tanggal Penarikan</th>
+                    <th style="width: 7%; text-align: center; padding-right: 30px;">Status</th>
+                    <th width="5%">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($penarikans as $index => $penarikan)
-                    <tr>
+@forelse($penarikans as $index => $penarikan)
+    <tr class="clickable-row" data-id="{{ $penarikan->id_penarikan }}">
                         {{-- 1. Nomor Urut --}}
                         <td>{{ $penarikans->firstItem() + $index }}</td>
 
-                        {{-- 2. Nama Anggota --}}
+                        {{-- 2. Nama Pengguna --}}
                         <td><span class="member-name">{{ $penarikan->nama_user ?? 'Unknown' }}</span></td>
 
                         {{-- 3. Pekerjaan --}}
                         <td>
                             @if ($penarikan->id_masyarakat)
-                                {{-- Masyarakat: Tampilkan "Masyarakat (Kecamatan, Desa)" --}}
                                 <span class="badge badge-masyarakat">
                                     Masyarakat ({{ $penarikan->kecamatan ?? '-' }}, {{ $penarikan->desa ?? '-' }})
                                 </span>
                             @else
-                                {{-- PNS: Tampilkan nama dinas --}}
                                 <span class="badge badge-pns">
                                     {{ $penarikan->dinas ?? 'ASN/PNS' }}
+                                    <br>
+                                    <small style="opacity: 0.8;">({{ $penarikan->kecamatan ?? '-' }},
+                                        {{ $penarikan->desa ?? '-' }})</small>
                                 </span>
                             @endif
                         </td>
 
-                        {{-- 4. Tanggal --}}
-                        <td>
-                            <span class="date-main">{{ $penarikan->tanggal_penarikan->format('d M Y') }}</span>
-                            <span class="date-time">{{ $penarikan->tanggal_penarikan->format('H:i') }}</span>
-                        </td>
+                        {{-- 4. Nama Penerima (BARU) --}}
+                        <td><strong>{{ $penarikan->nama_penerima ?? '-' }}</strong></td>
 
-                        {{-- 5. Jumlah Uang --}}
-                        <td><span class="amount">Rp {{ number_format($penarikan->jumlah_uang, 0, ',', '.') }}</span></td>
-
-                        {{-- 6. E-Wallet --}}
+                        {{-- 5. E-Wallet / Bank --}}
                         <td>
                             <span class="wallet-type">
                                 @if ($penarikan->jenis_layanan === 'bank')
@@ -213,7 +207,16 @@
                             <span class="wallet-number">{{ $penarikan->nomor_ewallet ?? '' }}</span>
                         </td>
 
-                        {{-- 7. Status --}}
+                        {{-- 6. Jumlah Uang --}}
+                        <td><span class="amount">Rp {{ number_format($penarikan->jumlah_uang, 0, ',', '.') }}</span></td>
+
+                        {{-- 7. Tanggal --}}
+                        <td>
+                            <span class="date-main">{{ $penarikan->tanggal_penarikan->format('d M Y') }}</span>
+                            <span class="date-time">{{ $penarikan->tanggal_penarikan->format('H:i') }}</span>
+                        </td>
+
+                        {{-- 8. Status --}}
                         <td>
                             @php
                                 $statusClass = match ($penarikan->status) {
@@ -226,7 +229,7 @@
                             <span class="status-badge {{ $statusClass }}">{{ $statusText }}</span>
                         </td>
 
-                        {{-- 8. Aksi --}}
+                        {{-- 9. Aksi --}}
                         <td>
                             <div class="action-buttons">
                                 <button class="btn-action btn-view" onclick="showDetail({{ $penarikan->id_penarikan }})"
@@ -238,7 +241,7 @@
                     </tr>
                 @empty
                     <tr class="empty-row">
-                        <td colspan="7">
+                        <td colspan="9">
                             <i class="fas fa-inbox"
                                 style="font-size: 48px; opacity: 0.3; display: block; margin-bottom: 8px;"></i>
                             Belum ada data penarikan
@@ -275,7 +278,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Nama Anggota</label>
+                        <label class="form-label">Nama Pengguna</label>
                         <input type="text" id="detail-nama" class="form-input" readonly>
                     </div>
 
@@ -303,9 +306,10 @@
                         <input type="text" id="detail-dinas" class="form-input" readonly>
                     </div>
 
+                    {{-- NAMA PENERIMA (BARU) --}}
                     <div class="form-group">
-                        <label class="form-label">Tanggal Pengajuan</label>
-                        <input type="text" id="detail-tanggal" class="form-input" readonly>
+                        <label class="form-label">Nama Penerima</label>
+                        <input type="text" id="detail-nama-penerima" class="form-input" readonly>
                     </div>
 
                     <div class="form-group">
@@ -321,6 +325,11 @@
                     <div class="form-group">
                         <label class="form-label">Jumlah Penarikan</label>
                         <input type="text" id="detail-jumlah" class="form-input amount-highlight" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Pengajuan</label>
+                        <input type="text" id="detail-tanggal" class="form-input" readonly>
                     </div>
 
                     <div class="form-group">
@@ -506,5 +515,30 @@
         // Panggil saat halaman load
         toggleFilterType();
         toggleResetWilayah();
+        
+                // ==========================================
+        // FITUR: KLIK SELURUH BARIS TABEL UNTUK DETAIL
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.querySelector('#penarikanTable tbody');
+
+            if (tableBody) {
+                tableBody.addEventListener('click', function(event) {
+                    // Cari elemen <tr> terdekat dari area yang diklik
+                    const row = event.target.closest('tr');
+
+                    // Pastikan yang diklik adalah baris data (memiliki class clickable-row)
+                    // Ini mencegah error jika yang diklik adalah baris "Belum ada data"
+                    if (row && row.classList.contains('clickable-row')) {
+                        const idPenarikan = row.getAttribute('data-id');
+                        
+                        if (idPenarikan) {
+                            // Panggil fungsi showDetail yang sudah ada di penarikan.js
+                            showDetail(idPenarikan);
+                        }
+                    }
+                });
+            }
+        });
     </script>
 @endpush

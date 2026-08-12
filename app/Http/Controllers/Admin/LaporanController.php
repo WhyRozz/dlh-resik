@@ -98,9 +98,16 @@ class LaporanController extends Controller
 
             // ✅ FIX #4: KIRIM NOTIFIKASI
             $notification = new \App\Services\NotificationService();
+
+            $tipeUser = $laporan->masyarakat ? 'masyarakat' : 'pns';
+            $userId = $laporan->masyarakat ? $user->id_masyarakat : $user->id_pns;
+
             $notification->sendReportResult(
                 $user->fcm_token,
-                $laporan->status
+                $laporan->status,
+                $userId,
+                $tipeUser,
+                $laporan->id
             );
 
             return response()->json(['success' => true]);

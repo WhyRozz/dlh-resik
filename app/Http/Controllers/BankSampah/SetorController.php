@@ -19,20 +19,28 @@ class SetorController extends Controller
 {
     public function index(Request $request)
     {
-        $query = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns.dinas', 'jenisSampah', 'petugas'])
+        $query = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns.dinas', 'pns.desa.kecamatan', 'jenisSampah', 'petugas'])
             ->orderBy('tanggal_transaksi', 'desc');
 
         // ✅ FILTER OTOMATIS UNTUK SUB ADMIN DESA
         /** @var \App\Models\Admin|null $admin */
         $admin = Auth::guard('admin')->user();
         if ($admin && $admin->isSubAdminDesa() && $admin->id_desa) {
-            $query->where(function ($q) use ($admin) {
+
+            // ✅ AMBIL SEMUA ID PETUGAS YANG BERASAL DARI DESA INI
+            $petugasIds = \App\Models\Petugas::where('level', 'bank_sampah_' . $admin->id_desa)
+                ->pluck('id_petugas')
+                ->toArray();
+
+            $query->where(function ($q) use ($admin, $petugasIds) {
                 $q->whereHas('masyarakat.desa', function ($sub) use ($admin) {
                     $sub->where('id_desa', $admin->id_desa);
                 })
                     ->orWhereHas('pns.desa', function ($sub) use ($admin) {
                         $sub->where('id_desa', $admin->id_desa);
-                    });
+                    })
+                    // ✅ TAMBAHKAN INI: Tampilkan juga jika petugas yang memproses adalah dari desa ini
+                    ->orWhereIn('id_petugas', $petugasIds);
             });
         }
 
@@ -127,8 +135,10 @@ class SetorController extends Controller
                 $row->nama_pengsetor = $row->pns->nama ?? 'Unknown';
                 $row->tipe_pengsetor = 'PNS';
                 $row->dinas = $row->pns->dinas->nama_dinas ?? 'ASN/PNS';
-                $row->kecamatan = null;
-                $row->desa = null;
+
+                // ✅ AMBIL JUGA KECAMATAN DAN DESA UNTUK PNS
+                $row->kecamatan = $row->pns->desa->kecamatan->nama_kecamatan ?? '-';
+                $row->desa = $row->pns->desa->nama_desa ?? '-';
             }
         }
 
@@ -155,8 +165,8 @@ class SetorController extends Controller
 
     public function detail($id): JsonResponse
     {
-        $data = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns.dinas', 'jenisSampah', 'petugas'])
-            ->findOrFail($id);
+        // ✅ TAMBAHKAN 'pns.desa.kecamatan'
+        $data = TransaksiSetor::with(['masyarakat.desa.kecamatan', 'pns.dinas', 'pns.desa.kecamatan', 'jenisSampah', 'petugas'])->findOrFail($id);
         return response()->json($data);
     }
 

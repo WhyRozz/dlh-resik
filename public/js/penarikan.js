@@ -68,6 +68,7 @@ function showDetail(id) {
             // Set values
             const elId = document.getElementById('detail-id');
             const elNama = document.getElementById('detail-nama');
+            const elNamaPenerima = document.getElementById('detail-nama-penerima');
             const elTipe = document.getElementById('detail-tipe');
             const elTanggal = document.getElementById('detail-tanggal');
             const elJumlah = document.getElementById('detail-jumlah');
@@ -86,6 +87,9 @@ function showDetail(id) {
             if (elId) elId.value = '#TRX-' + String(data.id_penarikan).padStart(5, '0');
             if (elNama) elNama.value = data.nama_user || 'Unknown';
 
+            // SET NAMA PENERIMA
+            if (elNamaPenerima) elNamaPenerima.value = data.nama_penerima || '-';
+
             // Set tipe pengguna dan tampilkan field yang sesuai
             let tipePengguna = '';
             if (data.id_masyarakat) {
@@ -99,12 +103,18 @@ function showDetail(id) {
                 if (elDesa) elDesa.value = data.masyarakat?.desa?.nama_desa || '-';
             } else if (data.id_pns) {
                 tipePengguna = 'PNS';
-                // Tampilkan dinas, sembunyikan kecamatan & desa
-                if (wilayahGroup) wilayahGroup.style.display = 'none';
+
+                // ✅ TAMPILKAN SEMUA: Dinas, Kecamatan, dan Desa untuk PNS
+                if (wilayahGroup) wilayahGroup.style.display = 'grid';
                 if (dinasGroup) dinasGroup.style.display = 'block';
 
                 // Set nilai dinas
                 if (elDinas) elDinas.value = data.pns?.dinas?.nama_dinas || '-';
+
+                // ✅ SET NILAI KECAMATAN & DESA DARI DATA PNS
+                if (elKecamatan) elKecamatan.value = data.pns?.desa?.kecamatan?.nama_kecamatan || '-';
+                if (elDesa) elDesa.value = data.pns?.desa?.nama_desa || '-';
+
             }
 
             if (elTipe) elTipe.value = tipePengguna;

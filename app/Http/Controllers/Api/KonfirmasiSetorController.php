@@ -95,28 +95,37 @@ class KonfirmasiSetorController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        $transaksi = TransaksiSetor::findOrFail($idTransaksi);
-
-        if ($transaksi->status_transaksi === 'dibatalkan') {
-            return response()->json(['status' => 'error', 'message' => 'Transaksi sudah dibatalkan, tidak bisa dikonfirmasi'], 400);
-        }
-
-        if ($transaksi->tanggal_koreksi) {
-            return response()->json(['status' => 'error', 'message' => 'Transaksi sudah dikonfirmasi sebelumnya'], 400);
-        }
-
-        if ($transaksi->berat_asli !== null) {
-            return response()->json(['status' => 'error', 'message' => 'Data sudah pernah diedit, tidak bisa diedit lagi'], 400);
-        }
-
         try {
-            DB::transaction(function () use ($request, $transaksi) {
+            // ✅ PERBAIKAN #1: Gunakan lockForUpdate() di dalam transaction
+            $result = DB::transaction(function () use ($request, $idTransaksi) {
+                // ✅ LOCK BARIS INI agar tidak bisa diakses request lain
+                $transaksi = TransaksiSetor::where('id_transaksi', $idTransaksi)
+                    ->lockForUpdate()  // ✅ PESSIMISTIC LOCKING
+                    ->first();
+
+                if (!$transaksi) {
+                    throw new \Exception('Transaksi tidak ditemukan');
+                }
+
+                // ✅ PERBAIKAN #2: Validasi DI DALAM transaction
+                if ($transaksi->status_transaksi === 'dibatalkan') {
+                    throw new \Exception('Transaksi sudah dibatalkan, tidak bisa dikonfirmasi');
+                }
+
+                if ($transaksi->tanggal_koreksi) {
+                    throw new \Exception('Transaksi sudah dikonfirmasi sebelumnya');
+                }
+
+                if ($transaksi->berat_asli !== null) {
+                    throw new \Exception('Data sudah pernah diedit, tidak bisa diedit lagi');
+                }
+
                 $jenis = JenisSampah::find($request->id_jenis_sampah);
 
                 // Simpan berat asli jika ada perubahan
                 if ($transaksi->berat != $request->berat || $transaksi->id_jenis_sampah != $request->id_jenis_sampah) {
                     $transaksi->berat_asli = $transaksi->berat;
-                    $transaksi->status_transaksi = 'dikoreksi'; // ✅ ENUM: dikoreksi
+                    $transaksi->status_transaksi = 'dikoreksi';
                     $transaksi->catatan_koreksi = $request->catatan ?? 'Dikoreksi saat konfirmasi';
                 }
 
@@ -132,26 +141,46 @@ class KonfirmasiSetorController extends Controller
                 // ✅✅✅ INCREMENT SALDO HANYA SAAT KONFIRMASI ✅✅✅
                 if ($transaksi->id_masyarakat) {
                     Masyarakat::where('id_masyarakat', $transaksi->id_masyarakat)
-                        ->increment('saldo', $transaksi->total_rupiah);      // ✅ Saldo
+                        ->increment('saldo', $transaksi->total_rupiah);
                     Masyarakat::where('id_masyarakat', $transaksi->id_masyarakat)
-                        ->increment('total_setoran', $transaksi->berat);     // ✅ Total setoran
+                        ->increment('total_setoran', $transaksi->berat);
                 } elseif ($transaksi->id_pns) {
                     Pns::where('id_pns', $transaksi->id_pns)
                         ->increment('saldo', $transaksi->total_rupiah);
                     Pns::where('id_pns', $transaksi->id_pns)
                         ->increment('total_setoran', $transaksi->berat);
                 }
+
+                return $transaksi;
             });
 
-            $transaksi->refresh();
-
-            $user = $transaksi->masyarakat ?? $transaksi->pns;
+            // ✅ Kirim notifikasi DI LUAR transaction (agar tidak memperlambat)
+            $result->refresh();
+            $user = $result->masyarakat ?? $result->pns;
+            $petugas = \App\Models\Petugas::find($result->id_petugas);  // ✅ TAMBAH INI
 
             $notification = new NotificationService();
 
+            $tipeUser = $result->id_masyarakat ? 'masyarakat' : 'pns';
+            $userId = $result->id_masyarakat ?? $result->id_pns;
+
+            // 1. Notifikasi ke user (masyarakat/PNS)
             $notification->sendDepositResult(
                 $user?->fcm_token,
-                $transaksi->total_rupiah
+                $result->total_rupiah,
+                $userId,
+                $tipeUser,
+                $result->id_transaksi
+            );
+
+            // 2. ✅ TAMBAH INI: Notifikasi ke Admin Web
+            $notification->sendDeposit(
+                $user->nama ?? 'Pengguna',
+                $petugas?->desa_id,
+                $result->berat,
+                $result->berat_asli ?? $result->berat,
+                $result->total_rupiah,
+                $result->id_transaksi
             );
 
             return response()->json([
@@ -159,124 +188,119 @@ class KonfirmasiSetorController extends Controller
                 'message' => 'Berhasil dikonfirmasi & saldo user ditambahkan'
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-        }
-    }
-
-    /**
-     * POST /api/auto-confirm-setor
-     * ✅ SALDO JUGA DITAMBAHKAN DI SINI UNTUK AUTO-CONFIRM
-     */
-    public function autoConfirm()
-    {
-        try {
-            $expiredTransaksi = TransaksiSetor::whereNull('tanggal_koreksi')
-                ->where('tanggal_transaksi', '<', Carbon::now()->subHours(24))
-                ->get();
-
-            $count = 0;
-            foreach ($expiredTransaksi as $transaksi) {
-                DB::transaction(function () use ($transaksi) {
-                    // Update status (pakai ENUM yang valid)
-                    $transaksi->status_transaksi = 'selesai'; // ✅ ENUM: selesai
-                    $transaksi->catatan_koreksi = 'Auto-confirmed setelah 24 jam';
-                    $transaksi->tanggal_koreksi = now();
-                    $transaksi->save();
-
-                    // ✅✅✅ INCREMENT SALDO UNTUK AUTO-CONFIRM ✅✅✅
-                    if ($transaksi->id_masyarakat) {
-                        Masyarakat::where('id_masyarakat', $transaksi->id_masyarakat)
-                            ->increment('saldo', $transaksi->total_rupiah);
-                        Masyarakat::where('id_masyarakat', $transaksi->id_masyarakat)
-                            ->increment('total_setoran', $transaksi->berat);
-                    } elseif ($transaksi->id_pns) {
-                        Pns::where('id_pns', $transaksi->id_pns)
-                            ->increment('saldo', $transaksi->total_rupiah);
-                        Pns::where('id_pns', $transaksi->id_pns)
-                            ->increment('total_setoran', $transaksi->berat);
-                    }
-                });
-
-                $user = $transaksi->masyarakat ?? $transaksi->pns;
-
-                $notification = new NotificationService();
-
-                $notification->sendDepositResult(
-                    $user?->fcm_token,
-                    $transaksi->total_rupiah
-                );
-
-                $count++;
-            }
-
+            // ✅ PERBAIKAN #3: Return error yang lebih informatif
             return response()->json([
-                'status' => 'success',
-                'message' => "Berhasil auto-confirm $count transaksi"
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], $e->getMessage() === 'Transaksi tidak ditemukan' ? 404 : 400);
         }
     }
+
 
     /**
      * DELETE /api/tolak-setor/{id_transaksi}
      */
     public function reject($idTransaksi)
     {
-        $transaksi = TransaksiSetor::findOrFail($idTransaksi);
+        try {
+            // ✅ PERBAIKAN: Gunakan lockForUpdate() di dalam transaction
+            $result = DB::transaction(function () use ($idTransaksi) {
+                // ✅ LOCK BARIS agar tidak bisa diakses request lain
+                $transaksi = TransaksiSetor::where('id_transaksi', $idTransaksi)
+                    ->lockForUpdate()  // ✅ PESSIMISTIC LOCKING
+                    ->first();
 
-        if ($transaksi->tanggal_koreksi || $transaksi->status_transaksi === 'dibatalkan') {
-            return response()->json(['status' => 'error', 'message' => 'Transaksi sudah diproses'], 400);
+                if (!$transaksi) {
+                    throw new \Exception('Transaksi tidak ditemukan');
+                }
+
+                // ✅ VALIDASI DI DALAM transaction (setelah lock)
+                if ($transaksi->tanggal_koreksi !== null) {
+                    throw new \Exception('Transaksi sudah dikonfirmasi, tidak bisa ditolak');
+                }
+
+                if ($transaksi->status_transaksi === 'dibatalkan') {
+                    throw new \Exception('Transaksi sudah dibatalkan sebelumnya');
+                }
+
+                // ✅ Update status
+                $transaksi->status_transaksi = 'dibatalkan';
+                $transaksi->tanggal_koreksi = now();  // ✅ TANDAI SUDAH DIPROSES
+                $transaksi->save();
+
+                return $transaksi;
+            });
+
+            // ✅ Kirim notifikasi DI LUAR transaction
+            $result->refresh();
+            $user = $result->masyarakat ?? $result->pns;
+
+            $notification = new NotificationService();
+
+            $tipeUser = $result->id_masyarakat ? 'masyarakat' : 'pns';
+            $userId = $result->id_masyarakat ?? $result->id_pns;
+
+            $notification->sendDepositRejected(
+                $user?->fcm_token,
+                $userId,
+                $tipeUser,
+                $result->id_transaksi
+            );
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaksi ditolak'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], $e->getMessage() === 'Transaksi tidak ditemukan' ? 404 : 400);
         }
-
-
-        $transaksi->status_transaksi = 'dibatalkan'; // ✅ ENUM: dibatalkan
-        $transaksi->save();
-
-        $user = $transaksi->masyarakat ?? $transaksi->pns;
-
-        $notification = new NotificationService();
-
-        $notification->sendDepositRejected(
-            $user?->fcm_token
-        );
-
-        return response()->json(['status' => 'success', 'message' => 'Transaksi ditolak'], 200);
     }
 
     /**
      * GET /api/setor-statistics/{id_petugas}
+     * UBAH: Dari harian ke mingguan (7 hari terakhir)
      */
     public function getStatistics($idPetugas)
     {
         try {
-            $today = Carbon::today();
+            $today = Carbon::now();  // PAKAI now() BUKAN today()
+            $sevenDaysAgo = Carbon::today()->subDays(6)->startOfDay();  // 7 hari lalu pukul 00:00
 
+            // Filter 7 hari terakhir untuk semua query
             $pending = TransaksiSetor::where('id_petugas', $idPetugas)
+                ->whereBetween('tanggal_transaksi', [$sevenDaysAgo, $today])  // MINGGUAN
                 ->whereNull('tanggal_koreksi')
+                ->where('status_transaksi', '!=', 'dibatalkan')
                 ->count();
 
             $selesai = TransaksiSetor::where('id_petugas', $idPetugas)
+                ->whereBetween('tanggal_transaksi', [$sevenDaysAgo, $today])  // MINGGUAN
                 ->whereNotNull('tanggal_koreksi')
                 ->where('status_transaksi', '!=', 'dibatalkan')
                 ->count();
 
             $dibatalkan = TransaksiSetor::where('id_petugas', $idPetugas)
+                ->whereBetween('tanggal_transaksi', [$sevenDaysAgo, $today])  // MINGGUAN
                 ->where('status_transaksi', 'dibatalkan')
                 ->count();
 
             $hariIni = TransaksiSetor::where('id_petugas', $idPetugas)
-                ->whereDate('tanggal_transaksi', $today)
+                ->whereBetween('tanggal_transaksi', [$sevenDaysAgo, $today])  // MINGGUAN
                 ->count();
 
             $totalNominalHariIni = TransaksiSetor::where('id_petugas', $idPetugas)
-                ->whereDate('tanggal_transaksi', $today)
+                ->whereBetween('tanggal_transaksi', [$sevenDaysAgo, $today])  // MINGGUAN
                 ->whereNotNull('tanggal_koreksi')
+                ->where('status_transaksi', '!=', 'dibatalkan')
                 ->sum('total_rupiah');
 
             $totalBeratHariIni = TransaksiSetor::where('id_petugas', $idPetugas)
-                ->whereDate('tanggal_transaksi', $today)
+                ->whereBetween('tanggal_transaksi', [$sevenDaysAgo, $today])  // MINGGUAN
                 ->whereNotNull('tanggal_koreksi')
+                ->where('status_transaksi', '!=', 'dibatalkan')
                 ->sum('berat');
 
             return response()->json([
@@ -288,6 +312,10 @@ class KonfirmasiSetorController extends Controller
                     'hari_ini' => $hariIni,
                     'total_nominal_hari_ini' => (float) $totalNominalHariIni,
                     'total_berat_hari_ini' => (float) $totalBeratHariIni,
+                    'periode' => [  // TAMBAH: Info periode
+                        'dari' => $sevenDaysAgo->format('d/m/Y'),
+                        'sampai' => $today->format('d/m/Y'),
+                    ],
                 ]
             ], 200);
         } catch (\Exception $e) {
@@ -303,7 +331,11 @@ class KonfirmasiSetorController extends Controller
         try {
             $status = $request->query('status', 'all');
 
-            $query = TransaksiSetor::with(['jenisSampah', 'masyarakat', 'pns'])
+            $query = TransaksiSetor::with([
+                'jenisSampah',
+                'masyarakat.desa.kecamatan',
+                'pns.dinas'
+            ])
                 ->where('id_petugas', $idPetugas)
                 ->orderBy('tanggal_transaksi', 'desc');
 
@@ -320,6 +352,19 @@ class KonfirmasiSetorController extends Controller
             $list = $query->get()->map(function ($trx) {
                 $isExpired = Carbon::parse($trx->tanggal_transaksi)->diffInHours(Carbon::now()) >= 24;
 
+                // LOGIC PEKERJAAN DI SINI
+                $pekerjaan = '';
+                if ($trx->masyarakat) {
+                    $kecamatan = optional(optional($trx->masyarakat)->desa)->kecamatan;
+                    $desa = optional($trx->masyarakat)->desa;
+                    $pekerjaan = 'Masyarakat - ' .
+                        ($kecamatan?->nama_kecamatan ?? '-') . ', ' .
+                        ($desa?->nama_desa ?? '-');
+                } elseif ($trx->pns) {
+                    $dinas = optional($trx->pns)->dinas;
+                    $pekerjaan = 'ASN/PNS - ' . ($dinas?->nama_dinas ?? '-');
+                }
+
                 return [
                     'id_transaksi' => $trx->id_transaksi,
                     'tanggal_transaksi' => $trx->tanggal_transaksi,
@@ -330,6 +375,7 @@ class KonfirmasiSetorController extends Controller
                     'harga_per_kg' => (float) ($trx->harga_per_kg ?? 0),
                     'total_rupiah' => (float) ($trx->total_rupiah ?? 0),
                     'nama_pengguna' => $trx->masyarakat?->nama ?? $trx->pns?->nama ?? '-',
+                    'pekerjaan' => $pekerjaan,
                     'id_masyarakat' => $trx->id_masyarakat,
                     'id_pns' => $trx->id_pns,
                     'status_transaksi' => $trx->status_transaksi,

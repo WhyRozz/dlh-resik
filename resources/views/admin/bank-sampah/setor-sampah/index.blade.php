@@ -143,13 +143,17 @@
                         <th width="8%">Jenis</th>
                         <th width="8%">Berat</th>
                         <th width="8%">Harga</th>
-                        <th width="10%">Petugas</th>
+                        <th style="width: 10%; text-align: center;">Petugas</th>
                         <th width="7%">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($setorData as $index => $row)
-                        <tr>
+                        {{-- TAMBAHKAN onclick, cursor pointer, dan efek hover di sini --}}
+                        <tr onclick="openDetailModal({{ $row->id_transaksi }})"
+                            style="cursor: pointer; transition: background 0.2s;"
+                            onmouseover="this.style.backgroundColor='#f9fbf9'"
+                            onmouseout="this.style.backgroundColor='transparent'">
                             <td>{{ $setorData->firstItem() + $index }}</td>
                             <td>
                                 <div class="user-info">
@@ -164,9 +168,12 @@
                                         Masyarakat ({{ $row->kecamatan ?? '-' }}, {{ $row->desa ?? '-' }})
                                     </span>
                                 @else
-                                    {{-- PNS: Tampilkan nama dinas --}}
+                                    {{-- PNS: Tampilkan nama dinas, kecamatan, dan desa --}}
                                     <span class="badge badge-pns">
                                         {{ $row->dinas ?? 'ASN/PNS' }}
+                                        <br>
+                                        <small style="opacity: 0.8;">({{ $row->kecamatan ?? '-' }},
+                                            {{ $row->desa ?? '-' }})</small>
                                     </span>
                                 @endif
                             </td>
@@ -179,13 +186,22 @@
                                 </div>
                             </td>
                             <td>
+                                @php
+                                    $namaPetugas = $row->petugas->nama_lengkap ?? '-';
+                                    $wilayahPetugas = $row->petugas->nama_wilayah ?? '';
+                                    $teksPetugas = $wilayahPetugas
+                                        ? $namaPetugas . ' - ' . $wilayahPetugas
+                                        : $namaPetugas;
+                                @endphp
                                 <div class="user-info">
-                                    <strong>{{ $row->petugas->nama_lengkap ?? '-' }}</strong>
-                                    <small><i class="fas fa-user-check"></i> Petugas</small>
+                                    <strong>{{ $teksPetugas }}</strong>
+                                    <small><i class="fas fa-user-check"></i> Petugas & Wilayah</small>
                                 </div>
                             </td>
-                            <td>
-                                <button class="btn-action" onclick="openDetailModal({{ $row->id_transaksi }})">
+                            {{-- TAMBAHKAN event.stopPropagation() agar klik tombol mata tidak memicu klik baris 2x --}}
+                            <td onclick="event.stopPropagation()">
+                                <button class="btn-action" onclick="openDetailModal({{ $row->id_transaksi }})"
+                                    title="Lihat Detail">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </td>

@@ -82,54 +82,52 @@ class AuthController extends Controller
         return redirect()->route('admin.login');
     }
 
-    public function saveFcmToken(Request $request)
+      public function saveFcmToken(Request $request)
     {
-        $request->validate([
-            'token' => 'required|string',
-            'device_name' => 'nullable|string|max:255',
-        ]);
+        \Log::info('=== WEB ADMIN SAVE FCM TOKEN ===', $request->all());
 
-        /** @var \App\Models\Admin|null $admin */
         $admin = Auth::guard('admin')->user();
-
         if (!$admin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Admin belum login.'
-            ], 401);
+            return response()->json(['success' => false, 'message' => 'Admin belum login.'], 401);
         }
 
-        $token = $request->token;
-        $deviceName = $request->device_name ?? 'Unknown Device';
-
-        // ✅ CEK APAKAH TOKEN SUDAH ADA
-        $existingToken = DB::table('admin_fcm_tokens')
-            ->where('id_admin', $admin->id_admin)
-            ->where('fcm_token', $token)
-            ->first();
-
-        if ($existingToken) {
-            // ✅ UPDATE last_active jika token sudah ada
-            DB::table('admin_fcm_tokens')
-                ->where('id', $existingToken->id)
-                ->update([
-                    'last_active' => now(),
-                    'device_name' => $deviceName
-                ]);
-        } else {
-            // ✅ INSERT TOKEN BARU (MULTI-DEVICE)
-            DB::table('admin_fcm_tokens')->insert([
-                'id_admin' => $admin->id_admin,
-                'fcm_token' => $token,
-                'device_name' => $deviceName,
-                'last_active' => now(),
-                'created_at' => now()
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'FCM Token berhasil disimpan (multi-device).'
+        $request->validate([
+            'token'       => 'required|string',
+            'device_name' => 'nullable|string|max:255',
+            'device_id'   => 'nullable|string|max:100',
         ]);
+
+        $token      = $request->token;
+        $deviceName = $request->device_name ?? 'Unknown Device';
+        // ✅ Kunci device: pakai device_id (kalau ada), fallback ke device_name
+        $deviceKey  = $request->device_id ?: ($request->device_name ?: 'default');
+
+        try {
+            // ✅ 1 device = 1 baris. Kunci unik = (id_admin + device_id)
+            //    Token berganti di device yang sama → UPDATE baris yang sama, bukan nambah.
+            DB::table('admin_fcm_tokens')->updateOrInsert(
+                ['id_admin' => $admin->id_admin, 'device_id' => $deviceKey],
+                [
+                    'fcm_token'   => $token,
+                    'device_name' => $deviceName,
+                    'last_active' => now(),
+                    'updated_at'  => now(),
+                ]
+            );
+
+            // isi created_at kalau baris baru
+            DB::table('admin_fcm_tokens')
+                ->where('id_admin', $admin->id_admin)
+                ->where('device_id', $deviceKey)
+                ->whereNull('created_at')
+                ->update(['created_at' => now()]);
+
+            \Log::info("✅ Token tersimpan | admin {$admin->id_admin} | device {$deviceKey}");
+
+            return response()->json(['success' => true, 'message' => 'Token tersimpan (1 device = 1 token).']);
+        } catch (\Exception $e) {
+            \Log::error('❌ ERROR SIMPAN TOKEN: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }

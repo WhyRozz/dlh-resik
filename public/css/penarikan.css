@@ -1,5 +1,5 @@
 /* ========================================
-   DATA PENARIKAN STYLES
+   DATA PENARIKAN STYLES (GLOBAL)
    ======================================== */
 
 /* Page Container */
@@ -21,79 +21,12 @@
     flex-wrap: nowrap;
 }
 
-/* Header Filters (Bulan, Tahun, Status) */
-.header-filters {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-shrink: 0;
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .page-title {
     margin: 0;
     color: #2e8b57;
     font-size: 1.4rem;
     font-weight: 700;
     white-space: nowrap;
-}
-
-
-
-.filter-group {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.filter-select {
-    padding: 0.6rem 0.9rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    background: #f8f9fa;
-    min-width: 130px;
-    cursor: pointer;
-    height: 38px;
-    transition: all 0.3s ease;
-}
-
-.filter-select:focus {
-    outline: none;
-    border-color: #2e8b57;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
-}
-
-.btn-filter {
-    background: #2e8b57;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 0.85rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    height: 38px;
-    transition: all 0.3s ease;
-}
-
-.btn-filter:hover {
-    background: #257046;
-}
-
-.btn-filter.reset {
-    background: #6c757d;
-}
-
-.btn-filter.reset:hover {
-    background: #5a6268;
 }
 
 /* Search Box */
@@ -152,36 +85,87 @@
 }
 
 /* ===== FILTER + EXPORT ===== */
-
-.filter-section{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    width:100%;
-    margin-bottom:15px;
+.filter-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
 }
 
-#filterForm{
-    flex:1;
+#filterForm {
+    flex: 1;
 }
 
-.filter-group{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
+/* (Duplikat dihapus, digabung di sini) */
+.filter-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
-.page-header{
-    display:flex;
-    align-items:center;
-    justify-content:flex-end;
-    margin-left:20px;
-    flex-shrink:0;
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: 20px;
+    flex-shrink: 0;
 }
 
-#exportForm{
-    margin:0;
+#exportForm {
+    margin: 0;
+}
+
+.filter-select {
+    padding: 0.6rem 0.9rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: #f8f9fa;
+    min-width: 130px;
+    cursor: pointer;
+    height: 38px;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #2e8b57;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+}
+
+.btn-filter {
+    background: #2e8b57;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 38px;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover {
+    background: #257046;
+}
+
+.btn-filter.reset {
+    background: #6c757d;
+    display: inline-flex; /* Penting! Agar JS bisa mengontrolnya */
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-filter.reset:hover {
+    background: #5a6268;
 }
 
 .btn-cetak {
@@ -207,24 +191,25 @@
     height: 25px;
 }
 
-/* Table Container */
+/* ===== TABLE ===== */
 .table-container {
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     overflow-x: auto;
     border: 1px solid #e0e0e0;
-    margin-top: -20px;
+    margin-top: 10px;
 }
 
 .data-table {
     width: 100%;
     border-collapse: collapse;
     background: white;
+    min-width: 650px; /* Mencegah tabel hancur di layar kecil */
 }
 
 .data-table thead {
-    background: #e8f5e9;  /* Warna hijau lebih soft seperti Setor */
+    background: #e8f5e9;
 }
 
 .data-table th {
@@ -234,7 +219,7 @@
     color: #666;
     font-size: 0.85rem;
     border-bottom: 1px solid #e0e0e0;
-    white-space: nowrap;  /* Agar header tidak wrap */
+    white-space: nowrap;
 }
 
 .data-table tbody tr {
@@ -248,45 +233,21 @@
 }
 
 .data-table tbody tr:last-child td {
-    border-bottom: none;  /* Hilangkan border di row terakhir */
+    border-bottom: none;
 }
 
 .data-table td {
     padding: 14px 20px;
     color: #333;
-    vertical-align: middle;  /* Agar teks di tengah vertikal */
+    vertical-align: middle;
 }
 
-.member-name {
-    font-weight: 500;
-}
-
-.date-main {
-    display: block;
-    font-weight: 500;
-}
-
-.date-time {
-    display: block;
-    font-size: 0.85rem;
-    color: #888;
-}
-
-.amount {
-    font-weight: 600;
-    color: #2e8b57;
-}
-
-.wallet-type {
-    display: block;
-    font-weight: 500;
-}
-
-.wallet-number {
-    display: block;
-    font-size: 0.85rem;
-    color: #666;
-}
+.member-name { font-weight: 500; }
+.date-main { display: block; font-weight: 500; }
+.date-time { display: block; font-size: 0.85rem; color: #888; }
+.amount { font-weight: 600; color: #2e8b57; }
+.wallet-type { display: block; font-weight: 500; }
+.wallet-number { display: block; font-size: 0.85rem; color: #666; }
 
 .status-badge {
     padding: 4px 12px;
@@ -296,20 +257,9 @@
     display: inline-block;
 }
 
-.status-badge.status-diproses {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.status-badge.status-berhasil {
-    background: #d4edda;
-    color: #155724;
-}
-
-.status-badge.status-ditolak {
-    background: #f8d7da;
-    color: #721c24;
-}
+.status-badge.status-diproses { background: #fff3cd; color: #856404; }
+.status-badge.status-berhasil { background: #d4edda; color: #155724; }
+.status-badge.status-ditolak { background: #f8d7da; color: #721c24; }
 
 .action-buttons {
     display: flex;
@@ -328,15 +278,8 @@
     transition: all 0.2s;
 }
 
-.btn-view {
-    background: #2e8b57;
-    color: white;
-}
-
-.btn-view:hover {
-    background: #257046;
-    transform: scale(1.05);
-}
+.btn-view { background: #2e8b57; color: white; }
+.btn-view:hover { background: #257046; transform: scale(1.05); }
 
 .empty-row td {
     text-align: center;
@@ -344,7 +287,8 @@
     color: #aaa;
 }
 
-/* Pagination */
+/* ===== PAGINATION ===== */
+/* (Duplikat dihapus, digabung di sini) */
 .pagination-container {
     margin-top: 1.5rem;
     display: flex;
@@ -356,19 +300,6 @@
     border-top: 1px solid #e0e0e0;
     font-size: 0.9rem;
     color: #666;
-}
-
-
-/* ===== PAGINATION ===== */
-.pagination-container {
-    margin-top: 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 15px 20px 0;
-    border-top: 1px solid #e0e0e0;
 }
 
 .pagination-container > div:first-child {
@@ -435,12 +366,28 @@
     display: none;
 }
 
+/* ===== BADGE PEKERJAAN ===== */
+.badge-masyarakat,
+.badge-pns {
+    display: block; /* Lebih rapi daripada inline-block + min-width 100% */
+    width: 100%;
+    text-align: center;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    box-sizing: border-box;
+}
+
+.badge-masyarakat { background: #dcfce7; color: #166534; }
+.badge-pns { background: #dbeafe; color: #1e40af; }
+
 
 /* ========================================
-   MODAL STYLES
+   MODAL & POPUP STYLES
    ======================================== */
 
-.modal-overlay {
+.modal-overlay, .success-popup, .confirm-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -454,26 +401,11 @@
     backdrop-filter: blur(2px);
 }
 
-.modal-overlay.active {
+.confirm-modal { z-index: 10001; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(3px); }
+.success-popup { z-index: 10000; }
+
+.modal-overlay.active, .success-popup.active, .confirm-modal.active {
     display: flex;
-}
-
-/* Form row untuk 2 kolom */
-.modal-container .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-.modal-container .form-row .form-group {
-    width: 100%;
-}
-
-/* Responsive untuk mobile */
-@media (max-width: 768px) {
-    .modal-container .form-row {
-        grid-template-columns: 1fr;
-    }
 }
 
 .modal-container {
@@ -490,14 +422,8 @@
 }
 
 @keyframes modalSlide {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
@@ -510,11 +436,7 @@
     color: white;
 }
 
-.modal-title {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
+.modal-title { margin: 0; font-size: 1.1rem; font-weight: 600; }
 
 .modal-close {
     background: rgba(255, 255, 255, 0.2);
@@ -531,9 +453,7 @@
     transition: background 0.2s;
 }
 
-.modal-close:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
+.modal-close:hover { background: rgba(255, 255, 255, 0.3); }
 
 .modal-body {
     padding: 20px;
@@ -541,14 +461,16 @@
     flex: 1;
 }
 
-.form-grid {
+.modal-container .form-row {
     display: grid;
-    gap: 12px;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
 }
 
-.form-group {
-    margin-bottom: 0;
-}
+.modal-container .form-row .form-group { width: 100%; }
+
+.form-grid { display: grid; gap: 12px; }
+.form-group { margin-bottom: 0; }
 
 .form-label {
     display: block;
@@ -558,20 +480,10 @@
     font-weight: 500;
 }
 
-.label-primary {
-    color: #2e8b57;
-    font-weight: 700;
-}
+.label-primary { color: #2e8b57; font-weight: 700; }
+.label-danger, .required { color: #e53935; }
 
-.label-danger {
-    color: #e53935;
-}
-
-.required {
-    color: #e53935;
-}
-
-.form-input {
+.form-input, .form-textarea, .form-select {
     width: 100%;
     padding: 10px 12px;
     border: 1px solid #ddd;
@@ -590,29 +502,8 @@
     color: #2e8b57;
 }
 
-.form-textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: white;
-    font-size: 0.95rem;
-    color: #333;
-    resize: vertical;
-    box-sizing: border-box;
-}
-
-.form-select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: white;
-    font-size: 0.95rem;
-    color: #333;
-    cursor: pointer;
-    box-sizing: border-box;
-}
+.form-textarea { resize: vertical; background: white; }
+.form-select { background: white; cursor: pointer; }
 
 .form-section {
     border-top: 2px solid #e0e0e0;
@@ -638,27 +529,10 @@
     display: none;
 }
 
-.status-info.active {
-    display: block;
-}
-
-.status-info.info {
-    background: #e3f2fd;
-    border-left: 4px solid #2196f3;
-    color: #1976d2;
-}
-
-.status-info.success {
-    background: #e8f5e9;
-    border-left: 4px solid #4caf50;
-    color: #388e3c;
-}
-
-.status-info.danger {
-    background: #ffebee;
-    border-left: 4px solid #f44336;
-    color: #d32f2f;
-}
+.status-info.active { display: block; }
+.status-info.info { background: #e3f2fd; border-left: 4px solid #2196f3; color: #1976d2; }
+.status-info.success { background: #e8f5e9; border-left: 4px solid #4caf50; color: #388e3c; }
+.status-info.danger { background: #ffebee; border-left: 4px solid #f44336; color: #d32f2f; }
 
 .modal-footer {
     padding: 16px 20px;
@@ -678,214 +552,50 @@
     transition: all 0.2s;
 }
 
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
+.btn-secondary { background: #6c757d; color: white; }
+.btn-secondary:hover { background: #5a6268; }
+.btn-primary, .btn-ok { background: #2e8b57; color: white; }
+.btn-primary:hover, .btn-ok:hover { background: #257046; }
 
-.btn-secondary:hover {
-    background: #5a6268;
-}
-
-.btn-primary {
-    background: #2e8b57;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #257046;
-}
-
-/* ========================================
-   SUCCESS POPUP
-   ======================================== */
-
-.success-popup {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 10000;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(2px);
-}
-
-.success-content {
+/* Success Popup Content */
+.success-content, .confirm-content {
     background: white;
     padding: 32px 24px;
     border-radius: 16px;
     text-align: center;
-    max-width: 360px;
+    max-width: 400px;
     width: 90%;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
     animation: popupSlide 0.3s ease;
 }
 
 @keyframes popupSlide {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
-.success-icon {
+@keyframes confirmSlide {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.success-icon, .confirm-icon {
+    font-size: 64px;
     margin-bottom: 16px;
     color: #4caf50;
 }
 
-.success-icon i {
-    font-size: 64px;
-}
+.confirm-icon.success { color: #2e8b57; }
+.confirm-icon.danger { color: #ef4444; }
 
-.success-title {
-    margin: 0 0 8px 0;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #333;
-}
-
-.success-message {
-    margin: 0;
-    font-size: 1rem;
-    color: #666;
-    line-height: 1.5;
-}
-
-/* ========================================
-   RESPONSIVE
-   ======================================== */
-
-@media (max-width: 1024px) {
-    .header-wrapper {
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .filter-section {
-        order: 3;
-        width: 100%;
-        margin-top: 0.5rem;
-    }
-
-    .filter-group {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-}
-
-@media (max-width: 768px) {
-    .header-wrapper {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .page-title,
-    .filter-section,
-    .top-search {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .filter-group {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .filter-select,
-    .btn-filter {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .search-wrapper {
-        width: 100%;
-    }
-
-    .modal-container {
-        width: 98%;
-        max-height: 95vh;
-    }
-
-    .modal-body {
-        padding: 16px;
-    }
-}
-
-
-/* ========================================
-   CONFIRMATION MODAL
-   ======================================== */
-
-.confirm-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 10001;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(3px);
-}
-
-.confirm-modal.active {
-    display: flex;
-}
-
-.confirm-content {
-    background: white;
-    padding: 30px;
-    border-radius: 16px;
-    text-align: center;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: confirmSlide 0.3s ease;
-}
-
-@keyframes confirmSlide {
-    from {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-.confirm-icon {
-    font-size: 64px;
-    color: #f59e0b;
-    margin-bottom: 16px;
-}
-
-.confirm-icon.success {
-    color: #2e8b57;
-}
-
-.confirm-icon.danger {
-    color: #ef4444;
-}
-
-.confirm-title {
+.success-title, .confirm-title {
     margin: 0 0 12px 0;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: #1f2937;
 }
 
-.confirm-message {
+.success-message, .confirm-message {
     margin: 0 0 24px 0;
     font-size: 1rem;
     color: #6b7280;
@@ -909,154 +619,194 @@
     min-width: 100px;
 }
 
-.btn-cancel {
-    background: #e5e7eb;
-    color: #374151;
-}
-
-.btn-cancel:hover {
-    background: #d1d5db;
-    transform: translateY(-1px);
-}
-
-.btn-ok {
-    background: #2e8b57;
-    color: white;
-}
-
-.btn-ok:hover {
-    background: #257046;
-    transform: translateY(-1px);
-}
-
-.btn-ok.danger {
-    background: #ef4444;
-}
-
-.btn-ok.danger:hover {
-    background: #dc2626;
-}
-
-
+.btn-cancel { background: #e5e7eb; color: #374151; }
+.btn-cancel:hover { background: #d1d5db; transform: translateY(-1px); }
+.btn-ok.danger { background: #ef4444; }
+.btn-ok.danger:hover { background: #dc2626; }
 
 
 /* ========================================
-   FIX KHUSUS MOBILE (TANPA MERUSAK DESKTOP)
+   RESPONSIVE & MOBILE OPTIMIZED (CLEAN)
    ======================================== */
-@media (max-width: 480px) {
-    /* 1. Perbaiki scroll tabel agar stabil & sinkron */
+@media (max-width: 768px) {
+    /* 1. Container: Rapi, tidak overflow */
+    .page-container {
+        padding: 15px;
+        margin-top: 50px;
+        overflow-x: hidden;
+    }
+
+    /* 2. Header: Stack vertikal, full width */
+    .header-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-title {
+        font-size: 1.25rem;
+        margin: 0;
+        width: 100%;
+        text-align: left;
+        white-space: normal;
+    }
+
+    /* 3. Search Box: Full width & anti-zoom iOS */
+    .top-search {
+        width: 100%;
+        justify-content: flex-start;
+        margin: 0;
+        padding: 0;
+    }
+
+    .search-wrapper {
+        width: 100%;
+        max-width: 100%;
+        height: 42px;
+    }
+
+    .search-input {
+        font-size: 16px; /* Mencegah auto-zoom di iOS Safari */
+    }
+
+    /* 4. Filter Section: Layout 2 Baris Compact */
+    .filter-section {
+        width: 100%;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+    }
+
+    /* Baris 1: Bulan & Tahun (2 kolom sama besar) */
+    .filter-group:first-child {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        width: 100%;
+    }
+
+    /* Baris 2: Status, Filter, Reset */
+    .filter-group:last-child {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+    /* Dropdown & Tombol: Touch-friendly (min 42px) */
+    .filter-select {
+        width: 100%;
+        min-width: 0;
+        height: 42px;
+        font-size: 16px; /* Mencegah auto-zoom di iOS Safari */
+    }
+
+    .filter-group:last-child .filter-select {
+        max-width: 100%;
+        flex: 1;
+    }
+
+    .btn-filter {
+        height: 42px;
+        font-size: 0.95rem;
+        padding: 0 16px;
+        white-space: nowrap;
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* 5. Tombol Export Excel: Full width */
+    .page-header {
+        width: 100%;
+        margin: 5px 0 15px 0;
+        margin-left: 0;
+        justify-content: center;
+    }
+
+    .btn-cetak {
+        width: 100%;
+        height: 42px;
+        font-size: 0.95rem;
+        justify-content: center;
+    }
+
+    /* 6. Tabel: HANYA tabel yang scroll horizontal */
     .table-container {
+        margin-top: 10px;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch; /* Smooth scroll iOS */
         border-radius: 8px;
     }
-    
-    .page-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #2e8b57;
-    margin-top: -30px;   
-    margin-bottom: 10px; 
-    text-align: left;
-    white-space: normal;
-    width: 100%;
-    display: block;
-    }
 
-    .header-wrapper {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-        padding: 15px 10px;
-    }
-    
     .data-table {
+        min-width: 650px; /* Memaksa scroll horizontal, bukan halaman */
+        font-size: 0.85rem;
         display: table;
-        min-width: 700px; /* Paksa scroll horizontal rapi */
     }
 
-    /* 2. Perbesar area sentuh (standar mobile 44px) */
-    .filter-select,
-    .btn-filter,
-    .search-wrapper,
-    .btn-cetak,
-    .btn-action {
-        min-height: 44px;
-    }
-    
-    /* Tombol aksi bulat biar tetap proporsional */
-    .btn-action {
-        width: 44px;
-        height: 44px;
+    .data-table th, 
+    .data-table td {
+        padding: 12px;
     }
 
-    /* 3. Pagination rapi & tidak tumpuk */
+    .btn-action {
+        width: 40px;
+        height: 40px;
+        min-height: 40px; /* Standar sentuh mobile */
+    }
+
+    /* 7. Pagination: Rapi di tengah, tidak tumpuk */
     .pagination-container {
         flex-direction: column;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         padding: 15px 10px;
         text-align: center;
     }
+
     .pagination {
         flex-wrap: wrap;
         justify-content: center;
+        gap: 6px;
     }
+
     .pagination li a,
     .pagination li span {
         padding: 8px 12px;
-        font-size: 0.85rem;
-        min-width: 32px;
-        height: 32px;
+        font-size: 0.9rem;
+        min-width: 36px;
+        height: 36px;
     }
 
-    /* 4. Modal aman di layar kecil */
+    /* 8. Modal: Aman di layar kecil */
     .modal-container {
         width: 95%;
+        max-width: 95%;
         margin: 10px;
         max-height: 85vh;
     }
+
     .modal-body {
         padding: 15px;
     }
-    
-    /* 5. Form di modal lebih rapi */
+
     .form-grid {
         gap: 15px;
     }
+
+    .modal-container .form-row {
+        grid-template-columns: 1fr; /* 1 kolom di mobile */
+    }
+
     .form-input,
     .form-textarea,
     .form-select {
         font-size: 16px; /* Mencegah zoom otomatis di iOS */
         padding: 12px;
     }
-}
-
-/* Badge Pekerjaan */
-.badge-masyarakat {
-    background: #dcfce7;
-    color: #166534;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    display: inline-block;
-}
-
-.badge-pns {
-    background: #dbeafe;
-    color: #1e40af;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    display: inline-block;
-}
-
-/* Center teks di badge Pekerjaan */
-.badge-masyarakat,
-.badge-pns {
-    text-align: center;
-    display: inline-block;
-    min-width: 100%; /* Agar badge memenuhi lebar td */
 }

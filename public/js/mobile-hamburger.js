@@ -52,22 +52,28 @@ class MobileHamburgerMenu {
         });
     }
     
-    initSubmenus() {
-        const toggles = this.dropdown.querySelectorAll(this.submenuToggles);
-        
-        toggles.forEach((toggle) => {
-            toggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const submenu = toggle.closest('.mobile-menu-item').querySelector('.mobile-submenu');
-                if (submenu) {
-                    submenu.classList.toggle('show');
-                    toggle.classList.toggle('rotate');
-                }
-            });
+initSubmenus() {
+    const submenuLinks = this.dropdown.querySelectorAll('.mobile-menu-link[data-submenu]');
+
+    submenuLinks.forEach((link) => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const menuItem = link.closest('.mobile-menu-item');
+            const submenu = menuItem.querySelector('.mobile-submenu');
+            const arrow = menuItem.querySelector('.mobile-submenu-toggle');
+
+            if (submenu) {
+                submenu.classList.toggle('show');
+            }
+
+            if (arrow) {
+                arrow.classList.toggle('rotate');
+            }
         });
-    }
+    });
+}
     
     toggle() {
         this.dropdown.classList.toggle('active');

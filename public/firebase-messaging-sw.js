@@ -12,20 +12,9 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(function (payload) {
-
-    console.log("Background Message:", payload);
-
-    const title =
-        payload.notification?.title ??
-        "RESIK";
-
-    const options = {
-        body: payload.notification?.body,
-        icon: "/favicon.ico",
-        badge: "/favicon.ico"
-    };
-
-    self.registration.showNotification(title, options);
+// ⛔ JANGAN panggil self.registration.showNotification() di sini!
+// Firebase SDK SUDAH otomatis menampilkan notifikasi dari payload "notification".
+// Kalau kita tampilkan manual lagi di sini = muncul 2x (INI BIANG KEROK #1).
+messaging.onBackgroundMessage((payload) => {
+    console.log("[SW] background message (ditampilkan otomatis oleh SDK):", payload);
 });
-

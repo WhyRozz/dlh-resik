@@ -63,16 +63,41 @@ class FirebaseService
             $androidNotification['icon'] = $data['icon'];
         }
 
-        // 3. Susun Payload FCM v1
+        // 3. Susun Payload FCM v1 (LENGKAP UNTUK ANDROID & WEB)
         $payload = [
             "message" => [
-                "token"        => $deviceToken,
-                "notification" => $notificationPayload,
-                "android"      => [
-                    "priority"     => "high", // WAJIB
-                    "notification" => $androidNotification,
+                "token" => $deviceToken,
+                "notification" => [
+                    "title" => $title,
+                    "body"  => $body,
                 ],
-                "data"         => $data
+                "data" => $data,
+                
+                // ✅ TAMBAHKAN INI: Konfigurasi khusus agar Web Browser menampilkan 1x notifikasi yang rapi
+                "webpush" => [
+                    "headers" => [
+                        "Urgency" => "high",
+                    ],
+                    "notification" => [
+                        "title" => $title,
+                        "body"  => $body,
+                        "icon"  => $data['icon'] ?? '/icons/Icon-192.png',
+                        "tag"   => (string)($data['id'] ?? 'resik-notif') // ✅ per-pesan, tidak saling timpa
+                    ]
+                ],
+
+                // ✅ Konfigurasi Android (HP)
+                "android" => [
+                    "priority" => "high",
+                    "notification" => [
+                        "channel_id"            => "high_importance_channel",
+                        "notification_priority" => "PRIORITY_MAX",
+                        "sound"                 => "default",
+                        "visibility"            => "public",
+                        "icon"                  => $data['icon'] ?? null,
+                        "image"                 => $data['image'] ?? null,
+                    ],
+                ],
             ]
         ];
 

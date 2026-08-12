@@ -27,8 +27,8 @@ class PenarikanController extends Controller
 
     public function index(Request $request)  // ✅ Pastikan ada $request
     {
-        // ✅ LANGKAH 1: Ubah jadi $query dulu (JANGAN langsung paginate)
-        $query = Penarikan::with(['masyarakat.desa.kecamatan', 'pns.dinas']);
+        // ✅ TAMBAHKAN 'pns.desa.kecamatan' agar bisa ambil nama desa/kecamatan PNS
+        $query = Penarikan::with(['masyarakat.desa.kecamatan', 'pns.dinas', 'pns.desa.kecamatan']);
 
         // ✅ FILTER OTOMATIS UNTUK SUB ADMIN DESA
         /** @var \App\Models\Admin|null $admin */
@@ -114,9 +114,14 @@ class PenarikanController extends Controller
                 $penarikan->nama_user = $penarikan->pns->nama ?? 'Unknown';
                 // Ambil dinas
                 $penarikan->dinas = $penarikan->pns->dinas->nama_dinas ?? 'ASN/PNS';
-                $penarikan->kecamatan = null;
-                $penarikan->desa = null;
+
+                // AMBIL JUGA KECAMATAN DAN DESA UNTUK PNS (karena sekarang PNS punya id_desa)
+                $penarikan->kecamatan = $penarikan->pns->desa->kecamatan->nama_kecamatan ?? '-';
+                $penarikan->desa = $penarikan->pns->desa->nama_desa ?? '-';
             }
+
+            // TAMBAHKAN NAMA PENERIMA
+            $penarikan->nama_penerima = $penarikan->nama_penerima ?? '-';
         }
 
         // ✅ LANGKAH 5: ➕ Tambah 'tahunList' di compact
@@ -216,9 +221,11 @@ class PenarikanController extends Controller
      */
     public function show($id)
     {
+        // TAMBAHKAN 'pns.desa.kecamatan' DI SINI AGAR DATA DIKIRIM KE JS
         $penarikan = Penarikan::with([
             'masyarakat.desa.kecamatan',
-            'pns.dinas'
+            'pns.dinas',
+            'pns.desa.kecamatan'
         ])->findOrFail($id);
 
         $userName = $penarikan->masyarakat->nama ?? $penarikan->pns->nama ?? 'Unknown';
@@ -229,7 +236,7 @@ class PenarikanController extends Controller
                 'id_masyarakat' => $penarikan->id_masyarakat,
                 'id_pns' => $penarikan->id_pns,
                 'masyarakat' => $penarikan->masyarakat,
-                'pns' => $penarikan->pns
+                'pns' => $penarikan->pns // Sekarang ini berisi data desa & kecamatan
             ])
         );
     }
@@ -292,10 +299,16 @@ class PenarikanController extends Controller
 
             $notification = new \App\Services\NotificationService();
 
+            $tipeUser = $penarikan->id_masyarakat ? 'masyarakat' : 'pns';
+            $userId = $penarikan->id_masyarakat ?? $penarikan->id_pns;
+
             $notification->sendWithdrawalResult(
                 $user?->fcm_token,
                 $statusBaru,
-                $penarikan->jumlah_uang
+                $penarikan->jumlah_uang,
+                $userId,
+                $tipeUser,
+                $penarikan->id_penarikan
             );
 
             return response()->json([

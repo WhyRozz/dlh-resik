@@ -106,6 +106,8 @@ class DinasSheet implements FromCollection, WithHeadings, WithMapping, WithStyle
     {
         $query = DB::table('pns')
             ->leftJoin('dinas', 'pns.id_dinas', '=', 'dinas.id_dinas')
+            ->leftJoin('desa', 'pns.id_desa', '=', 'desa.id_desa') // ✅ TAMBAH
+            ->leftJoin('kecamatan', 'desa.id_kecamatan', '=', 'kecamatan.id_kecamatan') // ✅ TAMBAH
             ->select(
                 'pns.nama',
                 'pns.email',
@@ -114,6 +116,8 @@ class DinasSheet implements FromCollection, WithHeadings, WithMapping, WithStyle
                 'pns.jenis_kelamin',
                 'pns.tanggal_lahir',
                 'dinas.nama_dinas',
+                'kecamatan.nama_kecamatan', // ✅ TAMBAH
+                'desa.nama_desa',           // ✅ TAMBAH
                 'pns.kode_anggota',
                 'pns.barcode_id',
                 'pns.saldo',
@@ -140,6 +144,8 @@ class DinasSheet implements FromCollection, WithHeadings, WithMapping, WithStyle
             'Jenis Kelamin',
             'Tanggal Lahir',
             'Dinas/Instansi',
+            'Kecamatan',          // ✅ TAMBAH
+            'Desa/Kelurahan',     // ✅ TAMBAH
             'Kode Anggota',
             'Barcode ID',
             'Saldo',
@@ -160,6 +166,8 @@ class DinasSheet implements FromCollection, WithHeadings, WithMapping, WithStyle
             $user->jenis_kelamin ?? '-',
             $user->tanggal_lahir ? \Carbon\Carbon::parse($user->tanggal_lahir)->format('d-m-Y') : '-',
             $user->nama_dinas ?? '-',
+            $user->nama_kecamatan ?? '-', // ✅ TAMBAH
+            $user->nama_desa ?? '-',      // ✅ TAMBAH
             $user->kode_anggota ?? '-',
             $user->barcode_id ?? '-',
             'Rp ' . number_format($user->saldo, 0, ',', '.'),
@@ -172,9 +180,9 @@ class DinasSheet implements FromCollection, WithHeadings, WithMapping, WithStyle
         // ✅ PENTING: Set view ke A1 dan freeze header
         $sheet->setSelectedCell('A1');
         $sheet->freezePane('A2'); // Freeze baris header
-        
+
         // ✅ Set lebar kolom default SEBELUM auto-size
-        foreach (range('A', 'L') as $col) {
+        foreach (range('A', 'N') as $col) {
             $sheet->getColumnDimension($col)->setWidth(15);
         }
 
@@ -182,14 +190,14 @@ class DinasSheet implements FromCollection, WithHeadings, WithMapping, WithStyle
         $lastRow = $totalRows + 2;
 
         // AUTO-SIZE semua kolom (setelah set width default)
-        foreach (range('A', 'L') as $col) {
+        foreach (range('A', 'N') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         $sheet->calculateColumnWidths();
 
         // Style header
-        $sheet->getStyle('A1:L1')->applyFromArray([
+        $sheet->getStyle('A1:N1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 12,
@@ -213,7 +221,7 @@ class DinasSheet implements FromCollection, WithHeadings, WithMapping, WithStyle
         ]);
 
         // Style total row
-        $sheet->getStyle("A{$lastRow}:L{$lastRow}")->applyFromArray([
+        $sheet->getStyle("A{$lastRow}:N{$lastRow}")->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 12
@@ -264,7 +272,7 @@ class MasyarakatSheet implements FromCollection, WithHeadings, WithMapping, With
     protected $kecamatanId;
     protected $desaId;
     protected $search;
-    protected $no = 0; 
+    protected $no = 0;
 
     public function __construct($filter, $kecamatanId = '', $desaId = '', $search = '')
     {
@@ -354,7 +362,7 @@ class MasyarakatSheet implements FromCollection, WithHeadings, WithMapping, With
         // ✅ PENTING: Set view ke A1 dan freeze header
         $sheet->setSelectedCell('A1');
         $sheet->freezePane('A2'); // Freeze baris header
-        
+
         // ✅ Set lebar kolom default SEBELUM auto-size
         foreach (range('A', 'L') as $col) {
             $sheet->getColumnDimension($col)->setWidth(15);
@@ -415,7 +423,7 @@ class MasyarakatSheet implements FromCollection, WithHeadings, WithMapping, With
         $sheet->setCellValue("C{$lastRow}", $totalRows);
 
         // Style all cells border
-        $sheet->getStyle("A1:L{$lastRow}")->applyFromArray([
+        $sheet->getStyle("A1:N{$lastRow}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,

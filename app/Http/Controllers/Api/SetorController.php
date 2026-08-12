@@ -32,7 +32,8 @@ class SetorController extends Controller
         \Log::info('=== SCAN QR CODE ===');
         \Log::info('Barcode yang diterima: ' . $barcodeId);
 
-        $masyarakat = Masyarakat::select('id_masyarakat', 'nama', 'email', 'no_telepon', 'barcode_id', 'saldo')
+        // CARI MASYARAKAT dengan relasi desa & kecamatan
+        $masyarakat = Masyarakat::with('desa.kecamatan')
             ->where('barcode_id', $barcodeId)
             ->first();
 
@@ -40,12 +41,24 @@ class SetorController extends Controller
             \Log::info('✅ User ditemukan di masyarakat: ' . $masyarakat->nama);
             return response()->json([
                 'status' => 'success',
-                'data' => $masyarakat,
+                'data' => [
+                    'id_masyarakat' => $masyarakat->id_masyarakat,
+                    'nama' => $masyarakat->nama,
+                    'email' => $masyarakat->email,
+                    'no_telepon' => $masyarakat->no_telepon,
+                    'barcode_id' => $masyarakat->barcode_id,
+                    'saldo' => $masyarakat->saldo,
+                    'foto' => $masyarakat->foto ? asset('uploads/' . $masyarakat->foto) : null,
+                    'tipe' => 'masyarakat',
+                    'nama_desa' => optional($masyarakat->desa)->nama_desa,
+                    'nama_kecamatan' => optional(optional($masyarakat->desa)->kecamatan)->nama_kecamatan,
+                ],
                 'tipe' => 'masyarakat'
             ]);
         }
 
-        $pns = Pns::select('id_pns', 'nama', 'email', 'no_telepon', 'barcode_id', 'saldo', 'kode_anggota')
+        // CARI PNS dengan relasi dinas
+        $pns = Pns::with('dinas')
             ->where('barcode_id', $barcodeId)
             ->first();
 
@@ -53,7 +66,18 @@ class SetorController extends Controller
             \Log::info('✅ User ditemukan di pns: ' . $pns->nama);
             return response()->json([
                 'status' => 'success',
-                'data' => $pns,
+                'data' => [
+                    'id_pns' => $pns->id_pns,
+                    'nama' => $pns->nama,
+                    'email' => $pns->email,
+                    'no_telepon' => $pns->no_telepon,
+                    'barcode_id' => $pns->barcode_id,
+                    'saldo' => $pns->saldo,
+                    'kode_anggota' => $pns->kode_anggota,
+                    'foto' => $pns->foto ? asset('uploads/' . $pns->foto) : null,
+                    'tipe' => 'pns',
+                    'nama_dinas' => optional($pns->dinas)->nama_dinas,
+                ],
                 'tipe' => 'pns'
             ]);
         }
@@ -212,8 +236,16 @@ class SetorController extends Controller
                     'berat' => (float) ($trx->berat ?? 0),
                     'harga_per_kg' => (float) ($trx->harga_per_kg ?? 0),
                     'total_rupiah' => (float) ($trx->total_rupiah ?? 0),
-                    'nama_petugas' => $trx->petugas?->nama_lengkap ?? $trx->petugas?->nama ?? '-',
                     'status' => $trx->status_transaksi ?? 'selesai',
+
+                    // KIRIM OBJEK PETUGAS LENGKAP (nama_wilayah otomatis ikut karena $appends di Model)
+                    'petugas' => $trx->petugas ? [
+                        'nama_lengkap' => $trx->petugas->nama_lengkap ?? $trx->petugas->nama ?? '-',
+                        'nama_wilayah' => $trx->petugas->nama_wilayah ?? '',
+                    ] : null,
+
+                    // Fallback agar tidak merusak kode lama
+                    'nama_petugas' => $trx->petugas?->nama_lengkap ?? $trx->petugas?->nama ?? '-',
                 ];
             });
 
@@ -227,6 +259,78 @@ class SetorController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * GET /api/transaksi-setor/{id}
+     * ✅ ENDPOINT BARU: Ambil detail transaksi setor spesifik by ID
+     */
+    public function show($id, Request $request)
+    {
+        $idMasyarakat = $request->query('id_masyarakat');
+        $idPns = $request->query('id_pns');
+        $tipeUser = $request->query('tipe_user');
+
+        // Validasi keamanan: pastikan user hanya bisa akses transaksinya sendiri
+        if (!$tipeUser || (!$idMasyarakat && !$idPns)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Parameter tidak lengkap'
+            ], 422);
+        }
+
+        try {
+            $query = TransaksiSetor::with(['jenisSampah', 'petugas'])
+                ->where('id_transaksi', $id);
+
+            // Filter berdasarkan kepemilikan
+            if ($tipeUser === 'masyarakat') {
+                $query->where('id_masyarakat', $idMasyarakat);
+            } elseif ($tipeUser === 'pns') {
+                $query->where('id_pns', $idPns);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tipe user tidak valid'
+                ], 422);
+            }
+
+            $trx = $query->first();
+
+            if (!$trx) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data transaksi tidak ditemukan'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id_transaksi' => $trx->id_transaksi,
+                    'tanggal_transaksi' => $trx->tanggal_transaksi,
+                    'jenis_sampah' => $trx->jenisSampah?->jenis ?? 'Umum',
+                    'berat' => (float) ($trx->berat ?? 0),
+                    'harga_per_kg' => (float) ($trx->harga_per_kg ?? 0),
+                    'total_rupiah' => (float) ($trx->total_rupiah ?? 0),
+                    'status' => $trx->status_transaksi ?? 'selesai',
+
+                    // KIRIM OBJEK PETUGAS LENGKAP
+                    'petugas' => $trx->petugas ? [
+                        'nama_lengkap' => $trx->petugas->nama_lengkap ?? $trx->petugas->nama ?? '-',
+                        'nama_wilayah' => $trx->petugas->nama_wilayah ?? '',
+                    ] : null,
+
+                    'nama_petugas' => $trx->petugas?->nama_lengkap ?? $trx->petugas?->nama ?? '-',
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Transaksi Setor Show Error: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
             ], 500);
         }
     }

@@ -109,10 +109,12 @@ function openModal(userId, userType) {
 
             // Fill modal fields - PEKERJAAN, WILAYAH & ACCOUNT INFO BERDASARKAN TIPE
             if (userType === 'pns') {
-                // PNS: Tampilkan "ASN/PNS (Nama Dinas)", hilangkan Kecamatan & Desa
+                // PNS: Tampilkan "ASN/PNS (Nama Dinas)", serta Kecamatan & Desa
                 document.getElementById('modalPekerjaan').textContent = `ASN/PNS (${data.nama_dinas || '-'})`;
-                document.getElementById('modalKecamatan').textContent = '-';
-                document.getElementById('modalDesa').textContent = '-';
+
+                // ✅ ISI DENGAN DATA DARI API
+                document.getElementById('modalKecamatan').textContent = data.nama_kecamatan || '-';
+                document.getElementById('modalDesa').textContent = data.nama_desa || '-';
 
                 // PNS tetap menampilkan Kode Anggota & Barcode ID dari data
                 document.getElementById('modalKodeAnggota').textContent = data.kode_anggota || '-';
@@ -258,13 +260,13 @@ function toggleResetWilayah() {
 }
 
 // Cascading dropdown: Kecamatan → Desa
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const kecamatanSelect = document.getElementById('filterKecamatan');
     if (kecamatanSelect) {
-        kecamatanSelect.addEventListener('change', function() {
+        kecamatanSelect.addEventListener('change', function () {
             const kecId = this.value;
             const desaSelect = document.getElementById('filterDesa');
-            
+
             desaSelect.innerHTML = '<option value="">Semua Desa</option>';
             desaSelect.disabled = !kecId;
 
@@ -281,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .catch(err => console.error('Error fetching desa:', err));
             }
-            
+
             toggleResetWilayah();
         });
     }
@@ -289,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tombol Filter Wilayah
     const btnFilter = document.getElementById('btnFilterWilayah');
     if (btnFilter) {
-        btnFilter.addEventListener('click', function() {
+        btnFilter.addEventListener('click', function () {
             const tipeFilter = document.getElementById('tipeFilter').value;
             const url = new URL(window.location.href);
 
@@ -323,13 +325,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tombol Reset Wilayah
     const btnReset = document.getElementById('btnResetWilayah');
     if (btnReset) {
-        btnReset.addEventListener('click', function() {
+        btnReset.addEventListener('click', function () {
             const url = new URL(window.location.href);
             url.searchParams.delete('kecamatan_id');
             url.searchParams.delete('desa_id');
             url.searchParams.delete('dinas_id');
             url.searchParams.delete('tipe_filter');
             window.location.href = url.toString();
+        });
+    }
+
+    // ===== FITUR: KLIK SELURUH BARIS TABEL UNTUK BUKA MODAL =====
+    const tableBody = document.querySelector('table tbody');
+    if (tableBody) {
+        tableBody.addEventListener('click', function(event) {
+            // Cari elemen <tr> terdekat yang memiliki class 'clickable-row'
+            const row = event.target.closest('.clickable-row');
+            
+            if (row) {
+                const userId = row.getAttribute('data-id');
+                const userType = row.getAttribute('data-type');
+                
+                if (userId && userType) {
+                    // Panggil fungsi openModal yang sudah ada
+                    openModal(userId, userType);
+                }
+            }
         });
     }
 

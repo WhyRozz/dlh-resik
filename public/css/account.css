@@ -7,7 +7,7 @@
 /* ===== GESER TABEL KE ATAS (KHUSUS HALAMAN AKUN) ===== */
 /* ===== GESER TABEL KE ATAS (KHUSUS HALAMAN AKUN) ===== */
 /* Hanya terapkan jika ada filter kecamatan */
-.petugas-section:has(#filterKecamatan) .petugas-table-container {
+.petugas-section .petugas-table-container {
     margin-top: -20px;
 }
 
@@ -297,7 +297,7 @@ body {
 
 /* KHUSUS Halaman Kelola Akun - Geser tombol ke atas */
 /* Hanya jika ada filter kecamatan */
-.petugas-section:has(#filterKecamatan) .btn-tambah-akun {
+.petugas-section .btn-tambah-akun {
     margin-top: -20px;
 }
 
@@ -952,97 +952,237 @@ body {
     }
 }
 
+/* ========================================
+   RESPONSIVE MOBILE - KELOLA AKUN (OPTIMIZED)
+   ======================================== */
+
 @media (max-width: 768px) {
+    /* 1. Main Content: Padding lebih rapat */
     .main-content {
-        padding: 15px 15px 10px;
+        padding: 15px 12px 10px;
     }
 
+    /* 2. Header & Search: Rapi dan anti-zoom */
     .content-header {
         flex-direction: column;
         align-items: stretch;
-        gap: 15px;
+        gap: 12px;
+        margin-bottom: 10px;
+        margin-top: 50px;
     }
 
     .content-header h2 {
-        font-size: 22px;
-        text-align: center;
+        font-size: 1.25rem; /* ~20px */
+        text-align: left;
+        margin: 0;
     }
 
     .search-wrapper-akun {
         width: 100%;
     }
 
+    .search-input-akun {
+        height: 44px; /* Touch target standar */
+        padding: 10px 40px;
+        font-size: 16px !important; /* KUNCI: Mencegah auto-zoom di iOS Safari */
+        border-radius: 12px;
+    }
+
+    .search-icon {
+        left: 14px;
+        font-size: 16px;
+    }
+
+    /* 3. Account Cards (Grid) */
     .accounts-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
     }
 
     .account-card {
-        padding: 20px 15px;
+        padding: 15px;
+        border-radius: 12px;
     }
 
     .btn-group {
         flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
     }
 
     .btn {
         width: 100%;
+        height: 42px; /* Touch target */
+        justify-content: center;
+        border-radius: 8px;
     }
 
+    /* 4. Filter Section (Kecamatan/Desa): Stack Vertikal Rapi */
     .petugas-section {
-        padding: 20px 15px;
+        padding: 15px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 15px;
     }
 
+    .petugas-section h3 {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+
+    /* Wrapper filter (sesuaikan dengan struktur HTML Anda, biasanya div pembungkus) */
+    .petugas-section > div, 
+    .filter-wrapper { 
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #filterKecamatan,
+    #filterDesa,
+    #btnFilter,
+    #btnReset {
+        width: 100%;
+        height: 44px; /* Touch target */
+        font-size: 16px !important; /* Mencegah auto-zoom iOS */
+        border-radius: 8px;
+        padding: 10px 15px;
+    }
+
+    /* 5. Mobile Cards View (Pengganti Tabel) */
     .desktop-table {
         display: none;
     }
 
     .mobile-cards {
         display: flex;
+        flex-direction: column;
+        gap: 12px;
     }
 
+    .petugas-card {
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid var(--gray-200);
+    }
+
+    .card-header-mobile {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+    }
+
+    .card-number {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-action-edit,
+    .btn-action-delete {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+
+    .card-body-mobile {
+        gap: 10px;
+    }
+
+    .card-row {
+        gap: 2px;
+    }
+
+    .card-label {
+        font-size: 0.75rem;
+        color: var(--gray-500);
+    }
+
+    .card-value {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+
+    .badge-wilayah-mobile {
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    /* 6. Modal: Aman di layar kecil & anti-zoom */
     .modal-container,
     .modal-content {
         width: 95%;
-        max-width: none;
+        max-width: 95%;
+        max-height: 90vh;
+        border-radius: 12px;
+    }
+
+    .modal-header {
+        padding: 15px 20px;
+    }
+
+    .modal-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .modal-body {
+        padding: 15px 20px;
+    }
+
+    .modal-body .form-group {
+        margin-bottom: 12px;
+    }
+
+    .modal-body .form-group input,
+    .modal-body .form-group select {
+        height: 44px;
+        font-size: 16px !important; /* KUNCI: Mencegah auto-zoom iOS */
+        padding: 10px 12px;
+        border-radius: 8px;
     }
 
     .modal-footer {
         flex-direction: column;
+        gap: 10px;
+        padding: 15px 20px 20px;
     }
 
     .btn-secondary,
     .btn-primary-modal {
         width: 100%;
+        height: 44px;
+        border-radius: 8px;
+        font-size: 15px;
     }
 }
 
+/* Layar Sangat Kecil (HP Lama / Compact) */
 @media (max-width: 480px) {
     .main-content {
-        padding: 15px 10px 10px;
+        padding: 10px 8px;
     }
 
     .content-header h2 {
-        font-size: 20px;
+        font-size: 1.15rem;
     }
 
-    .search-input-akun {
-        padding: 10px 40px 10px 40px;
-        font-size: 13px;
-    }
-
-    .search-icon {
-        left: 12px;
-        font-size: 13px;
-    }
-
-    #otpInput {
-        font-size: 20px;
-        letter-spacing: 6px;
-        padding: 12px;
-    }
-
+    .account-card, 
     .petugas-card {
-        padding: 15px;
+        padding: 12px;
     }
 
     .card-header-mobile {
@@ -1054,6 +1194,14 @@ body {
     .card-actions {
         width: 100%;
         justify-content: flex-end;
+    }
+
+    /* OTP Input khusus */
+    #otpInput, .otp-input-field {
+        font-size: 20px !important;
+        letter-spacing: 6px;
+        padding: 12px;
+        height: 50px;
     }
 }
 

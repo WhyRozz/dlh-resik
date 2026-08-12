@@ -163,6 +163,9 @@
                             @if ($user->jenis_pengguna === 'PNS')
                                 <span class="badge badge-asn">
                                     {{ $user->nama_dinas ?? 'ASN/PNS' }}
+                                    <br>
+                                    <small style="opacity: 0.8; font-size: 0.85em;">({{ $user->nama_kecamatan ?? '-' }},
+                                        {{ $user->nama_desa ?? '-' }})</small>
                                 </span>
                             @else
                                 <span class="badge badge-masyarakat">

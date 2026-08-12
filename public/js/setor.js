@@ -270,12 +270,12 @@ function openDetailModal(id) {
     if (!setorModal || !setorModalBody || !setorModalTemplate) {
         initSetorModal();
     }
-    
+
     // Tampilkan loading
     setorModalBody.innerHTML = `<div class="modal-loading"><div class="spinner"></div><p>Memuat data...</p></div>`;
     setorModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    
+
     // Fetch data dari endpoint
     fetch(`/admin/bank-sampah/setor/${id}`, {
         headers: {
@@ -283,96 +283,105 @@ function openDetailModal(id) {
             'Accept': 'application/json'
         }
     })
-    .then(res => {
-        if (!res.ok) throw new Error('Data tidak ditemukan');
-        return res.json();
-    })
-.then(data => {
-    // Render template
-    const content = setorModalTemplate.content.cloneNode(true);
-    setorModalBody.innerHTML = '';
-    setorModalBody.appendChild(content);
-    
-    // Set values dengan helper
-    setModalValue('d_no', data.id_transaksi);
-    
-    // Nama (fallback masyarakat/pns)
-    const namaPengsetor = data.masyarakat?.nama || data.pns?.nama || '-';
-    setModalValue('d_nama', namaPengsetor);
-    
-    // Tipe pengsetor
-    const tipePengsetor = data.masyarakat ? 'Masyarakat' : (data.pns ? 'PNS' : '-');
-    setModalValue('d_pekerjaan', tipePengsetor);
-    
-    // ✅ HANDLE LOKASI BERDASARKAN TIPE PENGSETOR
-    const lokasiSection = document.getElementById('d_lokasi_section');
-    const wilayahGroup = document.getElementById('d_wilayah_group');
-    const desaGroup = document.getElementById('d_desa_group');
-    const dinasGroup = document.getElementById('d_dinas_group');
-    
-    if (data.masyarakat) {
-        // Masyarakat: Tampilkan Kecamatan & Desa
-        lokasiSection.style.display = 'flex';
-        wilayahGroup.style.display = 'block';
-        desaGroup.style.display = 'block';
-        dinasGroup.style.display = 'none';
-        
-        // Set nilai kecamatan & desa
-        const kecamatan = data.masyarakat?.desa?.kecamatan?.nama_kecamatan || '-';
-        const desa = data.masyarakat?.desa?.nama_desa || '-';
-        
-        setModalValue('d_kecamatan', kecamatan);
-        setModalValue('d_desa', desa);
-        
-    } else if (data.pns) {
-        // PNS: Tampilkan Dinas
-        lokasiSection.style.display = 'flex';
-        wilayahGroup.style.display = 'none';
-        desaGroup.style.display = 'none';
-        dinasGroup.style.display = 'block';
-        
-        // Set nilai dinas
-        const dinas = data.pns?.dinas?.nama_dinas || '-';
-        setModalValue('d_dinas', dinas);
-        
-    } else {
-        // Tidak ada data
-        lokasiSection.style.display = 'none';
-    }
-    
-    // Jenis sampah (fallback lengkap)
-    const jenisObj = data.jenisSampah || data.jenis_sampah || {};
-    const jenisNama = jenisObj.jenis || jenisObj.nama || '-';
-    setModalValue('d_jenis', jenisNama);
-    
-    // Berat
-    const berat = data.berat ? parseFloat(data.berat).toFixed(2) + ' Kg' : '-';
-    setModalValue('d_berat', berat);
-    
-    // Harga per kg
-    const harga = data.harga_per_kg ? 'Rp ' + formatRupiah(data.harga_per_kg) : '-';
-    setModalValue('d_harga', harga);
-    
-    // Total rupiah
-    const total = data.total_rupiah ? 'Rp ' + formatRupiah(data.total_rupiah) : '-';
-    setModalValue('d_total', total);
-    
-    // Petugas
-    setModalValue('d_petugas', data.petugas?.nama_lengkap);
-    
-    // Waktu
-    const waktu = data.tanggal_transaksi ? new Date(data.tanggal_transaksi).toLocaleString('id-ID') : '-';
-    setModalValue('d_waktu', waktu);
-})
-    .catch(err => {
-        console.error('❌ Error:', err);
-        setorModalBody.innerHTML = `
+        .then(res => {
+            if (!res.ok) throw new Error('Data tidak ditemukan');
+            return res.json();
+        })
+        .then(data => {
+            // Render template
+            const content = setorModalTemplate.content.cloneNode(true);
+            setorModalBody.innerHTML = '';
+            setorModalBody.appendChild(content);
+
+            // Set values dengan helper
+            setModalValue('d_no', data.id_transaksi);
+
+            // Nama (fallback masyarakat/pns)
+            const namaPengsetor = data.masyarakat?.nama || data.pns?.nama || '-';
+            setModalValue('d_nama', namaPengsetor);
+
+            // Tipe pengsetor
+            const tipePengsetor = data.masyarakat ? 'Masyarakat' : (data.pns ? 'PNS' : '-');
+            setModalValue('d_pekerjaan', tipePengsetor);
+
+            // ✅ HANDLE LOKASI BERDASARKAN TIPE PENGSETOR
+            const lokasiSection = document.getElementById('d_lokasi_section');
+            const wilayahRow = document.getElementById('d_wilayah_row');
+            const dinasGroup = document.getElementById('d_dinas_group');
+
+            if (data.masyarakat) {
+                // Masyarakat: Tampilkan Kecamatan & Desa
+                lokasiSection.style.display = 'block';
+                wilayahRow.style.display = 'flex';
+                dinasGroup.style.display = 'none';
+
+                // Set nilai kecamatan & desa
+                const kecamatan = data.masyarakat?.desa?.kecamatan?.nama_kecamatan || '-';
+                const desa = data.masyarakat?.desa?.nama_desa || '-';
+
+                setModalValue('d_kecamatan', kecamatan);
+                setModalValue('d_desa', desa);
+
+            } else if (data.pns) {
+                // PNS: Tampilkan Kecamatan, Desa, dan Dinas
+                lokasiSection.style.display = 'block';
+                wilayahRow.style.display = 'flex';  // Tampilkan baris Kecamatan & Desa
+                dinasGroup.style.display = 'block'; // Tampilkan baris Dinas
+
+                // Set nilai kecamatan & desa
+                const kecamatan = data.pns?.desa?.kecamatan?.nama_kecamatan || '-';
+                const desa = data.pns?.desa?.nama_desa || '-';
+                setModalValue('d_kecamatan', kecamatan);
+                setModalValue('d_desa', desa);
+
+                // Set nilai dinas
+                const dinas = data.pns?.dinas?.nama_dinas || '-';
+                setModalValue('d_dinas', dinas);
+
+            } else {
+                // Tidak ada data
+                lokasiSection.style.display = 'none';
+            }
+
+            // Jenis sampah (fallback lengkap)
+            const jenisObj = data.jenisSampah || data.jenis_sampah || {};
+            const jenisNama = jenisObj.jenis || jenisObj.nama || '-';
+            setModalValue('d_jenis', jenisNama);
+
+            // Berat
+            const berat = data.berat ? parseFloat(data.berat).toFixed(2) + ' Kg' : '-';
+            setModalValue('d_berat', berat);
+
+            // Harga per kg
+            const harga = data.harga_per_kg ? 'Rp ' + formatRupiah(data.harga_per_kg) : '-';
+            setModalValue('d_harga', harga);
+
+            // Total rupiah
+            const total = data.total_rupiah ? 'Rp ' + formatRupiah(data.total_rupiah) : '-';
+            setModalValue('d_total', total);
+
+            // Petugas + Wilayah Kerja (digabung)
+            const namaPetugas = data.petugas?.nama_lengkap || '-';
+            const wilayahPetugas = data.petugas?.nama_wilayah || '';
+
+            // Gabung: "Nama - Wilayah" atau "Nama" saja jika tidak ada wilayah
+            const teksPetugas = wilayahPetugas ? `${namaPetugas} - ${wilayahPetugas}` : namaPetugas;
+
+            setModalValue('d_petugas', teksPetugas);
+
+            // Waktu
+            const waktu = data.tanggal_transaksi ? new Date(data.tanggal_transaksi).toLocaleString('id-ID') : '-';
+            setModalValue('d_waktu', waktu);
+        })
+        .catch(err => {
+            console.error('❌ Error:', err);
+            setorModalBody.innerHTML = `
             <div style="text-align:center;color:#e74c3c;padding:30px 20px;">
                 <i class="fas fa-exclamation-triangle" style="font-size:2.5rem;margin-bottom:15px;opacity:0.7;"></i>
                 <p style="margin:0;font-weight:500;">Gagal memuat data</p>
                 <small style="color:#888;">${err.message}</small>
             </div>`;
-    });
+        });
 }
 
 // ===== CLOSE MODAL =====
@@ -388,18 +397,18 @@ function closeDetailModal() {
  * FUNGSI: Setup event listeners global saat DOM ready
  * INTERAKSI: Auto-trigger via DOMContentLoaded
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initSetorModal();
-    
+
     // ESC key to close
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && setorModal && setorModal.style.display === 'flex') {
             closeDetailModal();
         }
     });
-    
+
     // Click outside to close (backdrop only)
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         const modalBox = document.querySelector('.modal-box');
         if (setorModal && modalBox && setorModal.style.display === 'flex') {
             if (!modalBox.contains(e.target) && e.target.classList.contains('modal-backdrop')) {

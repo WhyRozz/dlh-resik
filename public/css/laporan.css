@@ -434,7 +434,7 @@ th {
     .page-search-bar {
         width: 100%;
         max-width: 100%;
-        margin-top: -10px;
+        margin-top: 50px;
         padding: 0px 0px;
         justify-content: center;
     }
@@ -533,33 +533,58 @@ th {
         justify-content: center;
     }
 
-    /* Modal Responsive */
-    .modal-container {
-        width: 95%;
-        max-height: 90vh;
+    /* Modal Responsive - Full Screen dengan Scroll Proper */
+    .modal-overlay {
+        align-items: flex-start;
+        padding: 0;
+        overflow-y: auto;
     }
+
+    .modal-container {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* ← TAMBAHKAN INI */
+    }
+
     .modal-header {
         padding: 15px 20px;
+        flex-shrink: 0;
     }
+
     .modal-header h3 {
         font-size: 16px;
     }
+
     .modal-body {
         padding: 20px 15px;
-        max-height: 65vh;
+        flex: 1;
+        overflow-y: auto;
+        max-height: none; /* HAPUS pembatasan 65vh */
     }
+
     .modal-body img {
         max-height: 250px;
     }
+
     .modal-footer {
         padding: 15px 20px;
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
+        flex-shrink: 0; /* ← INI YANG PENTING: footer tidak mengecil */
+        background: #f5f5f5;
+        border-top: 1px solid #e0e0e0;
     }
+
     .modal-footer button {
-        width: 100%;
+        flex: 1; /* Tombol bagi ruang sama rata */
         padding: 12px;
     }
+
     .modal-body .status-options {
         flex-direction: column;
         gap: 10px;
@@ -612,6 +637,16 @@ th {
     .modal-body .form-input,
     .modal-body .form-textarea {
         font-size: 16px;
+    }
+    
+    /* TAMBAHKAN INI untuk layar sangat kecil */
+    .modal-footer {
+        padding: 12px 15px;
+        flex-direction: column !important; /* Stack vertikal di HP kecil */
+    }
+    .modal-footer button {
+        padding: 10px;
+        font-size: 13px;
     }
 }
 

@@ -73,7 +73,8 @@
     gap: 0.5rem;
     align-items: center;
     justify-content: center; 
-    flex-wrap: nowrap;
+    flex-wrap: wrap; /* UBAH: nowrap → wrap */
+    width: 100%; /* TAMBAH BARIS INI */
 }
 
 .filter-select {
@@ -600,13 +601,14 @@
 
 @media (max-width: 768px) {
     .page-container {
-        padding: 10px 15px 15px 15px;
-        margin-top: -20px;
+        padding: 15px 15px 15px 15px;
+        margin-top: 40px;
     }
 
     .header-wrapper {
         flex-direction: column;
         align-items: stretch;
+        gap: 15px; /* TAMBAH BARIS INI */
     }
 
     .page-title,
@@ -621,14 +623,28 @@
         max-width: none;
     }
 
+    /* PERBAIKAN FILTER */
+    .filter-section {
+        padding: 10px 0; /* TAMBAH BARIS INI */
+    }
+
     .filter-group {
         flex-direction: column;
         align-items: stretch;
+        gap: 10px; /* UBAH: dari default ke 10px */
     }
 
-    .filter-select,
+    .filter-select {
+        width: 100%;
+        min-width: unset; /* TAMBAH BARIS INI */
+        height: 44px; /* TAMBAH BARIS INI - lebih besar untuk mobile */
+        font-size: 0.95rem; /* TAMBAH BARIS INI */
+    }
+
     .btn-filter {
         width: 100%;
+        height: 44px; /* TAMBAH BARIS INI - lebih besar untuk mobile */
+        font-size: 0.95rem; /* TAMBAH BARIS INI */
         justify-content: center;
     }
 
@@ -832,4 +848,21 @@
     font-weight: 600;
     font-size: 0.8rem;
     display: inline;
+}
+
+/* =========================================
+   FIX: FILTER WILAYAH DI MOBILE
+   ========================================= */
+@media (max-width: 768px) {
+    /* Filter select full width */
+    .filter-section .filter-select {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    
+    /* Tombol filter full width */
+    .filter-section .btn-filter {
+        width: 100%;
+        margin-top: 5px;
+    }
 }

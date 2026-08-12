@@ -1,5 +1,5 @@
 /* ========================================
-   SUB ADMIN DESA - CUSTOM STYLES
+   SUB ADMIN DESA - CUSTOM STYLES (CLEAN & RESPONSIVE)
    ======================================== */
 
 /* ===== BADGE WILAYAH ===== */
@@ -31,22 +31,22 @@
 /* ===== FILTER SELECT CUSTOM ===== */
 .filter-select-custom {
     padding: 10px 15px;
-    border: 2px solid var(--gray-200);
+    border: 2px solid var(--gray-200, #e2e8f0);
     border-radius: 8px;
     font-size: 14px;
     min-width: 200px;
     background: white;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
 }
 
 .filter-select-custom:hover {
-    border-color: var(--primary-green);
+    border-color: var(--primary-green, #2e8b57);
 }
 
 .filter-select-custom:focus {
     outline: none;
-    border-color: var(--primary-green);
+    border-color: var(--primary-green, #2e8b57);
     box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
 }
 
@@ -58,33 +58,8 @@
     flex-wrap: wrap;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-    .header-actions-wrapper {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .filter-select-custom {
-        width: 100%;
-        min-width: auto;
-    }
-
-    .btn-tambah-akun {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-.search-wrapper-akun {
-    margin-right: 20px;
-    /* atau sesuaikan nilainya */
-}
-
-.data-table th:nth-child(5) {
-    text-align: center;
-}
-
+/* ===== TABLE HEADERS ===== */
+.data-table th:nth-child(5),
 .data-table th:nth-child(6) {
     text-align: center;
 }
@@ -122,16 +97,7 @@
     transform: translateY(-2px);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    #filterKecamatanSubAdmin,
-    #btnFilterSubAdmin,
-    #btnResetSubAdmin {
-        width: 100%;
-    }
-}
-
-/* ===== MODAL SCROLL & CLOSE BUTTON ===== */
+/* ===== MODAL STYLES ===== */
 .subadmin-modal-overlay {
     display: none;
     position: fixed;
@@ -145,7 +111,7 @@
     backdrop-filter: blur(4px);
 }
 
-.modal-overlay.active {
+.subadmin-modal-overlay.active {
     display: flex;
     opacity: 1;
 }
@@ -164,32 +130,33 @@
     flex-direction: column;
 }
 
-.modal-overlay.active .modal-container {
+.subadmin-modal-overlay.active .subadmin-modal-container {
     transform: scale(1);
 }
 
 .subadmin-modal-header {
     background: white;
-    color: var(--gray-700);
+    color: var(--gray-700, #334155);
     padding: 20px 25px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start; /* RATA KIRI */
     align-items: center;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--gray-200, #e2e8f0);
     flex-shrink: 0;
 }
 
-.modal-header h3 {
+.subadmin-modal-header h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 700;
-    color: var(--primary-green);
+    color: var(--primary-green, #2e8b57);
+    text-align: left; /* RATA KIRI */
 }
 
 .modal-close {
-    background: var(--gray-100);
+    background: var(--gray-100, #f1f5f9);
     border: none;
-    color: var(--gray-500);
+    color: var(--gray-500, #64748b);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -198,12 +165,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: var(--transition);
+    transition: all 0.3s ease;
+    margin-left: auto; /* Dorong tombol close ke kanan */
 }
 
 .modal-close:hover {
-    background: var(--gray-200);
-    color: var(--danger);
+    background: var(--gray-200, #e2e8f0);
+    color: var(--danger, #dc2626);
 }
 
 .subadmin-modal-body {
@@ -215,8 +183,8 @@
 
 .subadmin-modal-footer {
     padding: 15px 25px 20px;
-    background: var(--gray-50);
-    border-top: 1px solid var(--gray-200);
+    background: var(--gray-50, #f8fafc);
+    border-top: 1px solid var(--gray-200, #e2e8f0);
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -224,22 +192,22 @@
 }
 
 /* Scrollbar untuk modal body */
-.modal-body::-webkit-scrollbar {
+.subadmin-modal-body::-webkit-scrollbar {
     width: 8px;
 }
 
-.modal-body::-webkit-scrollbar-track {
-    background: var(--gray-100);
+.subadmin-modal-body::-webkit-scrollbar-track {
+    background: var(--gray-100, #f1f5f9);
     border-radius: 4px;
 }
 
-.modal-body::-webkit-scrollbar-thumb {
-    background: var(--gray-300);
+.subadmin-modal-body::-webkit-scrollbar-thumb {
+    background: var(--gray-300, #cbd5e1);
     border-radius: 4px;
 }
 
-.modal-body::-webkit-scrollbar-thumb:hover {
-    background: var(--gray-400);
+.subadmin-modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-400, #94a3b8);
 }
 
 /* ===== PREVENT BROWSER AUTOFILL ===== */
@@ -252,7 +220,176 @@ input:-webkit-autofill:active {
     transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Hide autofill suggestions */
 input[data-autocompleted] {
     background-color: transparent !important;
 }
+
+/* ========================================
+   RESPONSIVE MOBILE - FULLY OPTIMIZED & CLEAN
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* 1. Search Wrapper: Rapi, tanpa margin kanan yang mengganggu */
+    .search-wrapper-akun {
+        margin-right: 0 !important;
+        width: 100%;
+        margin-bottom: 12px;
+        padding: 0;
+    }
+
+    .search-wrapper-akun input,
+    .search-input-akun {
+        height: 44px;
+        font-size: 16px !important; /* KUNCI: Anti auto-zoom iOS */
+        border-radius: 10px;
+        padding: 10px 15px 10px 40px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 2. Header Actions: Stack vertikal, rapi dan konsisten */
+    .header-actions-wrapper {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+        align-items: stretch;
+        padding: 0;
+    }
+
+    /* Wrapper tambahan jika ada di HTML */
+    .header-actions-wrapper > div {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+    }
+
+    /* 3. Filter Dropdowns: Full width, tinggi standar sentuh */
+    .filter-select-custom,
+    #filterKecamatanSubAdmin {
+        width: 100% !important;
+        min-width: 100% !important;
+        height: 44px;
+        font-size: 16px !important; /* KUNCI: Anti auto-zoom iOS */
+        border-radius: 10px;
+        padding: 10px 15px;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    /* 4. Tombol Filter & Reset: Berdampingan (50% masing-masing) agar hemat tempat */
+    #btnFilterSubAdmin,
+    #btnResetSubAdmin {
+        flex: 1;
+        min-width: 0;
+        height: 44px;
+        font-size: 15px !important;
+        border-radius: 10px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    /* 5. Badge Wilayah: Lebih proporsional di layar kecil */
+    .badge-wilayah,
+    .badge-wilayah-mobile {
+        max-width: 100%;
+        font-size: 12px;
+        padding: 6px 12px;
+        line-height: 1.4;
+    }
+
+    /* 6. Tabel: Scroll horizontal halus, tidak merusak layout halaman */
+    .desktop-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 12px;
+    }
+
+    .data-table {
+        min-width: 600px;
+        font-size: 13px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 12px 10px;
+        white-space: nowrap;
+    }
+
+    /* 7. Modal: Rapi, pas di layar, tombol mudah ditekan */
+    .subadmin-modal-container {
+        width: 95%;
+        max-width: 95%;
+        border-radius: 12px;
+        margin: 10px;
+    }
+
+    .subadmin-modal-header {
+        padding: 15px 20px;
+    }
+
+    .subadmin-modal-header h3 {
+        font-size: 16px;
+    }
+
+    .modal-close {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+
+    .subadmin-modal-body {
+        padding: 15px 20px;
+    }
+
+    .subadmin-modal-body input,
+    .subadmin-modal-body select {
+        height: 44px;
+        font-size: 16px !important; /* KUNCI: Anti auto-zoom iOS */
+        padding: 10px 12px;
+        border-radius: 8px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .subadmin-modal-footer {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px 20px 20px;
+    }
+
+    .subadmin-modal-footer button {
+        width: 100%;
+        height: 44px;
+        border-radius: 8px;
+        font-size: 15px;
+        justify-content: center;
+    }
+}
+
+/* Layar Sangat Kecil (HP Compact) */
+@media (max-width: 480px) {
+    .subadmin-modal-container {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        margin: 0;
+    }
+    
+    .data-table {
+        min-width: 550px;
+        font-size: 12px;
+    }
+
+    .subadmin-modal-header {
+        padding: 15px 20px;
+    }
+
+    .subadmin-modal-body {
+        padding: 15px 20px;
+    }
+}
+

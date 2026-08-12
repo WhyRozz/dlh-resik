@@ -209,4 +209,76 @@ class LaporanController extends Controller
 
         return asset('storage/' . $path);
     }
+
+    /**
+     * GET /api/laporan/{id}
+     * ✅ ENDPOINT BARU: Ambil detail laporan spesifik by ID
+     */
+    public function show($id, Request $request)
+    {
+        $userId = $request->query('user_id');
+        $tipe = $request->query('tipe');
+
+        // Validasi keamanan: pastikan user hanya bisa akses laporannya sendiri
+        if (!$userId || !$tipe) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Parameter tidak lengkap'
+            ], 422);
+        }
+
+        try {
+            $query = \App\Models\Laporan::where('id', $id);
+
+            // Filter berdasarkan kepemilikan
+            if ($tipe === 'masyarakat') {
+                $query->where('id_masyarakat', $userId);
+            } elseif ($tipe === 'pns') {
+                $query->where('id_pns', $userId);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tipe user tidak valid'
+                ], 422);
+            }
+
+            $laporan = $query->first();
+
+            if (!$laporan) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data laporan tidak ditemukan'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id' => $laporan->id,
+                    'judul' => strlen($laporan->keterangan) > 30
+                        ? substr($laporan->keterangan, 0, 30) . '...'
+                        : $laporan->keterangan,
+                    'keterangan' => $laporan->keterangan,
+                    'alamat' => $laporan->lokasi,
+                    'lokasi' => $laporan->lokasi,
+                    'tanggal' => $laporan->tanggal
+                        ? $laporan->tanggal->timezone('Asia/Jakarta')->toIso8601String()
+                        : null,
+                    'status' => $laporan->status,
+                    'foto' => $laporan->foto ? $this->getUrlFoto($laporan->foto) : null,
+                    'foto_balasan' => $laporan->foto_balasan
+                        ? $this->getUrlFoto($laporan->foto_balasan)
+                        : null,
+                    'nama' => $laporan->nama,
+                    'balasan' => $laporan->balasan,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Laporan Show Error: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

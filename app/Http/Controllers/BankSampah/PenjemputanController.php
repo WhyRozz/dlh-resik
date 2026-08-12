@@ -162,50 +162,92 @@ class PenjemputanController extends Controller
     }
 
 
-    public function approve($id)
+      public function approve($id)
     {
-        $affected = DB::table($this->table)
-            ->where('id', $id)
-            ->where('status', 'diproses')
-            ->update(['status' => 'disetujui']);
-
-        if (!$affected) {
-            return redirect()->back()->with('error', 'Data sudah diproses atau tidak ditemukan.');
+        try {
+            $affected = DB::table($this->table)
+                ->where('id', $id)
+                ->where('status', 'diproses')
+                ->update(['status' => 'disetujui']);
+    
+            if (!$affected) {
+                return redirect()->back()->with('error', 'Data sudah diproses atau tidak ditemukan.');
+            }
+    
+            $penjemputan = Penjemputan::with('petugas')->find($id);
+    
+            if (!$penjemputan || !$penjemputan->petugas) {
+                \Log::error('Penjemputan atau petugas tidak ditemukan, ID: ' . $id);
+                return redirect()->back()->with('error', 'Data tidak ditemukan.');
+            }
+    
+            // ✅ KIRIM NOTIFIKASI DENGAN ERROR HANDLING
+            try {
+                $notification = new \App\Services\NotificationService();
+                $notification->sendPickupResult(
+                    $penjemputan->petugas->fcm_token,
+                    "disetujui",
+                    $penjemputan->id_petugas,
+                    'petugas',
+                    $penjemputan->id
+                );
+                \Log::info('Notifikasi penjemputan disetujui berhasil dikirim');
+            } catch (\Exception $notifError) {
+                \Log::error(' Gagal kirim notifikasi: ' . $notifError->getMessage());
+                // Tetap return success karena penjemputan sudah disetujui
+            }
+    
+            return redirect()->back()->with('success', 'Penjemputan berhasil disetujui.');
+            
+        } catch (\Exception $e) {
+            \Log::error('❌ Error approve penjemputan: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        $penjemputan = Penjemputan::with('petugas')->find($id);
-
-        $notification = new \App\Services\NotificationService();
-
-        $notification->sendPickupResult(
-            $penjemputan->petugas?->fcm_token,
-            "disetujui"
-        );
-
-        return redirect()->back()->with('success', 'Penjemputan berhasil disetujui.');
     }
 
-    public function reject($id)
+       public function reject($id)
     {
-        $affected = DB::table($this->table)
-            ->where('id', $id)
-            ->where('status', 'diproses')
-            ->update(['status' => 'ditolak']);
-
-        if (!$affected) {
-            return redirect()->back()->with('error', 'Gagal menolak data.');
+        try {
+            $affected = DB::table($this->table)
+                ->where('id', $id)
+                ->where('status', 'diproses')
+                ->update(['status' => 'ditolak']);
+    
+            if (!$affected) {
+                return redirect()->back()->with('error', 'Gagal menolak data.');
+            }
+    
+            $penjemputan = Penjemputan::with('petugas')->find($id);
+    
+            if (!$penjemputan || !$penjemputan->petugas) {
+                \Log::error('Penjemputan atau petugas tidak ditemukan, ID: ' . $id);
+                return redirect()->back()->with('error', 'Data tidak ditemukan.');
+            }
+    
+            // ✅ KIRIM NOTIFIKASI DENGAN ERROR HANDLING
+            try {
+                $notification = new \App\Services\NotificationService();
+                $notification->sendPickupResult(
+                    $penjemputan->petugas->fcm_token,
+                    "ditolak",
+                    $penjemputan->id_petugas,
+                    'petugas',
+                    $penjemputan->id
+                );
+                \Log::info('Notifikasi penjemputan ditolak berhasil dikirim');
+            } catch (\Exception $notifError) {
+                \Log::error('❌ Gagal kirim notifikasi: ' . $notifError->getMessage());
+                // Tetap return success karena penjemputan sudah ditolak
+            }
+    
+            return redirect()->back()->with('success', 'Penjemputan ditolak.');
+            
+        } catch (\Exception $e) {
+            \Log::error('❌ Error reject penjemputan: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        $penjemputan = Penjemputan::with('petugas')->find($id);
-
-        $notification = new \App\Services\NotificationService();
-
-        $notification->sendPickupResult(
-            $penjemputan->petugas?->fcm_token,
-            "ditolak"
-        );
-
-        return redirect()->back()->with('success', 'Penjemputan ditolak.');
     }
 
     // ========================================

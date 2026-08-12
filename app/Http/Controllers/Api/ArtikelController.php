@@ -15,7 +15,7 @@ class ArtikelController extends Controller
                 'id_artikel' => $item->id_artikel,
                 'judul' => $item->judul,
                 'deskripsi' => $item->deskripsi,
-                'tanggal' => $item->tanggal ? $item->tanggal->format('d-m-Y') : null,
+                'tanggal' => $item->tanggal ? $item->tanggal->format('Y-m-d') : null,
                 'foto' => $item->foto ? $this->getUrlFoto($item->foto) : null,
             ];
         });

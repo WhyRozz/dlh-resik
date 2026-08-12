@@ -44,4 +44,11 @@ class Notification extends Model
         return $this->belongsTo(Pns::class, 'user_id', 'id_pns')
             ->where('tipe_user', 'pns');
     }
+
+    // Relasi ke Petugas
+    public function petugas()
+    {
+        return $this->belongsTo(Petugas::class, 'user_id', 'id_petugas')
+            ->where('tipe_user', 'petugas');
+    }
 }
