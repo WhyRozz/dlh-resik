@@ -239,16 +239,5 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
 // ── Download APK Route (Public) ──
 Route::get('/download-apk', function () {
-    $filePath = public_path('downloads/resik.apk');
-
-    // Cek apakah file ada
-    if (!file_exists($filePath)) {
-        abort(404, 'File APK tidak ditemukan. Silakan hubungi administrator.');
-    }
-
-    // Download dengan header yang tepat untuk APK
-    return response()->download($filePath, 'RESIK.apk', [
-        'Content-Type' => 'application/vnd.android.package-archive',
-        'Content-Disposition' => 'attachment; filename="RESIK.apk"',
-    ]);
+    return redirect('/downloads_apk/resik.apk');
 })->name('download.apk');

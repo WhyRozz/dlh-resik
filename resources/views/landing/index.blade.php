@@ -221,7 +221,7 @@
                     efisien, dan ramah pengguna.
                 </p>
                 
-                <a href="{{ route('download.apk') }}" class="btn-download">
+                <a href="{{ asset('downloads_apk/resik.apk') }}" class="btn-download" download>
                     DOWNLOAD APK
                 </a>
             </div>
